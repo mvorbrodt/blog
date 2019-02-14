@@ -28,6 +28,8 @@ private:
     auto_event m_waitset;
 };
 
+
+
 class rw_fast_mutex
 {
 public:
