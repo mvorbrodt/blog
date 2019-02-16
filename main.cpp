@@ -3,7 +3,7 @@
 #include "trace.h"
 using namespace std;
 
-const int COUNT = 1'000'000;
+const int COUNT = 10'000'000;
 
 int main(int argc, char** argv)
 {
