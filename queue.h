@@ -211,6 +211,12 @@ public:
 		return m_count == 0;
 	}
 
+    bool full() const noexcept
+    {
+        std::scoped_lock lock(m_cs);
+        return m_count == m_size;
+    }
+
 	bool size() const noexcept
 	{
 		std::scoped_lock lock(m_cs);
