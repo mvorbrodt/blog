@@ -208,16 +208,19 @@ public:
 
 	bool empty() const noexcept
 	{
+		std::scoped_lock lock(m_cs);
 		return m_count == 0;
 	}
 
     bool full() const noexcept
     {
+        std::scoped_lock lock(m_cs);
         return m_count == m_size;
     }
 
 	bool size() const noexcept
 	{
+		std::scoped_lock lock(m_cs);
 		return m_count;
 	}
 
@@ -230,7 +233,7 @@ private:
 	const unsigned int m_size;
 	unsigned int m_pushIndex;
 	unsigned int m_popIndex;
-	std::atomic_uint m_count;
+	unsigned int m_count;
 	T* m_data;
 
 	fast_semaphore m_openSlots;
