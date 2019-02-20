@@ -1,6 +1,6 @@
+#include <iostream>
 #include <atomic>
 #include <thread>
-#include "trace.h"
 using namespace std;
 
 //#define FENCE
@@ -18,17 +18,17 @@ int main(int argc, char** argv)
 	bool flag = false;
 
 	thread t1([&]() {
-		trace("t1 started");
-		this_thread::sleep_for(1s);
+		this_thread::sleep_for(100ms);
+		cout << "t1 started" << endl;
 		flag = true;
 		FENCE_RELEASE;
-		trace("t1 signals and exits");
+		cout << "t1 signals and exits" << endl;
 	});
 
 	thread t2([&]() {
-		trace("t2 started");
+		cout << "t2 started" << endl;
 		while(flag == false) FENCE_ACQUIRE;
-		trace("t2 got signaled and exits");
+		cout << "t2 got signaled and exits" << endl;
 	});
 
 	t1.join();
