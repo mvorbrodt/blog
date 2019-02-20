@@ -18,7 +18,7 @@ public:
 		assert(size != 0);
 	}
 
-	fast_blocking_queue() noexcept
+	~fast_blocking_queue() noexcept
 	{
 		while (m_count--)
 		{
@@ -117,7 +117,7 @@ private:
 	const unsigned int m_size;
 	std::atomic_uint m_pushIndex;
 	std::atomic_uint m_popIndex;
-	unsigned int m_count;
+	std::atomic_uint m_count;
 	T* m_data;
 
 	fast_semaphore m_openSlots;
