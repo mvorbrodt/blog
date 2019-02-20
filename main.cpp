@@ -1,61 +1,38 @@
-#include <iostream>
 #include <atomic>
 #include <thread>
-#include <memory>
-#include <cstring>
-#include "queue.h"
+#include "trace.h"
 using namespace std;
 
-const int COUNT = 0;
+//#define FENCE
+
+#ifdef FENCE
+#define FENCE_ACQUIRE atomic_thread_fence(memory_order_acquire)
+#define FENCE_RELEASE atomic_thread_fence(memory_order_release)
+#else
+#define FENCE_ACQUIRE
+#define FENCE_RELEASE
+#endif
 
 int main(int argc, char** argv)
 {
-	struct UDT
-	{
-		byte data[16];
-	};
+	bool flag = false;
 
-	atomic<UDT> udt;
-	cout << "atomic<UDT> is lock free = " << udt.is_lock_free() << endl;
+	thread t1([&]() {
+		trace("t1 started");
+		this_thread::sleep_for(1s);
+		flag = true;
+		FENCE_RELEASE;
+		trace("t1 signals and exits");
+	});
 
-	atomic_bool e1{false}, e2{false}, e3{false};
-	assert(e1.is_lock_free());
-	
-	thread t1([&](){
-		for(int i = 0; i < COUNT; ++i)
-		{
-			bool e = true;
-			while(!e1.compare_exchange_weak(e, false, memory_order_acq_rel) && !e) e = true;
-			cout << "A" << endl;
-			e2.store(true, memory_order_release);
-		}
+	thread t2([&]() {
+		trace("t2 started");
+		while(flag == false) FENCE_ACQUIRE;
+		trace("t2 got signaled and exits");
 	});
-	
-	thread t2([&](){
-		for(int i = 0; i < COUNT; ++i)
-		{
-			bool e = true;
-			while(!e2.compare_exchange_weak(e, false, memory_order_acq_rel)) e = true;
-			cout << "B" << endl;
-			e3.store(true, memory_order_release);
-		}
-	});
-	
-	thread t3([&](){
-		for(int i = 0; i < COUNT; ++i)
-		{
-			bool e = true;
-			while(!e3.compare_exchange_weak(e, false, memory_order_acq_rel)) e = true;
-			cout << "C" << endl;
-			e1.store(true, memory_order_release);
-		}
-	});
-	
-	e1.store(true);
-	
+
 	t1.join();
 	t2.join();
-	t3.join();
-	
+
 	return 1;
 }
