@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mutex>
-#include <atomic>
 #include <utility>
 #include <type_traits>
 #include <cassert>
@@ -19,11 +18,6 @@ public:
 	{
 		assert(size != 0);
 	}
-
-	blocking_queue(const blocking_queue&) = delete;
-	blocking_queue(blocking_queue&&) = delete;
-	blocking_queue& operator = (const blocking_queue&) = delete;
-	blocking_queue& operator = (blocking_queue&&) = delete;
 
 	~blocking_queue() noexcept
 	{
@@ -204,29 +198,6 @@ public:
 		T item;
 		pop(item);
 		return item;
-	}
-
-	bool empty() const noexcept
-	{
-		std::scoped_lock lock(m_cs);
-		return m_count == 0;
-	}
-
-    bool full() const noexcept
-    {
-        std::scoped_lock lock(m_cs);
-        return m_count == m_size;
-    }
-
-	bool size() const noexcept
-	{
-		std::scoped_lock lock(m_cs);
-		return m_count;
-	}
-
-	unsigned int max_size() const noexcept
-	{
-		return m_size;
 	}
 
 private:
