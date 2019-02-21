@@ -16,7 +16,7 @@ atomic_bool f{false};
 #define FENCE_RELEASE f.store(true, memory_order_release)
 #elif defined ATOMIC_CONSUME
 atomic_bool f{false};
-#define FENCE_ACQUIRE f.load(memory_order_acquire)
+#define FENCE_ACQUIRE f.load(memory_order_consume)
 #define FENCE_RELEASE f.store(flag, memory_order_release)
 #else
 #define FENCE_ACQUIRE
