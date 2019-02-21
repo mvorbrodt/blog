@@ -25,7 +25,7 @@ atomic_bool f{false};
 
 int main(int argc, char** argv)
 {
-	atomic<bool> flag = false;
+	bool flag = false;
 
 	thread t1([&]() {
 		this_thread::sleep_for(100ms);
