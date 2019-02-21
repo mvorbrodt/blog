@@ -41,7 +41,7 @@ public:
 	}
 
 private:
-	std::atomic<unsigned int> m_state;
+	std::atomic_uint m_state;
 	auto_event m_waitset;
 };
 
@@ -88,9 +88,9 @@ public:
 	}
 
 private:
-	std::atomic<int> m_wrstate;
-	std::atomic<int> m_count;
-	std::atomic<int> m_rdwake;
+	std::atomic_int m_wrstate;
+	std::atomic_int m_count;
+	std::atomic_int m_rdwake;
 
 	semaphore m_rdwset;
 	semaphore m_wrwset;

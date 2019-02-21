@@ -63,6 +63,6 @@ public:
 	}
 
 private:
-	std::atomic<int> m_count;
+	std::atomic_int m_count;
 	semaphore m_semaphore;
 };

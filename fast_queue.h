@@ -29,9 +29,7 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_copy_constructible<Q>::value and
-		std::is_nothrow_copy_constructible<Q>::value, void>::type
+	typename std::enable_if<std::is_nothrow_copy_constructible<Q>::value, void>::type
 	push(const T& item) noexcept
 	{
 		m_openSlots.wait();
@@ -48,9 +46,7 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_move_constructible<Q>::value and
-		std::is_nothrow_move_constructible<Q>::value, void>::type
+	typename std::enable_if<std::is_nothrow_move_constructible<Q>::value, void>::type
 	push(T&& item) noexcept
 	{
 		m_openSlots.wait();
