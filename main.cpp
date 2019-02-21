@@ -3,11 +3,21 @@
 #include <thread>
 using namespace std;
 
-//#define FENCE
+//#define ATOMIC_FENCE
+//#define ATOMIC_RELEASE
+//#define ATOMIC_CONSUME
 
-#ifdef FENCE
+#if defined ATOMIC_FENCE
 #define FENCE_ACQUIRE atomic_thread_fence(memory_order_acquire)
 #define FENCE_RELEASE atomic_thread_fence(memory_order_release)
+#elif defined ATOMIC_RELEASE
+atomic_bool f{false};
+#define FENCE_ACQUIRE f.load(memory_order_acquire)
+#define FENCE_RELEASE f.store(true, memory_order_release)
+#elif defined ATOMIC_CONSUME
+atomic_bool f{false};
+#define FENCE_ACQUIRE f.load(memory_order_acquire)
+#define FENCE_RELEASE f.store(flag, memory_order_release)
 #else
 #define FENCE_ACQUIRE
 #define FENCE_RELEASE
