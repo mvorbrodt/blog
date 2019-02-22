@@ -4,9 +4,9 @@
 #include <vector>
 using namespace std;
 
-const int COUNT = 5;
-const int THREADS = 5;
-const int THREAD_MASK = 0b001;
+const unsigned int COUNT = 10;
+const unsigned int THREADS = 16;
+const unsigned int THREAD_MASK = 0b001;
 
 int main(int argc, char** argv)
 {
@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 			flag.fetch_or(thread_mask);
 			if(flag.load() == thread_mask)
 			{
-				cout << "T" << thread << " in critical section" << endl;
+				cout << "T" << thread << " in critical section, i = " << i << endl;
 				flag.fetch_xor(thread_mask);
 				++i;
 				this_thread::yield();
@@ -26,6 +26,7 @@ int main(int argc, char** argv)
 			else
 			{
 				flag.fetch_xor(thread_mask);
+				this_thread::yield();
 			}
 		}
 	};
