@@ -18,11 +18,11 @@ int main(int argc, char** argv)
 				cout << "T1 in critical section" << endl;
 				f1.store(false, memory_order_relaxed);
 				++i;
+				this_thread::yield();
 			}
 			else
 			{
 				f1.store(false, memory_order_relaxed);
-				this_thread::yield();
 			}
 		}
 	});
@@ -36,11 +36,11 @@ int main(int argc, char** argv)
 				cout << "T2 in critical section" << endl;
 				f2.store(false, memory_order_relaxed);
 				++i;
+				this_thread::yield();
 			}
 			else
 			{
 				f2.store(false, memory_order_relaxed);
-				this_thread::yield();
 			}
 		}
 	});
