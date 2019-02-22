@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 		for(int i = 0; i < COUNT;)
 		{
 			f1.store(true, memory_order_relaxed);
-			if(f2.load(memory_order_acquire) == false)
+			if(f2.load(memory_order_seq_cst) == false)
 			{
 				cout << "T1 in critical section" << endl;
 				f1.store(false, memory_order_relaxed);
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 		for(int i = 0; i < COUNT;)
 		{
 			f2.store(true, memory_order_relaxed);
-			if(f1.load(memory_order_acquire) == false)
+			if(f1.load(memory_order_seq_cst) == false)
 			{
 				cout << "T2 in critical section" << endl;
 				f2.store(false, memory_order_relaxed);
