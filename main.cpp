@@ -1,52 +1,41 @@
 #include <iostream>
 #include <atomic>
 #include <thread>
+#include <vector>
 using namespace std;
 
-const int COUNT = 10;
+const int COUNT = 5;
+const int THREADS = 5;
+const int THREAD_MASK = 0b001;
 
 int main(int argc, char** argv)
 {
-	atomic_bool f1{false}, f2{false};
+	atomic_uint flag{0};
 
-	thread t1([&]() {
+	auto proc = [&](int thread, unsigned int thread_mask) {
 		for(int i = 0; i < COUNT;)
 		{
-			f1.store(true, memory_order_relaxed);
-			if(f2.load(memory_order_seq_cst) == false)
+			flag.fetch_or(thread_mask);
+			if(flag.load() == thread_mask)
 			{
-				cout << "T1 in critical section" << endl;
-				f1.store(false, memory_order_relaxed);
+				cout << "T" << thread << " in critical section" << endl;
+				flag.fetch_xor(thread_mask);
 				++i;
 				this_thread::yield();
 			}
 			else
 			{
-				f1.store(false, memory_order_relaxed);
+				flag.fetch_xor(thread_mask);
 			}
 		}
-	});
+	};
 
-	thread t2([&]() {
-		for(int i = 0; i < COUNT;)
-		{
-			f2.store(true, memory_order_relaxed);
-			if(f1.load(memory_order_seq_cst) == false)
-			{
-				cout << "T2 in critical section" << endl;
-				f2.store(false, memory_order_relaxed);
-				++i;
-				this_thread::yield();
-			}
-			else
-			{
-				f2.store(false, memory_order_relaxed);
-			}
-		}
-	});
+	vector<thread> vt;
+	for(int i = 0; i < THREADS; ++i)
+		vt.emplace_back(proc, i, THREAD_MASK << i);
 
-	t1.join();
-	t2.join();
+	for(auto& t : vt)
+		t.join();
 
 	return 1;
 }
