@@ -1,3 +1,6 @@
+/*
+ * fast_mutex and rw_fast_mutex implemented by Chris Thomasson
+ */
 #pragma once
 
 #include <atomic>
