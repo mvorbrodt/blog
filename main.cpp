@@ -4,8 +4,8 @@
 #include <vector>
 using namespace std;
 
-const unsigned int COUNT = 10;
-const unsigned int THREADS = 16;
+const unsigned int COUNT = 5;
+const unsigned int THREADS = thread::hardware_concurrency();
 const unsigned int THREAD_MASK = 0b1;
 
 int main(int argc, char** argv)
@@ -17,12 +17,11 @@ int main(int argc, char** argv)
 		{
 			if(flag.fetch_or(thread_mask) == 0)
 			{
-				cout << "T" << t << " in critical section" << endl;
+				cout << "T" << t << " in critical section, entry " << i << endl;
 				++i;
 			}
 
 			flag.fetch_xor(thread_mask);
-			this_thread::yield();
 		}
 	};
 
