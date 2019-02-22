@@ -3,7 +3,7 @@
 #include <thread>
 using namespace std;
 
-const int COUNT = 3;
+const int COUNT = 10;
 
 int main(int argc, char** argv)
 {
@@ -12,16 +12,16 @@ int main(int argc, char** argv)
 	thread t1([&]() {
 		for(int i = 0; i < COUNT;)
 		{
-			f1 = true;
-			if(f2 == false)
+			f1.store(true, memory_order_relaxed);
+			if(f2.load(memory_order_acquire) == false)
 			{
 				cout << "T1 in critical section" << endl;
-				f1 = false;
+				f1.store(false, memory_order_relaxed);
 				++i;
 			}
 			else
 			{
-				f1 = false;
+				f1.store(false, memory_order_relaxed);
 				this_thread::yield();
 			}
 		}
@@ -30,16 +30,16 @@ int main(int argc, char** argv)
 	thread t2([&]() {
 		for(int i = 0; i < COUNT;)
 		{
-			f2 = true;
-			if(f1 == false)
+			f2.store(true, memory_order_relaxed);
+			if(f1.load(memory_order_acquire) == false)
 			{
 				cout << "T2 in critical section" << endl;
-				f2 = false;
+				f2.store(false, memory_order_relaxed);
 				++i;
 			}
 			else
 			{
-				f2 = false;
+				f2.store(false, memory_order_relaxed);
 				this_thread::yield();
 			}
 		}
