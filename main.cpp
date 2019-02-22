@@ -3,42 +3,46 @@
 #include <thread>
 using namespace std;
 
-//#define ATOMIC_FENCE
-//#define ATOMIC_RELEASE
-//#define ATOMIC_CONSUME
-
-#if defined ATOMIC_FENCE
-#define FENCE_ACQUIRE atomic_thread_fence(memory_order_acquire)
-#define FENCE_RELEASE atomic_thread_fence(memory_order_release)
-#elif defined ATOMIC_RELEASE
-atomic_bool f{false};
-#define FENCE_ACQUIRE f.load(memory_order_acquire)
-#define FENCE_RELEASE f.store(true, memory_order_release)
-#elif defined ATOMIC_CONSUME
-atomic_bool f{false};
-#define FENCE_ACQUIRE f.load(memory_order_consume)
-#define FENCE_RELEASE f.store(flag, memory_order_release)
-#else
-#define FENCE_ACQUIRE
-#define FENCE_RELEASE
-#endif
+const int COUNT = 3;
 
 int main(int argc, char** argv)
 {
-	bool flag = false;
+	atomic_bool f1{false}, f2{false};
 
 	thread t1([&]() {
-		this_thread::sleep_for(100ms);
-		cout << "t1 started" << endl;
-		flag = true;
-		FENCE_RELEASE;
-		cout << "t1 signals and exits" << endl;
+		for(int i = 0; i < COUNT;)
+		{
+			f1 = true;
+			if(f2 == false)
+			{
+				cout << "T1 in critical section" << endl;
+				f1 = false;
+				++i;
+			}
+			else
+			{
+				f1 = false;
+				this_thread::yield();
+			}
+		}
 	});
 
 	thread t2([&]() {
-		cout << "t2 started" << endl;
-		while(flag == false) FENCE_ACQUIRE;
-		cout << "t2 got signaled and exits" << endl;
+		for(int i = 0; i < COUNT;)
+		{
+			f2 = true;
+			if(f1 == false)
+			{
+				cout << "T2 in critical section" << endl;
+				f2 = false;
+				++i;
+			}
+			else
+			{
+				f2 = false;
+				this_thread::yield();
+			}
+		}
 	});
 
 	t1.join();
