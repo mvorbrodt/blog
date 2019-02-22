@@ -6,7 +6,7 @@ using namespace std;
 
 const unsigned int COUNT = 10;
 const unsigned int THREADS = 16;
-const unsigned int THREAD_MASK = 0b001;
+const unsigned int THREAD_MASK = 0b1;
 
 int main(int argc, char** argv)
 {
