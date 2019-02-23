@@ -1,36 +1,45 @@
 #include <iostream>
-#include <atomic>
+#include <mutex>
 #include <thread>
-#include <vector>
 using namespace std;
 
-const unsigned int COUNT = 5;
-const unsigned int THREADS = thread::hardware_concurrency();
-const unsigned int THREAD_MASK = 0b1;
+const int COUNT = 10'000'000;
+
+mutex aLock;
+mutex bLock;
+
+struct S
+{
+	unsigned int a:9;
+	unsigned int b:7;
+} __attribute__((packed));
 
 int main(int argc, char** argv)
 {
-	atomic_uint flag{0};
+	S s{};
 
-	auto proc = [&](int t, unsigned int thread_mask) {
-		for(int i = 0; i < COUNT;)
+	thread t1([&]() {
+		scoped_lock lock(aLock);
+		for(int i = 0; i < COUNT; ++i)
 		{
-			if(flag.fetch_or(thread_mask) == 0)
-			{
-				cout << "T" << t << " in critical section, entry " << i << endl;
-				++i;
-			}
-
-			flag.fetch_xor(thread_mask);
+			s.a = 0;
+			s.a = 0b111111111;
 		}
-	};
+	});
 
-	vector<thread> vt;
-	for(int i = 0; i < THREADS; ++i)
-		vt.emplace_back(proc, i, THREAD_MASK << i);
+	thread t2([&]() {
+		scoped_lock lock(bLock);
+		for(int i = 0; i < COUNT; ++i)
+		{
+			s.b = 0;
+			s.b = 0b1111111;
+		}
+	});
 
-	for(auto& t : vt)
-		t.join();
+	t1.join();
+	t2.join();
+
+	cout << "sizeof(S) = " << sizeof(S) << ", " << s.a << ", " << s.b << endl;
 
 	return 1;
 }
