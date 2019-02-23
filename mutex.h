@@ -1,5 +1,9 @@
 /*
- * fast_mutex and rw_fast_mutex implemented by Chris Thomasson
+ * fast_mutex and rw_fast_mutex designed and implemented by Chris Thomasson
+ *
+ * https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/296471
+ *
+ * https://groups.google.com/forum/#!topic/comp.lang.c++/g6veUOvOAu0
  */
 #pragma once
 
