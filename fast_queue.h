@@ -39,7 +39,7 @@ public:
 		++m_count;
 
 		auto expected = m_pushIndex.load();
-		while(!m_pushIndex.compare_exchange_strong(expected, m_pushIndex % m_size))
+		while(!m_pushIndex.compare_exchange_weak(expected, m_pushIndex % m_size))
 			expected = m_pushIndex.load();
 
 		m_fullSlots.post();
@@ -56,7 +56,7 @@ public:
 		++m_count;
 
 		auto expected = m_pushIndex.load();
-		while(!m_pushIndex.compare_exchange_strong(expected, m_pushIndex % m_size))
+		while(!m_pushIndex.compare_exchange_weak(expected, m_pushIndex % m_size))
 			expected = m_pushIndex.load();
 
 		m_fullSlots.post();
@@ -76,7 +76,7 @@ public:
 		--m_count;
 
 		auto expected = m_popIndex.load();
-		while(!m_popIndex.compare_exchange_strong(expected, m_popIndex % m_size))
+		while(!m_popIndex.compare_exchange_weak(expected, m_popIndex % m_size))
 			expected = m_popIndex.load();
 
 		m_openSlots.post();
@@ -96,7 +96,7 @@ public:
 		--m_count;
 
 		auto expected = m_popIndex.load();
-		while(!m_popIndex.compare_exchange_strong(expected, m_popIndex % m_size))
+		while(!m_popIndex.compare_exchange_weak(expected, m_popIndex % m_size))
 			expected = m_popIndex.load();
 
 		m_openSlots.post();
