@@ -259,6 +259,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RAYA24ULKQ;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_VERSION = "";
 				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/include/;
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
@@ -276,6 +277,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RAYA24ULKQ;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_VERSION = "";
 				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/include/;
