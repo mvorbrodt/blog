@@ -1,5 +1,8 @@
 /*
- * fast_mutex and rw_fast_mutex designed and implemented by Chris Thomasson
+ * fast_mutex designed by Alexander Terekhov, implemented by Chris Thomasson
+ * rw_fast_mutex designed and implemented by Chris Thomasson
+ *
+ * https://sourceware.org/pthreads-win32/
  *
  * https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/296471
  *
@@ -8,6 +11,7 @@
 #pragma once
 
 #include <atomic>
+#include <thread>
 #include <climits>
 #include "event.h"
 #include "semaphore.h"
@@ -17,7 +21,8 @@ class spinlock_mutex
 public:
 	void lock()
 	{
-		while(flag.test_and_set(std::memory_order_acquire));
+		while(flag.test_and_set(std::memory_order_acquire))
+			std::this_thread::yield();
 	}
 
 	void unlock()
