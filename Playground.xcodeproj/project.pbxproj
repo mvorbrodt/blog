@@ -25,6 +25,10 @@
 /* Begin PBXFileReference section */
 		5B21C85822074112006CFB1D /* queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = queue.h; sourceTree = "<group>"; };
 		5B21C859220742EC006CFB1D /* semaphore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = semaphore.h; sourceTree = "<group>"; };
+		5B31D3322223DEF400A2AE38 /* run-single-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-single-debug.sh"; sourceTree = SOURCE_ROOT; };
+		5B31D3332223DEF400A2AE38 /* run-all-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-all-debug.sh"; sourceTree = SOURCE_ROOT; };
+		5B31D3342223DEF400A2AE38 /* run-all.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-all.sh"; sourceTree = SOURCE_ROOT; };
+		5B31D3352223DEF400A2AE38 /* run-single.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-single.sh"; sourceTree = SOURCE_ROOT; };
 		5B4763142208BDD800EE4E20 /* T.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = T.h; sourceTree = "<group>"; };
 		5B4763152208C19800EE4E20 /* event.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = event.h; sourceTree = "<group>"; };
 		5B8522DA2135ABED0048744F /* Playground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Playground; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -50,9 +54,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5B31D3312223DED500A2AE38 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				5B31D3332223DEF400A2AE38 /* run-all-debug.sh */,
+				5B31D3342223DEF400A2AE38 /* run-all.sh */,
+				5B31D3322223DEF400A2AE38 /* run-single-debug.sh */,
+				5B31D3352223DEF400A2AE38 /* run-single.sh */,
+			);
+			path = Scripts;
+			sourceTree = "<group>";
+		};
 		5B8522D12135ABED0048744F = {
 			isa = PBXGroup;
 			children = (
+				5B31D3312223DED500A2AE38 /* Scripts */,
 				5BBCD7842222D98D009E8CCF /* LICENSE */,
 				5BBCD7852222D98E009E8CCF /* README.md */,
 				5B4763142208BDD800EE4E20 /* T.h */,
