@@ -31,7 +31,7 @@ public:
 				if(event.elapsed == event.ticks)
 				{
 					event.proc();
-					if(event.event != nullptr)
+					if(event.remove_after_fire)
 					{
 						m_events.erase(it++);
 						continue;
@@ -68,7 +68,7 @@ public:
 			f(args...);
 		};
 		m_events.insert({ event_ctx::kNextSeqNum++, proc,
-			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, event });
+			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, event, true });
 		return event;
 	}
 
@@ -82,7 +82,7 @@ public:
 			f(args...);
 		};
 		m_events.insert({ event_ctx::kNextSeqNum++, proc,
-			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, nullptr });
+			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, event, false });
 		return event;
 	}
 
@@ -101,6 +101,7 @@ private:
 		unsigned long long ticks;
 		mutable unsigned long long elapsed;
 		std::shared_ptr<manual_event> event;
+		bool remove_after_fire;
 	};
 
 	using set = std::set<event_ctx>;
