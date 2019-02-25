@@ -104,6 +104,5 @@ private:
 		std::shared_ptr<manual_event> event;
 	};
 
-	using set = std::set<event_ctx>;
-	set m_events;
+	std::set<event_ctx> m_events;
 };
