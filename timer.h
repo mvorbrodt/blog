@@ -52,7 +52,7 @@ public:
 		assert(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() >= m_tick.count());
 		auto event = std::make_shared<manual_event>();
 		auto proc = [=]() {
-			if(event->wait_for(std::chrono::milliseconds(0))) return;
+			if(event->wait_for(std::chrono::seconds(0))) return;
 			f(args...);
 		};
 		m_intervals.insert(m_intervals.end(), { proc,
@@ -66,7 +66,7 @@ public:
 		assert(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() >= m_tick.count());
 		auto event = std::make_shared<manual_event>();
 		auto proc = [=]() {
-			if(event->wait_for(std::chrono::milliseconds(0))) return;
+			if(event->wait_for(std::chrono::seconds(0))) return;
 			f(args...);
 		};
 		m_intervals.insert(m_intervals.end(), { proc,
