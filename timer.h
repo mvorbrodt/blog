@@ -26,7 +26,7 @@ public:
 			auto end = std::end(m_intervals);
 			while(it != end)
 			{
-				auto& interval = *it++;
+				auto& interval = *it;
 				++interval.elapsed;
 				if(interval.elapsed == interval.ticks)
 				{
@@ -38,12 +38,14 @@ public:
 						it = std::begin(m_intervals);
 						end = std::end(m_intervals);
 						std::advance(it, distance);
+						continue;
 					}
 					else
 					{
 						interval.elapsed = 0;
 					}
 				}
+				++it;
 			}
 			auto now = std::chrono::high_resolution_clock::now();
 			auto realDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(now - start);
