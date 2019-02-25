@@ -19,10 +19,10 @@ rm -f playground
 echo
 
 echo "*********************************************"
-echo "* GCC -O0 -march=native -std=c++17 -lstdc++ *"
+echo "* G++ -O0 -march=native -std=c++17 -lstdc++ *"
 echo "*********************************************"
 echo
 rm -f playground
-gcc -O0 -march=native -std=c++17 -lstdc++ main.cpp -o playground
+g++ -O0 -march=native -std=c++17 -lstdc++ main.cpp -o playground
 ./playground
 echo
