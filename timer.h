@@ -11,12 +11,15 @@
 class timer
 {
 public:
-	timer(const std::chrono::seconds& tick)
-	: m_tick(tick), m_thread([this]() {
-		std::chrono::microseconds drift{0};
+	template<typename T>
+	timer(T&& tick)
+	: m_tick(std::chrono::duration_cast<std::chrono::nanoseconds>(tick)), m_thread([this]()
+	{
+		auto start = std::chrono::high_resolution_clock::now();
+		std::chrono::nanoseconds drift{0};
 		while(!m_event.wait_for(m_tick - drift))
 		{
-			auto start = std::chrono::high_resolution_clock::now();
+			++m_ticks;
 			for(auto& interval : m_intervals)
 			{
 				++interval.elapsed;
@@ -29,7 +32,9 @@ public:
 				}
 			}
 			auto end = std::chrono::high_resolution_clock::now();
-			drift = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+			auto realDuration = end - start;
+			auto fakeDuration = m_tick * m_ticks;
+			drift = realDuration - fakeDuration;
 		}
 	})
 	{}
@@ -67,7 +72,8 @@ public:
 	}
 
 private:
-	std::chrono::seconds m_tick;
+	std::chrono::nanoseconds m_tick;
+	unsigned long long m_ticks = 0;
 	manual_event m_event;
 	std::thread m_thread;
 
