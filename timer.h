@@ -30,8 +30,8 @@ public:
 				++event.elapsed;
 				if(event.elapsed == event.ticks)
 				{
-					event.proc();
-					if(event.remove_after_fire)
+					auto remove = event.proc();
+					if(remove)
 					{
 						m_events.erase(it++);
 						continue;
@@ -63,11 +63,12 @@ public:
 		assert(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() >= m_tick.count());
 		auto event = std::make_shared<manual_event>();
 		auto proc = [=]() {
-			if(event->wait_for(std::chrono::seconds(0))) return;
+			if(event->wait_for(std::chrono::seconds(0))) return true;
 			f(args...);
+			return true;
 		};
 		m_events.insert({ event_ctx::kNextSeqNum++, proc,
-			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, event, true });
+			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, event });
 		return event;
 	}
 
@@ -77,11 +78,12 @@ public:
 		assert(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() >= m_tick.count());
 		auto event = std::make_shared<manual_event>();
 		auto proc = [=]() {
-			if(event->wait_for(std::chrono::seconds(0))) return;
+			if(event->wait_for(std::chrono::seconds(0))) return true;
 			f(args...);
+			return false;
 		};
 		m_events.insert({ event_ctx::kNextSeqNum++, proc,
-			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, event, false });
+			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, event });
 		return event;
 	}
 
@@ -96,11 +98,10 @@ private:
 		bool operator < (const event_ctx& rhs) const { return seq_num < rhs.seq_num; }
 		static inline unsigned long long kNextSeqNum = 0;
 		unsigned long long seq_num;
-		std::function<void(void)> proc;
+		std::function<bool(void)> proc;
 		unsigned long long ticks;
 		mutable unsigned long long elapsed;
 		std::shared_ptr<manual_event> event;
-		bool remove_after_fire;
 	};
 
 	using set = std::set<event_ctx>;
