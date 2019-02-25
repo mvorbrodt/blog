@@ -54,21 +54,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		5B31D3312223DED500A2AE38 /* Scripts */ = {
+		5B8522D12135ABED0048744F = {
 			isa = PBXGroup;
 			children = (
 				5B31D3332223DEF400A2AE38 /* run-all-debug.sh */,
 				5B31D3342223DEF400A2AE38 /* run-all.sh */,
 				5B31D3322223DEF400A2AE38 /* run-single-debug.sh */,
 				5B31D3352223DEF400A2AE38 /* run-single.sh */,
-			);
-			path = Scripts;
-			sourceTree = "<group>";
-		};
-		5B8522D12135ABED0048744F = {
-			isa = PBXGroup;
-			children = (
-				5B31D3312223DED500A2AE38 /* Scripts */,
 				5BBCD7842222D98D009E8CCF /* LICENSE */,
 				5BBCD7852222D98E009E8CCF /* README.md */,
 				5B4763142208BDD800EE4E20 /* T.h */,
