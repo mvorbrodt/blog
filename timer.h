@@ -47,7 +47,7 @@ public:
 	}
 
 	template<typename T, typename F, typename... Args>
-	std::shared_ptr<manual_event> set_timeout(T&& timeout, F f, Args&&... args)
+	auto set_timeout(T&& timeout, F f, Args&&... args)
 	{
 		assert(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() >= m_tick.count());
 		auto event = std::make_shared<manual_event>();
@@ -61,7 +61,7 @@ public:
 	}
 
 	template<typename T, typename F, typename... Args>
-	std::shared_ptr<manual_event> set_interval(T&& interval, F f, Args&&... args)
+	auto set_interval(T&& interval, F f, Args&&... args)
 	{
 		assert(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() >= m_tick.count());
 		auto event = std::make_shared<manual_event>();
