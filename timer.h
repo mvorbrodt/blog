@@ -46,8 +46,7 @@ public:
 			auto now = std::chrono::high_resolution_clock::now();
 			auto realDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(now - start);
 			auto fakeDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(m_tick * m_ticks);
-			if(realDuration > fakeDuration)
-				drift = realDuration - fakeDuration;
+			drift = realDuration - fakeDuration;
 		}
 	})
 	{}
