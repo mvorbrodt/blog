@@ -90,30 +90,3 @@ private:
 
 	std::list<interval_ctx> m_intervals;
 };
-
-template<typename D, typename F, typename... Args>
-std::shared_ptr<manual_event> set_timeout_thread(D d, F f, Args&&... args)
-{
-	auto event = std::make_shared<manual_event>();
-	std::thread([=]()
-	{
-		if(event->wait_for(d)) return;
-		f(args...);
-	}).detach();
-	return event;
-}
-
-template<typename D, typename F, typename... Args>
-std::shared_ptr<manual_event> set_interval_thread(D d, F f, Args&&... args)
-{
-	auto event = std::make_shared<manual_event>();
-	std::thread([=]()
-	{
-		while(true)
-		{
-			if(event->wait_for(d)) return;
-			f(args...);
-		}
-	}).detach();
-	return event;
-}
