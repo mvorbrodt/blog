@@ -4,7 +4,7 @@
 #include <chrono>
 #include <memory>
 #include <functional>
-#include <list>
+#include <set>
 #include <iterator>
 #include <cassert>
 #include "event.h"
@@ -22,8 +22,8 @@ public:
 		while(!m_event.wait_for(m_tick - drift))
 		{
 			++m_ticks;
-			auto it = std::begin(m_intervals);
-			auto end = std::end(m_intervals);
+			auto it = std::begin(m_events);
+			auto end = std::end(m_events);
 			while(it != end)
 			{
 				auto& event = *it;
@@ -33,11 +33,7 @@ public:
 					event.proc();
 					if(event.event != nullptr)
 					{
-						auto distance = std::distance(it, std::begin(m_intervals));
-						m_intervals.remove(event);
-						it = std::begin(m_intervals);
-						end = std::end(m_intervals);
-						std::advance(it, distance);
+						m_events.erase(it++);
 						continue;
 					}
 					else
@@ -71,7 +67,7 @@ public:
 			if(event->wait_for(std::chrono::seconds(0))) return;
 			f(args...);
 		};
-		m_intervals.insert(m_intervals.end(), { event_ctx::kNextSeqNum++, proc,
+		m_events.insert({ event_ctx::kNextSeqNum++, proc,
 			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, event });
 		return event;
 	}
@@ -85,7 +81,7 @@ public:
 			if(event->wait_for(std::chrono::seconds(0))) return;
 			f(args...);
 		};
-		m_intervals.insert(m_intervals.end(), { event_ctx::kNextSeqNum++, proc,
+		m_events.insert({ event_ctx::kNextSeqNum++, proc,
 			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, nullptr });
 		return event;
 	}
@@ -98,14 +94,15 @@ private:
 
 	struct event_ctx
 	{
-		bool operator == (const event_ctx& rhs) const { return seq_num == rhs.seq_num; }
+		bool operator < (const event_ctx& rhs) const { return seq_num < rhs.seq_num; }
 		static inline unsigned long long kNextSeqNum = 0;
 		unsigned long long seq_num;
 		std::function<void(void)> proc;
 		unsigned long long ticks;
-		unsigned long long elapsed;
+		mutable unsigned long long elapsed;
 		std::shared_ptr<manual_event> event;
 	};
 
-	std::list<event_ctx> m_intervals;
+	using set = std::set<event_ctx>;
+	set m_events;
 };
