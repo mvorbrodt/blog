@@ -26,15 +26,15 @@ public:
 			auto end = std::end(m_intervals);
 			while(it != end)
 			{
-				auto& interval = *it;
-				++interval.elapsed;
-				if(interval.elapsed == interval.ticks)
+				auto& event = *it;
+				++event.elapsed;
+				if(event.elapsed == event.ticks)
 				{
-					interval.proc();
-					if(interval.event != nullptr)
+					event.proc();
+					if(event.event != nullptr)
 					{
 						auto distance = std::distance(it, std::begin(m_intervals));
-						m_intervals.remove(interval);
+						m_intervals.remove(event);
 						it = std::begin(m_intervals);
 						end = std::end(m_intervals);
 						std::advance(it, distance);
@@ -42,7 +42,7 @@ public:
 					}
 					else
 					{
-						interval.elapsed = 0;
+						event.elapsed = 0;
 					}
 				}
 				++it;
@@ -71,7 +71,7 @@ public:
 			if(event->wait_for(std::chrono::seconds(0))) return;
 			f(args...);
 		};
-		m_intervals.insert(m_intervals.end(), { interval_ctx::kNextSeqNum++, proc,
+		m_intervals.insert(m_intervals.end(), { event_ctx::kNextSeqNum++, proc,
 			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, event });
 		return event;
 	}
@@ -85,7 +85,7 @@ public:
 			if(event->wait_for(std::chrono::seconds(0))) return;
 			f(args...);
 		};
-		m_intervals.insert(m_intervals.end(), { interval_ctx::kNextSeqNum++, proc,
+		m_intervals.insert(m_intervals.end(), { event_ctx::kNextSeqNum++, proc,
 			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, nullptr });
 		return event;
 	}
@@ -96,9 +96,9 @@ private:
 	manual_event m_event;
 	std::thread m_thread;
 
-	struct interval_ctx
+	struct event_ctx
 	{
-		bool operator == (const interval_ctx& rhs) const { return seq_num == rhs.seq_num; }
+		bool operator == (const event_ctx& rhs) const { return seq_num == rhs.seq_num; }
 		static inline unsigned long long kNextSeqNum = 0;
 		unsigned long long seq_num;
 		std::function<void(void)> proc;
@@ -107,5 +107,5 @@ private:
 		std::shared_ptr<manual_event> event;
 	};
 
-	std::list<interval_ctx> m_intervals;
+	std::list<event_ctx> m_intervals;
 };

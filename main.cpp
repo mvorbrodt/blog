@@ -16,7 +16,7 @@ int main()
 	};
 
 	cout << "start" << endl;
-	timer t(100ms);
+	timer t(1ms);
 	auto e1 = t.set_timeout(3s, [&]() { duration(); cout << "timeout 3s" << endl; });
 	auto e2 = t.set_interval(1s, [&]() { duration(); cout << "interval 1s" << endl; });
 	auto e3 = t.set_timeout(4s, [&]() { duration(); cout << "timeout 4s" << endl; });
