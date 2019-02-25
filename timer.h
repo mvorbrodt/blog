@@ -15,6 +15,7 @@ public:
 	timer(T&& tick)
 	: m_tick(std::chrono::duration_cast<std::chrono::nanoseconds>(tick)), m_thread([this]()
 	{
+		assert(m_tick.count() > 0);
 		auto start = std::chrono::high_resolution_clock::now();
 		std::chrono::nanoseconds drift{0};
 		while(!m_event.wait_for(m_tick - drift))
@@ -23,7 +24,7 @@ public:
 			for(auto& interval : m_intervals)
 			{
 				++interval.elapsed;
-				if(interval.elapsed == interval.interval)
+				if(interval.elapsed == interval.ticks)
 				{
 					interval.proc();
 					if(interval.event != nullptr)
@@ -31,9 +32,9 @@ public:
 					interval.elapsed = 0;
 				}
 			}
-			auto end = std::chrono::high_resolution_clock::now();
-			auto realDuration = end - start;
-			auto fakeDuration = m_tick * m_ticks;
+			auto now = std::chrono::high_resolution_clock::now();
+			auto realDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(now - start);
+			auto fakeDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(m_tick * m_ticks);
 			drift = realDuration - fakeDuration;
 		}
 	})
@@ -45,29 +46,31 @@ public:
 		m_thread.join();
 	}
 
-	template<typename F, typename... Args>
-	std::shared_ptr<manual_event> set_timeout(unsigned int timeout_in_ticks, F f, Args&&... args)
+	template<typename T, typename F, typename... Args>
+	std::shared_ptr<manual_event> set_timeout(T&& timeout, F f, Args&&... args)
 	{
-		assert(timeout_in_ticks > 0);
+		assert(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() >= m_tick.count());
 		auto event = std::make_shared<manual_event>();
 		auto proc = [=]() {
 			if(event->wait_for(std::chrono::milliseconds(0))) return;
 			f(args...);
 		};
-		m_intervals.insert(m_intervals.end(), { proc, timeout_in_ticks, 0, event });
+		m_intervals.insert(m_intervals.end(), { proc,
+			static_cast<unsigned int>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, event });
 		return event;
 	}
 
-	template<typename F, typename... Args>
-	std::shared_ptr<manual_event> set_interval(unsigned int interval_in_ticks, F f, Args&&... args)
+	template<typename T, typename F, typename... Args>
+	std::shared_ptr<manual_event> set_interval(T&& interval, F f, Args&&... args)
 	{
-		assert(interval_in_ticks > 0);
+		assert(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() >= m_tick.count());
 		auto event = std::make_shared<manual_event>();
 		auto proc = [=]() {
 			if(event->wait_for(std::chrono::milliseconds(0))) return;
 			f(args...);
 		};
-		m_intervals.insert(m_intervals.end(), { proc, interval_in_ticks, 0, nullptr });
+		m_intervals.insert(m_intervals.end(), { proc,
+			static_cast<unsigned int>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, nullptr });
 		return event;
 	}
 
@@ -80,7 +83,7 @@ private:
 	struct interval_ctx
 	{
 		std::function<void(void)> proc;
-		unsigned int interval;
+		unsigned int ticks;
 		unsigned int elapsed;
 		std::shared_ptr<manual_event> event;
 	};
