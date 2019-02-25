@@ -202,12 +202,12 @@ public:
 		return m_count == m_size;
 	}
 
-	bool size() const
+	unsigned int size() const
 	{
 		return m_count;
 	}
 
-	bool capacity() const
+	unsigned int capacity() const
 	{
 		return m_size;
 	}

@@ -3,13 +3,13 @@
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
-#include <cassert>
 
 class semaphore
 {
 public:
-	explicit semaphore(int count = 0) noexcept
-	: m_count(count) { assert(count > -1); }
+	explicit semaphore(unsigned int count = 0) noexcept
+	: m_count(count)
+	{}
 
 	void post() noexcept
 	{
@@ -20,7 +20,7 @@ public:
 		m_cv.notify_one();
 	}
 
-	void post(int count) noexcept
+	void post(unsigned int count) noexcept
 	{
 		{
 			std::unique_lock lock(m_mutex);
@@ -57,7 +57,7 @@ public:
 	}
 
 private:
-	int m_count;
+	unsigned int m_count;
 	std::mutex m_mutex;
 	std::condition_variable m_cv;
 };

@@ -385,13 +385,13 @@ public:
 		return m_count == m_size;
 	}
 
-	bool size() const
+	unsigned int size() const
 	{
 		std::scoped_lock lock(m_cs);
 		return m_count;
 	}
 
-	bool capacity() const
+	unsigned int capacity() const
 	{
 		return m_size;
 	}

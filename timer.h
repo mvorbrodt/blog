@@ -13,7 +13,7 @@ class timer
 {
 public:
 	template<typename T>
-	timer(T&& tick)
+	explicit timer(T&& tick)
 	: m_tick(std::chrono::duration_cast<std::chrono::nanoseconds>(tick)), m_thread([this]()
 	{
 		assert(m_tick.count() > 0);
@@ -67,8 +67,7 @@ public:
 			f(args...);
 			return true;
 		};
-		m_events.insert({ event_ctx::kNextSeqNum++, proc,
-			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, event });
+		m_events.insert({ event_ctx::NextSeqNum(), static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, proc, event });
 		return event;
 	}
 
@@ -82,8 +81,7 @@ public:
 			f(args...);
 			return false;
 		};
-		m_events.insert({ event_ctx::kNextSeqNum++, proc,
-			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, event });
+		m_events.insert({ event_ctx::NextSeqNum(), static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, proc, event });
 		return event;
 	}
 
@@ -95,14 +93,26 @@ private:
 
 	struct event_ctx
 	{
-		bool operator < (const event_ctx& rhs) const { return seq_num < rhs.seq_num; }
-		static inline unsigned long long kNextSeqNum = 0;
+		static inline unsigned long long NextSeqNum()
+		{
+			static unsigned long long kNextSeqNum = 0;
+			return ++kNextSeqNum;
+		}
+
 		unsigned long long seq_num;
-		std::function<bool(void)> proc;
 		unsigned long long ticks;
 		mutable unsigned long long elapsed;
+		std::function<bool(void)> proc;
 		std::shared_ptr<manual_event> event;
 	};
 
-	std::set<event_ctx> m_events;
+	struct event_ctx_less
+	{
+		constexpr bool operator () (const event_ctx& lhs, const event_ctx& rhs) const
+		{
+			return lhs.seq_num < rhs.seq_num;
+		}
+	};
+
+	std::set<event_ctx, event_ctx_less> m_events;
 };
