@@ -23,13 +23,7 @@
     <ClInclude Include="event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="fast_queue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="handle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mutex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pool.h">
@@ -48,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="trace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="atomic_queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

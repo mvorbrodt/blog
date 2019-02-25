@@ -71,10 +71,9 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="atomic_queue.h" />
     <ClInclude Include="event.h" />
-    <ClInclude Include="fast_queue.h" />
     <ClInclude Include="handle.h" />
-    <ClInclude Include="mutex.h" />
     <ClInclude Include="pool.h" />
     <ClInclude Include="queue.h" />
     <ClInclude Include="semaphore.h" />
