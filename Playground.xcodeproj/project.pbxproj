@@ -34,11 +34,10 @@
 		5B8522DA2135ABED0048744F /* Playground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Playground; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B8522DD2135ABED0048744F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		5B917BE822027B8900A849D5 /* handle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = handle.h; sourceTree = "<group>"; };
-		5BA9EEA3221CB5B700E07392 /* fast_queue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fast_queue.h; sourceTree = "<group>"; };
+		5BA9EEA3221CB5B700E07392 /* atomic_queue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = atomic_queue.h; sourceTree = "<group>"; };
 		5BBB5616221331B800DD4E46 /* pool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pool.h; sourceTree = "<group>"; };
 		5BBCD7842222D98D009E8CCF /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		5BBCD7852222D98E009E8CCF /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		5BD459F12213A87D00B50DC4 /* mutex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mutex.h; sourceTree = "<group>"; };
 		5BDAA3ED21D8342900CE6375 /* timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
 		5BFCF95422175231008F2B1F /* trace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trace.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -68,10 +67,9 @@
 				5BFCF95422175231008F2B1F /* trace.h */,
 				5BBB5616221331B800DD4E46 /* pool.h */,
 				5B21C85822074112006CFB1D /* queue.h */,
-				5BA9EEA3221CB5B700E07392 /* fast_queue.h */,
+				5BA9EEA3221CB5B700E07392 /* atomic_queue.h */,
 				5BDAA3ED21D8342900CE6375 /* timer.h */,
 				5B4763152208C19800EE4E20 /* event.h */,
-				5BD459F12213A87D00B50DC4 /* mutex.h */,
 				5B21C859220742EC006CFB1D /* semaphore.h */,
 				5B8522DD2135ABED0048744F /* main.cpp */,
 				5B8522DB2135ABED0048744F /* Products */,

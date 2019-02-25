@@ -5,6 +5,7 @@
 #include <memory>
 #include <functional>
 #include <list>
+#include <iterator>
 #include <cassert>
 #include "event.h"
 
@@ -21,21 +22,34 @@ public:
 		while(!m_event.wait_for(m_tick - drift))
 		{
 			++m_ticks;
-			for(auto& interval : m_intervals)
+			auto it = std::begin(m_intervals);
+			auto end = std::end(m_intervals);
+			while(it != end)
 			{
+				auto& interval = *it++;
 				++interval.elapsed;
 				if(interval.elapsed == interval.ticks)
 				{
 					interval.proc();
 					if(interval.event != nullptr)
-						interval.event->signal();
-					interval.elapsed = 0;
+					{
+						auto distance = std::distance(it, std::begin(m_intervals));
+						m_intervals.remove(interval);
+						it = std::begin(m_intervals);
+						end = std::end(m_intervals);
+						std::advance(it, distance);
+					}
+					else
+					{
+						interval.elapsed = 0;
+					}
 				}
 			}
 			auto now = std::chrono::high_resolution_clock::now();
 			auto realDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(now - start);
 			auto fakeDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(m_tick * m_ticks);
-			drift = realDuration - fakeDuration;
+			if(realDuration > fakeDuration)
+				drift = realDuration - fakeDuration;
 		}
 	})
 	{}
@@ -55,8 +69,8 @@ public:
 			if(event->wait_for(std::chrono::seconds(0))) return;
 			f(args...);
 		};
-		m_intervals.insert(m_intervals.end(), { proc,
-			static_cast<unsigned int>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, event });
+		m_intervals.insert(m_intervals.end(), { interval_ctx::kNextSeqNum++, proc,
+			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() / m_tick.count()), 0, event });
 		return event;
 	}
 
@@ -69,8 +83,8 @@ public:
 			if(event->wait_for(std::chrono::seconds(0))) return;
 			f(args...);
 		};
-		m_intervals.insert(m_intervals.end(), { proc,
-			static_cast<unsigned int>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, nullptr });
+		m_intervals.insert(m_intervals.end(), { interval_ctx::kNextSeqNum++, proc,
+			static_cast<unsigned long long>(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() / m_tick.count()), 0, nullptr });
 		return event;
 	}
 
@@ -82,9 +96,12 @@ private:
 
 	struct interval_ctx
 	{
+		bool operator == (const interval_ctx& rhs) const { return seq_num == rhs.seq_num; }
+		static inline unsigned long long kNextSeqNum = 0;
+		unsigned long long seq_num;
 		std::function<void(void)> proc;
-		unsigned int ticks;
-		unsigned int elapsed;
+		unsigned long long ticks;
+		unsigned long long elapsed;
 		std::shared_ptr<manual_event> event;
 	};
 

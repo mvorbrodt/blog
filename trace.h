@@ -3,9 +3,8 @@
 #include <iostream>
 #include <iomanip>
 #include <mutex>
-#include "mutex.h"
 
-namespace { static inline fast_mutex kStdOutLock; }
+namespace { static inline std::mutex kStdOutLock; }
 
 template<typename... Ts>
 inline void trace(Ts&&... args)
