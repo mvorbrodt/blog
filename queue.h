@@ -3,6 +3,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <queue>
+#include <atomic>
 #include <chrono>
 #include <utility>
 #include <type_traits>
