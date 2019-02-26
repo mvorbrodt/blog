@@ -54,7 +54,7 @@ public:
 		m_ready.notify_one();
 		return true;
 	}
-	
+
 	template<typename Q = T>
 	typename std::enable_if<
 		std::is_move_constructible<Q>::value and
