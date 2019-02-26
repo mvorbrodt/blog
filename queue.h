@@ -11,7 +11,7 @@
 #include "semaphore.h"
 
 template<typename T>
-class simple_queue
+class simple_blocking_queue
 {
 public:
 	template<typename Q = T>

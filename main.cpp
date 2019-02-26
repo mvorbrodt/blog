@@ -1,16 +1,13 @@
 #include <iostream>
-#include "queue.h"
+#include "pool.h"
+#include "trace.h"
 using namespace std;
 
 int main()
 {
-	simple_queue<int> q;
-
-	cout << q.try_push(1) << endl;
-	cout << q.try_push(2) << endl;
-
-	int x;
-	cout << q.try_pop(x) << ", " << x << endl;
-	cout << q.try_pop(x) << ", " << x << endl;
-	cout << q.try_pop(x) << ", " << x << endl;
+	thread_pool tp;
+	thread([&]() {
+		for(int i = 1; i <= 10; ++i)
+			tp.enqueue_work([=]() { trace("work item ", i); return i * i; });
+	}).join();
 }
