@@ -15,10 +15,8 @@ class simple_blocking_queue
 {
 public:
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_copy_constructible<Q>::value and
-		std::is_nothrow_copy_constructible<Q>::value, void>::type
-	push(const T& item) noexcept
+	typename std::enable_if<std::is_copy_constructible<Q>::value, void>::type
+	push(const T& item)
 	{
 		{
 			std::unique_lock lock(m_mutex);
@@ -28,10 +26,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_move_constructible<Q>::value and
-		std::is_nothrow_move_constructible<Q>::value, void>::type
-	push(T&& item) noexcept
+	typename std::enable_if<std::is_move_constructible<Q>::value, void>::type
+	push(T&& item)
 	{
 		{
 			std::unique_lock lock(m_mutex);
@@ -41,10 +37,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_copy_constructible<Q>::value and
-		std::is_nothrow_copy_constructible<Q>::value, bool>::type
-	try_push(const T& item) noexcept
+	typename std::enable_if<std::is_copy_constructible<Q>::value, bool>::type
+	try_push(const T& item)
 	{
 		{
 			std::unique_lock lock(m_mutex, std::try_to_lock);
@@ -56,10 +50,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_move_constructible<Q>::value and
-		std::is_nothrow_move_constructible<Q>::value, bool>::type
-	try_push(T&& item) noexcept
+	typename std::enable_if<std::is_move_constructible<Q>::value, bool>::type
+	try_push(T&& item)
 	{
 		{
 			std::unique_lock lock(m_mutex, std::try_to_lock);
@@ -71,10 +63,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		not std::is_move_assignable<Q>::value
-		and std::is_nothrow_copy_assignable<Q>::value, bool>::type
-	pop(T& item) noexcept
+	typename std::enable_if<std::is_copy_assignable<Q>::value and not std::is_move_assignable<Q>::value, bool>::type
+	pop(T& item)
 	{
 		std::unique_lock lock(m_mutex);
 		while(m_queue.empty() && !m_done) m_ready.wait(lock);
@@ -85,10 +75,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_move_assignable<Q>::value and
-		std::is_nothrow_move_assignable<Q>::value, bool>::type
-	pop(T& item) noexcept
+	typename std::enable_if<std::is_move_assignable<Q>::value, bool>::type
+	pop(T& item)
 	{
 		std::unique_lock lock(m_mutex);
 		while(m_queue.empty() && !m_done) m_ready.wait(lock);
@@ -99,10 +87,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		not std::is_move_assignable<Q>::value
-		and std::is_nothrow_copy_assignable<Q>::value, bool>::type
-	try_pop(T& item) noexcept
+	typename std::enable_if<std::is_copy_assignable<Q>::value and not std::is_move_assignable<Q>::value, bool>::type
+	try_pop(T& item)
 	{
 		std::unique_lock lock(m_mutex, std::try_to_lock);
 		if(!lock || m_queue.empty()) return false;
@@ -112,10 +98,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_move_assignable<Q>::value and
-		std::is_nothrow_move_assignable<Q>::value, bool>::type
-	try_pop(T& item) noexcept
+	typename std::enable_if<std::is_move_assignable<Q>::value, bool>::type
+	try_pop(T& item)
 	{
 		std::unique_lock lock(m_mutex, std::try_to_lock);
 		if(!lock || m_queue.empty()) return false;
@@ -552,7 +536,7 @@ public:
 		return m_size;
 	}
 
-	T pop() noexcept(std::is_nothrow_invocable<decltype(&blocking_queue<T>::pop<T>), T&>::value)
+	T pop()
 	{
 		T item;
 		pop(item);

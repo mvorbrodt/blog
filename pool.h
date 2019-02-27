@@ -46,7 +46,7 @@ public:
 	using Proc = std::function<void(void)>;
 
 	template<typename F, typename... Args>
-	void enqueue_work(F&& f, Args&&... args) noexcept(std::is_nothrow_invocable<decltype(&blocking_queue<Proc>::push<Proc&&>), Proc&&>::value)
+	void enqueue_work(F&& f, Args&&... args)
 	{
 		m_queue.push([=]() { f(args...); });
 	}
