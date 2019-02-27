@@ -7,8 +7,7 @@ class manual_event
 {
 public:
 	explicit manual_event(bool signaled = false) noexcept
-	: m_signaled(signaled)
-	{}
+	: m_signaled(signaled) {}
 
 	void signal() noexcept
 	{
@@ -55,8 +54,7 @@ class auto_event
 {
 public:
 	explicit auto_event(bool signaled = false) noexcept
-	: m_signaled(signaled)
-	{}
+	: m_signaled(signaled) {}
 
 	void signal() noexcept
 	{
