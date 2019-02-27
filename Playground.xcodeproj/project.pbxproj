@@ -25,16 +25,8 @@
 /* Begin PBXFileReference section */
 		5B21C85822074112006CFB1D /* queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = queue.h; sourceTree = "<group>"; };
 		5B21C859220742EC006CFB1D /* semaphore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = semaphore.h; sourceTree = "<group>"; };
-		5B31D3332223DEF400A2AE38 /* run-all-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-all-debug.sh"; path = "scripts/run-all-debug.sh"; sourceTree = SOURCE_ROOT; };
-		5B31D3342223DEF400A2AE38 /* run-all.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-all.sh"; path = "scripts/run-all.sh"; sourceTree = SOURCE_ROOT; };
 		5B4763142208BDD800EE4E20 /* T.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = T.h; sourceTree = "<group>"; };
 		5B4763152208C19800EE4E20 /* event.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = event.h; sourceTree = "<group>"; };
-		5B51573E22273CE40087F5D1 /* run-apple-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-apple-debug.sh"; sourceTree = "<group>"; };
-		5B51573F22273CE40087F5D1 /* run-apple.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-apple.sh"; sourceTree = "<group>"; };
-		5B51574022273D540087F5D1 /* run-llvm-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-llvm-debug.sh"; sourceTree = "<group>"; };
-		5B51574122273D540087F5D1 /* run-gcc-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-gcc-debug.sh"; sourceTree = "<group>"; };
-		5B51574222273D540087F5D1 /* run-gcc.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-gcc.sh"; sourceTree = "<group>"; };
-		5B51574322273D540087F5D1 /* run-llvm.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-llvm.sh"; sourceTree = "<group>"; };
 		5B8522DA2135ABED0048744F /* Playground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Playground; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B8522DD2135ABED0048744F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		5B917BE822027B8900A849D5 /* handle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = handle.h; sourceTree = "<group>"; };
@@ -42,7 +34,15 @@
 		5BBB5616221331B800DD4E46 /* pool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pool.h; sourceTree = "<group>"; };
 		5BBCD7842222D98D009E8CCF /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		5BBCD7852222D98E009E8CCF /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		5BCAE4FA2227425100FDADA2 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
+		5BCAE4FD2227445200FDADA2 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
+		5BCAE4FE2227445B00FDADA2 /* run-gcc-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-gcc-debug.sh"; path = "scripts/run-gcc-debug.sh"; sourceTree = "<group>"; };
+		5BCAE4FF2227445B00FDADA2 /* run-llvm.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-llvm.sh"; path = "scripts/run-llvm.sh"; sourceTree = "<group>"; };
+		5BCAE5002227445B00FDADA2 /* run-all.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-all.sh"; path = "scripts/run-all.sh"; sourceTree = "<group>"; };
+		5BCAE5012227445B00FDADA2 /* run-all-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-all-debug.sh"; path = "scripts/run-all-debug.sh"; sourceTree = "<group>"; };
+		5BCAE5022227445B00FDADA2 /* run-llvm-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-llvm-debug.sh"; path = "scripts/run-llvm-debug.sh"; sourceTree = "<group>"; };
+		5BCAE5032227445B00FDADA2 /* run-apple.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-apple.sh"; path = "scripts/run-apple.sh"; sourceTree = "<group>"; };
+		5BCAE5042227445B00FDADA2 /* run-apple-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-apple-debug.sh"; path = "scripts/run-apple-debug.sh"; sourceTree = "<group>"; };
+		5BCAE5052227445B00FDADA2 /* run-gcc.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-gcc.sh"; path = "scripts/run-gcc.sh"; sourceTree = "<group>"; };
 		5BDAA3ED21D8342900CE6375 /* timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
 		5BFCF95422175231008F2B1F /* trace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trace.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -61,20 +61,9 @@
 		5B8522D12135ABED0048744F = {
 			isa = PBXGroup;
 			children = (
-				5BCAE4F92227423900FDADA2 /* scripts */,
-				5BCAE4FA2227425100FDADA2 /* run.sh */,
-				5BBCD7842222D98D009E8CCF /* LICENSE */,
-				5BBCD7852222D98E009E8CCF /* README.md */,
-				5B4763142208BDD800EE4E20 /* T.h */,
-				5B917BE822027B8900A849D5 /* handle.h */,
-				5BFCF95422175231008F2B1F /* trace.h */,
-				5BBB5616221331B800DD4E46 /* pool.h */,
-				5B21C85822074112006CFB1D /* queue.h */,
-				5BDAA3ED21D8342900CE6375 /* timer.h */,
-				5B4763152208C19800EE4E20 /* event.h */,
-				5BB0F01C22261454002E6270 /* mutex.h */,
-				5B21C859220742EC006CFB1D /* semaphore.h */,
-				5B8522DD2135ABED0048744F /* main.cpp */,
+				5BCAE4FC2227444100FDADA2 /* Scripts */,
+				5BCAE4FB2227443200FDADA2 /* Resources */,
+				5BCAE506222744B500FDADA2 /* Source */,
 				5B8522DB2135ABED0048744F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -87,19 +76,46 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		5BCAE4F92227423900FDADA2 /* scripts */ = {
+		5BCAE4FB2227443200FDADA2 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				5B31D3342223DEF400A2AE38 /* run-all.sh */,
-				5B31D3332223DEF400A2AE38 /* run-all-debug.sh */,
-				5B51573F22273CE40087F5D1 /* run-apple.sh */,
-				5B51573E22273CE40087F5D1 /* run-apple-debug.sh */,
-				5B51574322273D540087F5D1 /* run-llvm.sh */,
-				5B51574022273D540087F5D1 /* run-llvm-debug.sh */,
-				5B51574222273D540087F5D1 /* run-gcc.sh */,
-				5B51574122273D540087F5D1 /* run-gcc-debug.sh */,
+				5BBCD7842222D98D009E8CCF /* LICENSE */,
+				5BBCD7852222D98E009E8CCF /* README.md */,
 			);
-			path = scripts;
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		5BCAE4FC2227444100FDADA2 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				5BCAE4FD2227445200FDADA2 /* run.sh */,
+				5BCAE5002227445B00FDADA2 /* run-all.sh */,
+				5BCAE5012227445B00FDADA2 /* run-all-debug.sh */,
+				5BCAE5032227445B00FDADA2 /* run-apple.sh */,
+				5BCAE5042227445B00FDADA2 /* run-apple-debug.sh */,
+				5BCAE4FF2227445B00FDADA2 /* run-llvm.sh */,
+				5BCAE5022227445B00FDADA2 /* run-llvm-debug.sh */,
+				5BCAE5052227445B00FDADA2 /* run-gcc.sh */,
+				5BCAE4FE2227445B00FDADA2 /* run-gcc-debug.sh */,
+			);
+			name = Scripts;
+			sourceTree = "<group>";
+		};
+		5BCAE506222744B500FDADA2 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				5B4763142208BDD800EE4E20 /* T.h */,
+				5BFCF95422175231008F2B1F /* trace.h */,
+				5B917BE822027B8900A849D5 /* handle.h */,
+				5BBB5616221331B800DD4E46 /* pool.h */,
+				5B21C85822074112006CFB1D /* queue.h */,
+				5BDAA3ED21D8342900CE6375 /* timer.h */,
+				5B4763152208C19800EE4E20 /* event.h */,
+				5BB0F01C22261454002E6270 /* mutex.h */,
+				5B21C859220742EC006CFB1D /* semaphore.h */,
+				5B8522DD2135ABED0048744F /* main.cpp */,
+			);
+			name = Source;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
