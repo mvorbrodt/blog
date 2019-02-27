@@ -41,19 +41,21 @@ public:
 	}
 
 	template<typename T>
-	void wait_for(T&& t) noexcept
+	bool wait_for(T&& t) noexcept
 	{
 		std::unique_lock lock(m_mutex);
-		m_cv.wait_for(lock, t, [&]() { return m_count != 0; });
+		if(!m_cv.wait_for(lock, t, [&]() { return m_count != 0; })) return false;
 		--m_count;
+		return true;
 	}
 
 	template<typename T>
-	void wait_until(T&& t) noexcept
+	bool wait_until(T&& t) noexcept
 	{
 		std::unique_lock lock(m_mutex);
-		m_cv.wait_until(lock, t, [&]() { return m_count != 0; });
+		if(!m_cv.wait_until(lock, t, [&]() { return m_count != 0; })) return false;
 		--m_count;
+		return true;
 	}
 
 private:
