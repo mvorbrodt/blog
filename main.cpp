@@ -5,13 +5,12 @@
 using namespace std;
 using namespace chrono;
 
-const unsigned int COUNT = 1'000'000;
+const unsigned int COUNT = 10'000'000;
 const unsigned int REPS = 10;
 
 int main()
 {
-	srand((unsigned int)time(NULL));
-
+	srand(0);
 	auto start = high_resolution_clock::now();
 	{
 		simple_thread_pool tp;
@@ -27,6 +26,7 @@ int main()
 	auto duration = duration_cast<milliseconds>(end - start);
 	cout << "simple_thread_pool duration = " << duration.count() / 1000.f << " s" << endl;
 
+	srand(0);
 	start = high_resolution_clock::now();
 	{
 		thread_pool tp;
