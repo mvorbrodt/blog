@@ -25,8 +25,8 @@
 /* Begin PBXFileReference section */
 		5B21C85822074112006CFB1D /* queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = queue.h; sourceTree = "<group>"; };
 		5B21C859220742EC006CFB1D /* semaphore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = semaphore.h; sourceTree = "<group>"; };
-		5B31D3332223DEF400A2AE38 /* run-all-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-all-debug.sh"; sourceTree = SOURCE_ROOT; };
-		5B31D3342223DEF400A2AE38 /* run-all.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-all.sh"; sourceTree = SOURCE_ROOT; };
+		5B31D3332223DEF400A2AE38 /* run-all-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-all-debug.sh"; path = "scripts/run-all-debug.sh"; sourceTree = SOURCE_ROOT; };
+		5B31D3342223DEF400A2AE38 /* run-all.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-all.sh"; path = "scripts/run-all.sh"; sourceTree = SOURCE_ROOT; };
 		5B4763142208BDD800EE4E20 /* T.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = T.h; sourceTree = "<group>"; };
 		5B4763152208C19800EE4E20 /* event.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = event.h; sourceTree = "<group>"; };
 		5B51573E22273CE40087F5D1 /* run-apple-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-apple-debug.sh"; sourceTree = "<group>"; };
@@ -42,6 +42,7 @@
 		5BBB5616221331B800DD4E46 /* pool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pool.h; sourceTree = "<group>"; };
 		5BBCD7842222D98D009E8CCF /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		5BBCD7852222D98E009E8CCF /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		5BCAE4FA2227425100FDADA2 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
 		5BDAA3ED21D8342900CE6375 /* timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
 		5BFCF95422175231008F2B1F /* trace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trace.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -60,14 +61,8 @@
 		5B8522D12135ABED0048744F = {
 			isa = PBXGroup;
 			children = (
-				5B31D3342223DEF400A2AE38 /* run-all.sh */,
-				5B31D3332223DEF400A2AE38 /* run-all-debug.sh */,
-				5B51573F22273CE40087F5D1 /* run-apple.sh */,
-				5B51573E22273CE40087F5D1 /* run-apple-debug.sh */,
-				5B51574322273D540087F5D1 /* run-llvm.sh */,
-				5B51574022273D540087F5D1 /* run-llvm-debug.sh */,
-				5B51574222273D540087F5D1 /* run-gcc.sh */,
-				5B51574122273D540087F5D1 /* run-gcc-debug.sh */,
+				5BCAE4F92227423900FDADA2 /* scripts */,
+				5BCAE4FA2227425100FDADA2 /* run.sh */,
 				5BBCD7842222D98D009E8CCF /* LICENSE */,
 				5BBCD7852222D98E009E8CCF /* README.md */,
 				5B4763142208BDD800EE4E20 /* T.h */,
@@ -90,6 +85,21 @@
 				5B8522DA2135ABED0048744F /* Playground */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		5BCAE4F92227423900FDADA2 /* scripts */ = {
+			isa = PBXGroup;
+			children = (
+				5B31D3342223DEF400A2AE38 /* run-all.sh */,
+				5B31D3332223DEF400A2AE38 /* run-all-debug.sh */,
+				5B51573F22273CE40087F5D1 /* run-apple.sh */,
+				5B51573E22273CE40087F5D1 /* run-apple-debug.sh */,
+				5B51574322273D540087F5D1 /* run-llvm.sh */,
+				5B51574022273D540087F5D1 /* run-llvm-debug.sh */,
+				5B51574222273D540087F5D1 /* run-gcc.sh */,
+				5B51574122273D540087F5D1 /* run-gcc-debug.sh */,
+			);
+			path = scripts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
