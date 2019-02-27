@@ -106,7 +106,7 @@ public:
 	{
 		auto work = [f,args...]() { f(args...); };
 		unsigned int i = m_index++;
-		for(unsigned int n = 0; n < m_count; ++n)
+		for(unsigned int n = 0; n < m_count * K; ++n)
 			if(m_queues[(i + n) % m_count].try_push(work)) return;
 		m_queues[i % m_count].push(work);
 	}
@@ -120,7 +120,7 @@ public:
 
 		auto work = [task](){ (*task)(); };
 		unsigned int i = m_index++;
-		for(unsigned int n = 0; n < m_count; ++n)
+		for(unsigned int n = 0; n < m_count * K; ++n)
 			if(m_queues[(i + n) % m_count].try_push(work)) return res;
 		m_queues[i % m_count].push(work);
 
@@ -137,4 +137,6 @@ private:
 
 	const unsigned int m_count;
 	std::atomic_uint m_index = 0;
+
+	inline static const unsigned int K = 3;
 };
