@@ -25,13 +25,14 @@ public:
 			{
 				while(true)
 				{
-					auto workItem = m_queue.pop();
-					if(workItem == nullptr)
+					Proc f;
+					m_queue.pop(f);
+					if(f == nullptr)
 					{
 						m_queue.push(nullptr);
 						break;
 					}
-					workItem();
+					f();
 				}
 			}));
 	}
@@ -42,8 +43,6 @@ public:
 		for(auto& thread : m_threads)
 			thread.join();
 	}
-
-	using Proc = std::function<void(void)>;
 
 	template<typename F, typename... Args>
 	void enqueue_work(F&& f, Args&&... args)
@@ -62,9 +61,11 @@ public:
 	}
 
 private:
+	using Proc = std::function<void(void)>;
+	blocking_queue<Proc> m_queue;
+
 	using Threads = std::vector<std::thread>;
 	Threads m_threads;
-	blocking_queue<Proc> m_queue;
 };
 
 

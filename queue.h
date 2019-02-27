@@ -117,13 +117,6 @@ public:
 		m_ready.notify_all();
 	}
 
-	T pop() noexcept
-	{
-		T item;
-		pop(item);
-		return item;
-	}
-
 	bool empty() const noexcept
 	{
 		std::scoped_lock lock(m_mutex);
@@ -536,13 +529,6 @@ public:
 		return m_size;
 	}
 
-	T pop()
-	{
-		T item;
-		pop(item);
-		return item;
-	}
-
 private:
 	const unsigned int m_size;
 	unsigned int m_pushIndex;
@@ -735,13 +721,6 @@ public:
 
 		m_openSlots.post();
 		return true;
-	}
-
-	T pop() noexcept(std::is_nothrow_invocable_r<void, decltype(&atomic_blocking_queue<T>::pop<T>), T&>::value)
-	{
-		T item;
-		pop(item);
-		return item;
 	}
 
 	bool empty() const noexcept
