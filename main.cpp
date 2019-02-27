@@ -5,7 +5,7 @@
 using namespace std;
 using namespace chrono;
 
-const unsigned int COUNT = 10'000'000;
+const unsigned int COUNT = 1'000'000;
 const unsigned int REPS = 10;
 
 int main()
