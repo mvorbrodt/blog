@@ -84,9 +84,8 @@ public:
 				Proc f;
 				for(unsigned int n = 0; n < m_count; ++n)
 					if(m_queues[(i + n) % m_count].try_pop(f)) break;
-				if(!f) m_queues[i].pop(f);
-				bool sentinel = f();
-				if(sentinel) break;
+				if(!f && !m_queues[i].pop(f)) break;
+				f();
 			}
 		};
 		for(unsigned int i = 0; i < threads; ++i)
@@ -96,7 +95,7 @@ public:
 	~thread_pool() noexcept
 	{
 		for(auto& queue : m_queues)
-			queue.push([]() { return true; });
+			queue.done();
 		for(auto& thread : m_threads)
 			thread.join();
 	}
@@ -104,7 +103,7 @@ public:
 	template<typename F, typename... Args>
 	void enqueue_work(F&& f, Args&&... args)
 	{
-		auto work = [f,args...]() { f(args...); return false; };
+		auto work = [f,args...]() { f(args...); };
 		unsigned int i = m_index++;
 		for(unsigned int n = 0; n < m_count; ++n)
 			if(m_queues[(i + n) % m_count].try_push(work)) return;
@@ -119,7 +118,7 @@ public:
 		std::future<return_type> res = task->get_future();
 
 		unsigned int i = m_index++;
-		auto work = [task](){ (*task)(); return false; };
+		auto work = [task](){ (*task)(); };
 		for(unsigned int n = 0; n < m_count; ++n)
 			if(m_queues[(i + n) % m_count].try_push(work)) return res;
 		m_queues[i % m_count].push(work);
@@ -128,7 +127,7 @@ public:
 	}
 
 private:
-	using Proc = std::function<bool(void)>;
+	using Proc = std::function<void(void)>;
 	using Queues = std::vector<simple_blocking_queue<Proc>>;
 	Queues m_queues;
 

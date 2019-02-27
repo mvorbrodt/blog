@@ -73,27 +73,29 @@ public:
 	template<typename Q = T>
 	typename std::enable_if<
 		not std::is_move_assignable<Q>::value
-		and std::is_nothrow_copy_assignable<Q>::value, void>::type
+		and std::is_nothrow_copy_assignable<Q>::value, bool>::type
 	pop(T& item) noexcept
 	{
 		std::unique_lock lock(m_mutex);
-		while(m_queue.empty())
-			m_ready.wait(lock, [this]() { return !m_queue.empty(); });
+		while(m_queue.empty() && !m_done) m_ready.wait(lock);
+		if(m_queue.empty()) return false;
 		item = m_queue.front();
 		m_queue.pop();
+		return true;
 	}
 
 	template<typename Q = T>
 	typename std::enable_if<
 		std::is_move_assignable<Q>::value and
-		std::is_nothrow_move_assignable<Q>::value, void>::type
+		std::is_nothrow_move_assignable<Q>::value, bool>::type
 	pop(T& item) noexcept
 	{
 		std::unique_lock lock(m_mutex);
-		while(m_queue.empty())
-			m_ready.wait(lock, [this]() { return !m_queue.empty(); });
+		while(m_queue.empty() && !m_done) m_ready.wait(lock);
+		if(m_queue.empty()) return false;
 		item = std::move(m_queue.front());
 		m_queue.pop();
+		return true;
 	}
 
 	template<typename Q = T>
@@ -104,8 +106,6 @@ public:
 	{
 		std::unique_lock lock(m_mutex, std::try_to_lock);
 		if(!lock || m_queue.empty()) return false;
-		while(m_queue.empty())
-			m_ready.wait(lock, [this]() { return !m_queue.empty(); });
 		item = m_queue.front();
 		m_queue.pop();
 		return true;
@@ -119,11 +119,18 @@ public:
 	{
 		std::unique_lock lock(m_mutex, std::try_to_lock);
 		if(!lock || m_queue.empty()) return false;
-		while(m_queue.empty())
-			m_ready.wait(lock, [this]() { return !m_queue.empty(); });
 		item = std::move(m_queue.front());
 		m_queue.pop();
 		return true;
+	}
+
+	void done() noexcept
+	{
+		{
+			std::unique_lock lock(m_mutex);
+			m_done = true;
+		}
+		m_ready.notify_all();
 	}
 
 	T pop() noexcept
@@ -149,6 +156,7 @@ private:
 	std::queue<T> m_queue;
 	std::mutex m_mutex;
 	std::condition_variable m_ready;
+	bool m_done = false;
 };
 
 
