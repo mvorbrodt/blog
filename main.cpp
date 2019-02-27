@@ -5,8 +5,8 @@
 using namespace std;
 using namespace chrono;
 
-const unsigned int COUNT = 10'000'000;
-const unsigned int REPS = 1'000;
+const unsigned int COUNT = 1'000'000;
+const unsigned int REPS = 1'00;
 
 int main()
 {
@@ -30,7 +30,11 @@ int main()
 	{
 		thread_pool tp;
 		for(int i = 0; i < COUNT; ++i)
-			tp.enqueue_work([i]() { return i + rand(); });
+			tp.enqueue_work([i]() {
+				int x;
+				for(int n = 0; n < REPS; ++n)
+					x = i + rand();
+			});
 	}
 	end = high_resolution_clock::now();
 	duration = duration_cast<milliseconds>(end - start);
