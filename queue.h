@@ -552,7 +552,7 @@ public:
 		return m_size;
 	}
 
-	T pop() noexcept(std::is_nothrow_invocable_r<void, decltype(&blocking_queue<T>::pop<T>), T&>::value)
+	T pop() noexcept(std::is_nothrow_invocable<decltype(&blocking_queue<T>::pop<T>), T&>::value)
 	{
 		T item;
 		pop(item);
