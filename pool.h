@@ -138,5 +138,5 @@ private:
 	const unsigned int m_count;
 	std::atomic_uint m_index = 0;
 
-	inline static const unsigned int K = 3;
+	inline static const unsigned int K = 2;
 };
