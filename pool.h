@@ -118,8 +118,8 @@ public:
 		auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 		std::future<return_type> res = task->get_future();
 
-		unsigned int i = m_index++;
 		auto work = [task](){ (*task)(); };
+		unsigned int i = m_index++;
 		for(unsigned int n = 0; n < m_count; ++n)
 			if(m_queues[(i + n) % m_count].try_push(work)) return res;
 		m_queues[i % m_count].push(work);
