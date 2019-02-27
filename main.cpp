@@ -5,8 +5,8 @@
 using namespace std;
 using namespace chrono;
 
-const unsigned int COUNT = 1'000'000;
-const unsigned int REPS = 1'00;
+const unsigned int COUNT = 10'000'000;
+const unsigned int REPS = 10;
 
 int main()
 {
@@ -18,7 +18,8 @@ int main()
 		for(int i = 0; i < COUNT; ++i)
 			tp.enqueue_work([i]() {
 				int x;
-				for(int n = 0; n < REPS; ++n)
+				int reps = REPS + (REPS * (rand() % 5));
+				for(int n = 0; n < reps; ++n)
 					x = i + rand();
 			});
 	}
@@ -32,7 +33,8 @@ int main()
 		for(int i = 0; i < COUNT; ++i)
 			tp.enqueue_work([i]() {
 				int x;
-				for(int n = 0; n < REPS; ++n)
+				int reps = REPS + (REPS * (rand() % 5));
+				for(int n = 0; n < reps; ++n)
 					x = i + rand();
 			});
 	}

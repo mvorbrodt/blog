@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <vector>
 #include <thread>
 #include <memory>
@@ -134,6 +135,6 @@ private:
 	using Threads = std::vector<std::thread>;
 	Threads m_threads;
 
-	unsigned int m_count;
-	unsigned int m_index = 0;
+	const unsigned int m_count;
+	std::atomic_uint m_index = 0;
 };
