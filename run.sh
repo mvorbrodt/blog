@@ -5,14 +5,14 @@ die () {
     exit 1
 }
 
-[ "$#" -eq 1 ] || die "args: a, ad, l, ld, g, gd, all, alld"
+[ "$#" -eq 1 ] || die "args: c, cd, l, ld, g, gd, all, alld"
 
-if [ $1 == 'a' ]
+if [ $1 == 'c' ]
 then
-	./scripts/run-apple.sh
-elif [ $1 == 'ad' ]
+	./scripts/run-clang.sh
+elif [ $1 == 'cd' ]
 then
-	./scripts/run-apple-debug.sh
+	./scripts/run-clang-debug.sh
 elif [ $1 == 'l' ]
 then
 	./scripts/run-llvm.sh

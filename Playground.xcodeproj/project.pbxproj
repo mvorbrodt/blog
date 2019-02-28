@@ -40,8 +40,8 @@
 		5BCAE5002227445B00FDADA2 /* run-all.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-all.sh"; path = "scripts/run-all.sh"; sourceTree = "<group>"; };
 		5BCAE5012227445B00FDADA2 /* run-all-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-all-debug.sh"; path = "scripts/run-all-debug.sh"; sourceTree = "<group>"; };
 		5BCAE5022227445B00FDADA2 /* run-llvm-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-llvm-debug.sh"; path = "scripts/run-llvm-debug.sh"; sourceTree = "<group>"; };
-		5BCAE5032227445B00FDADA2 /* run-apple.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-apple.sh"; path = "scripts/run-apple.sh"; sourceTree = "<group>"; };
-		5BCAE5042227445B00FDADA2 /* run-apple-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-apple-debug.sh"; path = "scripts/run-apple-debug.sh"; sourceTree = "<group>"; };
+		5BCAE5032227445B00FDADA2 /* run-clang.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-clang.sh"; path = "scripts/run-clang.sh"; sourceTree = "<group>"; };
+		5BCAE5042227445B00FDADA2 /* run-clang-debug.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-clang-debug.sh"; path = "scripts/run-clang-debug.sh"; sourceTree = "<group>"; };
 		5BCAE5052227445B00FDADA2 /* run-gcc.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-gcc.sh"; path = "scripts/run-gcc.sh"; sourceTree = "<group>"; };
 		5BDAA3ED21D8342900CE6375 /* timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
 		5BFCF95422175231008F2B1F /* trace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trace.h; sourceTree = "<group>"; };
@@ -91,8 +91,8 @@
 				5BCAE4FD2227445200FDADA2 /* run.sh */,
 				5BCAE5002227445B00FDADA2 /* run-all.sh */,
 				5BCAE5012227445B00FDADA2 /* run-all-debug.sh */,
-				5BCAE5032227445B00FDADA2 /* run-apple.sh */,
-				5BCAE5042227445B00FDADA2 /* run-apple-debug.sh */,
+				5BCAE5032227445B00FDADA2 /* run-clang.sh */,
+				5BCAE5042227445B00FDADA2 /* run-clang-debug.sh */,
 				5BCAE4FF2227445B00FDADA2 /* run-llvm.sh */,
 				5BCAE5022227445B00FDADA2 /* run-llvm-debug.sh */,
 				5BCAE5052227445B00FDADA2 /* run-gcc.sh */,
