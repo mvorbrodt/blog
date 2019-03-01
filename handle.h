@@ -11,12 +11,12 @@ public:
 	typedef T  val_type;
 	typedef T& ref_type;
 
-	RAII(val_type h) noexcept : m_handle(h) { AcquirePolicy<T>::Execute(m_handle); }
+	RAII(val_type h) : m_handle(h) { AcquirePolicy<T>::Execute(m_handle); }
 	RAII(const RAII&) = delete;
-	RAII(RAII&&) noexcept = default;
+	RAII(RAII&&) = default;
 	RAII& operator = (const RAII&) = delete;
-	RAII& operator = (RAII&&) noexcept = default;
-	~RAII() noexcept { ReleasePolicy<T>::Execute(m_handle); }
+	RAII& operator = (RAII&&) = default;
+	~RAII() { ReleasePolicy<T>::Execute(m_handle); }
 
 	constexpr operator ref_type () { return m_handle; }
 	constexpr operator ref_type () const { return m_handle; }
