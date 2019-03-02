@@ -21,7 +21,7 @@ public:
 		assert(queueDepth != 0);
 		assert(threads != 0);
 		for(unsigned int i = 0; i < threads; ++i)
-			m_threads.emplace_back(std::thread([this]()
+			m_threads.emplace_back([this]()
 			{
 				while(true)
 				{
@@ -34,7 +34,7 @@ public:
 					}
 					f();
 				}
-			}));
+			});
 	}
 
 	~simple_thread_pool() noexcept
@@ -79,7 +79,7 @@ public:
 	: m_queues(threads), m_count(threads)
 	{
 		assert(threads != 0);
-		auto worker = [&](unsigned int i)
+		auto worker = [this](unsigned int i)
 		{
 			while(true)
 			{
