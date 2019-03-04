@@ -5,15 +5,15 @@
 using namespace std;
 using namespace chrono;
 
-const unsigned int COUNT = 1000000000;
+const unsigned long long COUNT = 10000000000;
 const unsigned int THREADS = std::thread::hardware_concurrency();
 
 int main()
 {
-	auto worker = [](unsigned int count)
+	auto worker = [](unsigned long long count)
 	{
 		int work = 0;
-		for(unsigned int i = 0; i < count; ++i)
+		for(unsigned long long i = 0; i < count; ++i)
 			work += i * i;
 		return work;
 	};
