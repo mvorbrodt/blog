@@ -1,44 +1,45 @@
 #include <iostream>
+#include <thread>
+#include <vector>
 #include <chrono>
-#include <cstdlib>
-#include "pool.h"
 using namespace std;
 using namespace chrono;
 
-const unsigned int COUNT = 10'000'000;
-const unsigned int REPS = 10;
+const unsigned int COUNT = 1000000000;
+const unsigned int THREADS = std::thread::hardware_concurrency();
 
 int main()
 {
-	srand(0);
-	auto start = high_resolution_clock::now();
+	auto worker = [](unsigned int count)
 	{
-		simple_thread_pool tp;
-		for(int i = 0; i < COUNT; ++i)
-			tp.enqueue_work([i]() {
-				int x;
-				int reps = REPS + (REPS * (rand() % 5));
-				for(int n = 0; n < reps; ++n)
-					x = i + rand();
-			});
-	}
-	auto end = high_resolution_clock::now();
-	auto duration = duration_cast<milliseconds>(end - start);
-	cout << "simple_thread_pool duration = " << duration.count() / 1000.f << " s" << endl;
+		int work = 0;
+		for(unsigned int i = 0; i < count; ++i)
+			work += i * i;
+		return work;
+	};
 
-	srand(0);
-	start = high_resolution_clock::now();
+	milliseconds base_line;
+	for(int t = 1; t <= THREADS; ++t)
 	{
-		thread_pool tp;
-		for(int i = 0; i < COUNT; ++i)
-			tp.enqueue_work([i]() {
-				int x;
-				int reps = REPS + (REPS * (rand() % 5));
-				for(int n = 0; n < reps; ++n)
-					x = i + rand();
-			});
+		vector<thread> vt;
+
+		auto start = high_resolution_clock::now();
+
+		for(unsigned int i = 0; i < t; ++i)
+			vt.emplace_back(worker, COUNT / t);
+
+		for(auto& t : vt)
+			t.join();
+		
+		auto end = high_resolution_clock::now();
+		auto duration = duration_cast<milliseconds>(end - start);
+		cout << t << " thread(s) duration = " << duration.count() / 1000.f << " s, speedup factor = ";
+
+		if(t == 1) base_line = duration;
+
+		auto speed_up = (float)base_line.count() / (float)duration.count();
+		cout << speed_up << endl;
+
+		if(t == THREADS / 2) cout << "hyper-threading" << endl;
 	}
-	end = high_resolution_clock::now();
-	duration = duration_cast<milliseconds>(end - start);
-	cout << "thread_pool duration = " << duration.count() / 1000.f << " s" << endl;
 }
