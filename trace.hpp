@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <iomanip>
 #include <mutex>
 
 namespace { static inline std::mutex kStdOutLock; }
