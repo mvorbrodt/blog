@@ -11,7 +11,7 @@ public:
 	typedef T  val_type;
 	typedef T& ref_type;
 
-	RAII(val_type h) : m_handle(h) { AcquirePolicy<T>::Execute(m_handle); }
+	explicit RAII(val_type h) : m_handle(h) { AcquirePolicy<T>::Execute(m_handle); }
 	RAII(const RAII&) = delete;
 	RAII(RAII&&) = default;
 	RAII& operator = (const RAII&) = delete;

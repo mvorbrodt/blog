@@ -75,7 +75,7 @@ private:
 class thread_pool
 {
 public:
-	thread_pool(unsigned int threads = std::thread::hardware_concurrency())
+	explicit thread_pool(unsigned int threads = std::thread::hardware_concurrency())
 	: m_queues(threads), m_count(threads)
 	{
 		assert(threads != 0);

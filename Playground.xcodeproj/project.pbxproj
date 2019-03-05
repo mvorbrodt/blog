@@ -23,20 +23,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		5B21C85822074112006CFB1D /* queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = queue.h; sourceTree = "<group>"; };
-		5B21C859220742EC006CFB1D /* semaphore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = semaphore.h; sourceTree = "<group>"; };
+		5B21C85822074112006CFB1D /* queue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = queue.hpp; sourceTree = "<group>"; };
+		5B21C859220742EC006CFB1D /* semaphore.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = semaphore.hpp; sourceTree = "<group>"; };
 		5B4763142208BDD800EE4E20 /* T.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = T.h; sourceTree = "<group>"; };
-		5B4763152208C19800EE4E20 /* event.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = event.h; sourceTree = "<group>"; };
+		5B4763152208C19800EE4E20 /* event.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = event.hpp; sourceTree = "<group>"; };
 		5B8522DA2135ABED0048744F /* Playground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Playground; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B8522DD2135ABED0048744F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		5B917BE822027B8900A849D5 /* handle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = handle.h; sourceTree = "<group>"; };
-		5BB0F01C22261454002E6270 /* mutex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mutex.h; sourceTree = "<group>"; };
-		5BBB5616221331B800DD4E46 /* pool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pool.h; sourceTree = "<group>"; };
+		5B917BE822027B8900A849D5 /* handle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = handle.hpp; sourceTree = "<group>"; };
+		5BB0F01C22261454002E6270 /* mutex.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mutex.hpp; sourceTree = "<group>"; };
+		5BBB5616221331B800DD4E46 /* pool.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pool.hpp; sourceTree = "<group>"; };
 		5BBCD7842222D98D009E8CCF /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		5BBCD7852222D98E009E8CCF /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		5BCAE4FD2227445200FDADA2 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
-		5BDAA3ED21D8342900CE6375 /* timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
-		5BFCF95422175231008F2B1F /* trace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trace.h; sourceTree = "<group>"; };
+		5BDAA3ED21D8342900CE6375 /* timer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = timer.hpp; sourceTree = "<group>"; };
+		5BFCF95422175231008F2B1F /* trace.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = trace.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,14 +89,14 @@
 			isa = PBXGroup;
 			children = (
 				5B4763142208BDD800EE4E20 /* T.h */,
-				5BFCF95422175231008F2B1F /* trace.h */,
-				5B917BE822027B8900A849D5 /* handle.h */,
-				5BBB5616221331B800DD4E46 /* pool.h */,
-				5B21C85822074112006CFB1D /* queue.h */,
-				5BDAA3ED21D8342900CE6375 /* timer.h */,
-				5B4763152208C19800EE4E20 /* event.h */,
-				5BB0F01C22261454002E6270 /* mutex.h */,
-				5B21C859220742EC006CFB1D /* semaphore.h */,
+				5BFCF95422175231008F2B1F /* trace.hpp */,
+				5B917BE822027B8900A849D5 /* handle.hpp */,
+				5BBB5616221331B800DD4E46 /* pool.hpp */,
+				5B21C85822074112006CFB1D /* queue.hpp */,
+				5BDAA3ED21D8342900CE6375 /* timer.hpp */,
+				5B4763152208C19800EE4E20 /* event.hpp */,
+				5BB0F01C22261454002E6270 /* mutex.hpp */,
+				5B21C859220742EC006CFB1D /* semaphore.hpp */,
 				5B8522DD2135ABED0048744F /* main.cpp */,
 			);
 			name = Source;

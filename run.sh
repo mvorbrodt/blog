@@ -1,9 +1,33 @@
 #!/bin/bash
 
+function help {
+	echo "$0 {a|ad|c|cd|l|ld|g|gd}"
+	echo
+	echo "    a - ALL"
+	echo "   ad - ALL debug"
+	echo "    c - Apple's clang"
+	echo "   cd - Apple's clang debug"
+	echo "    l - LLVM's clang"
+	echo "   ld - LLVM's clang debug"
+	echo "    g - GNU's gcc"
+	echo "   gd - GNU's gcc debug"
+	echo "    x - Cppcheck"
+	echo
+}
+
+function check {
+	echo "************************"
+	echo "* cppcheck --std=c++14 *"
+	echo "************************"
+	echo
+	cppcheck --quiet --std=c++14 -I /usr/include/c++/4.2.1/ -I /usr/local/include --force *.hpp *.cpp
+	echo
+}
+
 function build_clang {
-	echo "***********************************************"
-	echo "* CLANG -Ofast -march=native -std=c++2a -lc++ *"
-	echo "***********************************************"
+	echo "*************************************************"
+	echo "* clang++ -Ofast -march=native -std=c++2a -lc++ *"
+	echo "*************************************************"
 	echo
 	rm -f playground
 	clang++ \
@@ -19,9 +43,9 @@ function build_clang {
 }
 
 function build_clang_debug {
-	echo "********************************************"
-	echo "* CLANG -O0 -march=x86-64 -std=c++2a -lc++ *"
-	echo "********************************************"
+	echo "**********************************************"
+	echo "* clang++ -O0 -march=x86-64 -std=c++2a -lc++ *"
+	echo "**********************************************"
 	echo
 	rm -f playground
 	clang++ \
@@ -37,9 +61,9 @@ function build_clang_debug {
 }
 
 function build_llvm {
-	echo "**********************************************"
-	echo "* LLVM -Ofast -march=native -std=c++2a -lc++ *"
-	echo "**********************************************"
+	echo "***************************************************"
+	echo "* clang++-7 -Ofast -march=native -std=c++2a -lc++ *"
+	echo "***************************************************"
 	echo
 	rm -f playground
 	clang++-7 \
@@ -56,9 +80,9 @@ function build_llvm {
 }
 
 function build_llvm_debug {
-	echo "*******************************************"
-	echo "* LLVM -O0 -march=x86-64 -std=c++2a -lc++ *"
-	echo "*******************************************"
+	echo "************************************************"
+	echo "* clang++-7 -O0 -march=x86-64 -std=c++2a -lc++ *"
+	echo "************************************************"
 	echo
 	rm -f playground
 	clang++-7 \
@@ -75,9 +99,9 @@ function build_llvm_debug {
 }
 
 function build_gcc {
-	echo "************************************************"
-	echo "* G++ -Ofast -march=native -std=c++2a -lstdc++ *"
-	echo "************************************************"
+	echo "**************************************************"
+	echo "* g++-8 -Ofast -march=native -std=c++2a -lstdc++ *"
+	echo "**************************************************"
 	echo
 	rm -f playground
 	g++-8 \
@@ -96,9 +120,9 @@ function build_gcc {
 }
 
 function build_gcc_debug {
-	echo "*********************************************"
-	echo "* G++ -O0 -march=x86-64 -std=c++2a -lstdc++ *"
-	echo "*********************************************"
+	echo "***********************************************"
+	echo "* g++-8 -O0 -march=x86-64 -std=c++2a -lstdc++ *"
+	echo "***********************************************"
 	echo
 	rm -f playground
 	g++-8 \
@@ -113,20 +137,6 @@ function build_gcc_debug {
 		main.cpp \
 		-o playground
 	./playground
-	echo
-}
-
-function help {
-	echo "$0 {c|cd|l|ld|g|gd|a|ad}"
-	echo
-	echo "    c - CLANG (default)"
-	echo "   cd - CLANG Debug"
-	echo "    l - LLVM"
-	echo "   ld - LLVM Debug"
-	echo "    g - GCC"
-	echo "   gd - GCC Debug"
-	echo "    a - ALL"
-	echo "   ad - ALL Debug"
 	echo
 }
 
@@ -169,6 +179,9 @@ then
 	build_clang_debug
 	build_llvm_debug
 	build_gcc_debug
+elif [ $param = 'x' ]
+then
+	check
 else
 	help
 fi
