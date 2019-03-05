@@ -5,7 +5,7 @@ function help {
 	echo
 	echo "    a - ALL"
 	echo "   ad - ALL debug"
-	echo "    c - Apple's clang (default)"
+	echo "    c - Apple's clang"
 	echo "   cd - Apple's clang debug"
 	echo "    l - LLVM's clang"
 	echo "   ld - LLVM's clang debug"
@@ -43,8 +43,11 @@ function build_clang {
 		-ltbb \
 		main.cpp \
 		-o playground
-	./playground
-	echo
+	if [ -f playground ]; then
+		./playground
+		rm -f playground
+		echo
+	fi
 }
 
 function build_clang_debug {
@@ -61,8 +64,11 @@ function build_clang_debug {
 		-ltbb \
 		main.cpp \
 		-o playground
-	./playground
-	echo
+	if [ -f playground ]; then
+		./playground
+		rm -f playground
+		echo
+	fi
 }
 
 function build_llvm {
@@ -80,8 +86,11 @@ function build_llvm {
 		-ltbb \
 		main.cpp \
 		-o playground
-	./playground
-	echo
+	if [ -f playground ]; then
+		./playground
+		rm -f playground
+		echo
+	fi
 }
 
 function build_llvm_debug {
@@ -99,8 +108,11 @@ function build_llvm_debug {
 		-ltbb \
 		main.cpp \
 		-o playground
-	./playground
-	echo
+	if [ -f playground ]; then
+		./playground
+		rm -f playground
+		echo
+	fi
 }
 
 function build_gcc {
@@ -120,8 +132,11 @@ function build_gcc {
 		-ltbb \
 		main.cpp \
 		-o playground
-	./playground
-	echo
+	if [ -f playground ]; then
+		./playground
+		rm -f playground
+		echo
+	fi
 }
 
 function build_gcc_debug {
@@ -141,51 +156,34 @@ function build_gcc_debug {
 		-ltbb \
 		main.cpp \
 		-o playground
-	./playground
-	echo
+	if [ -f playground ]; then
+		./playground
+		rm -f playground
+		echo
+	fi
 }
 
-if [ $# -eq 0 ]
-then
-	param='c'
-elif [ $# -eq 1 ]
-then
-	param=$1
-elif [ $# -ge 2 ]
-then
-	param='help'
-fi
-
-if [ $param = 'c' ]
-then
+if [ "$1" == 'c' ]; then
 	build_clang
-elif [ $param = 'cd' ]
-then
+elif [ "$1" == 'cd' ]; then
 	build_clang_debug
-elif [ $param = 'l' ]
-then
+elif [ "$1" == 'l' ]; then
 	build_llvm
-elif [ $param = 'ld' ]
-then
+elif [ "$1" == 'ld' ]; then
 	build_llvm_debug
-elif [ $param = 'g' ]
-then
+elif [ "$1" == 'g' ]; then
 	build_gcc
-elif [ $param = 'gd' ]
-then
+elif [ "$1" == 'gd' ]; then
 	build_gcc_debug
-elif [ $param = 'a' ]
-then
+elif [ "$1" == 'a' ]; then
 	build_clang
 	build_llvm
 	build_gcc
-elif [ $param = 'ad' ]
-then
+elif [ "$1" == 'ad' ]; then
 	build_clang_debug
 	build_llvm_debug
 	build_gcc_debug
-elif [ $param = 'x' ]
-then
+elif [ "$1" == 'x' ]; then
 	check
 else
 	help
