@@ -22,7 +22,8 @@ int main()
 
 	generate(data.begin(), data.end(), mt);
 	sort(data.begin(), data.end());
-	
+	is_sorted(data.begin(), data.end());
+
 	auto end = high_resolution_clock::now();
 	auto duration = duration_cast<milliseconds>(end - start);
 	cout << "STL duration = " << duration.count() / 1000.f << "s" << endl;
@@ -31,6 +32,7 @@ int main()
 
 	generate(pstl::execution::par_unseq, data.begin(), data.end(), mt);
 	sort(pstl::execution::par_unseq, data.begin(), data.end());
+	is_sorted(pstl::execution::par_unseq, data.begin(), data.end());
 
 	end = high_resolution_clock::now();
 	duration = duration_cast<milliseconds>(end - start);
