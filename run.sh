@@ -1,11 +1,11 @@
 #!/bin/bash
 
 function help {
-	echo "$0 {a|ad|c|cd|l|ld|g|gd}"
+	echo "$0 {a|ad|c|cd|l|ld|g|gd|x}"
 	echo
 	echo "    a - ALL"
 	echo "   ad - ALL debug"
-	echo "    c - Apple's clang"
+	echo "    c - Apple's clang (default)"
 	echo "   cd - Apple's clang debug"
 	echo "    l - LLVM's clang"
 	echo "   ld - LLVM's clang debug"

@@ -9,7 +9,7 @@ using namespace std;
 using namespace chrono;
 using namespace pstl;
 
-const unsigned long long COUNT = 10'000'000;
+const unsigned long long COUNT = 100'000'000;
 
 int main()
 {
