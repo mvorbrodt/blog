@@ -16,11 +16,16 @@ function help {
 }
 
 function check {
-	echo "************************"
-	echo "* cppcheck --std=c++14 *"
-	echo "************************"
+	echo "*************************************"
+	echo "* cppcheck --std=c++14 --enable=all *"
+	echo "*************************************"
 	echo
-	cppcheck --std=c++14 --enable=all *.hpp *.cpp
+	cppcheck \
+		--std=c++14 \
+		--enable=all \
+		--platform=native \
+		--suppress=unusedFunction \
+		*.hpp *.cpp
 	echo
 }
 

@@ -18,8 +18,8 @@ public:
 	RAII& operator = (RAII&&) = default;
 	~RAII() { ReleasePolicy<T>::Execute(m_handle); }
 
-	constexpr operator ref_type () { return m_handle; }
-	constexpr operator ref_type () const { return m_handle; }
+	operator ref_type () { return m_handle; }
+	operator const ref_type () const { return m_handle; }
 
 private:
 	val_type m_handle;
