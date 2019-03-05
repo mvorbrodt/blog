@@ -20,7 +20,7 @@ function check {
 	echo "* cppcheck --std=c++14 *"
 	echo "************************"
 	echo
-	cppcheck --quiet --std=c++14 -I /usr/include/c++/4.2.1/ -I /usr/local/include --force *.hpp *.cpp
+	cppcheck --std=c++14 *.hpp *.cpp
 	echo
 }
 
