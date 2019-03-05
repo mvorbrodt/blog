@@ -303,6 +303,7 @@
 				GCC_VERSION = "";
 				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/include/;
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
+				OTHER_LDFLAGS = "-ltbb";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
@@ -323,6 +324,7 @@
 				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/include/;
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
 				LLVM_LTO = NO;
+				OTHER_LDFLAGS = "-ltbb";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};

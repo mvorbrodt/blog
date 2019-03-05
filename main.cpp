@@ -1,45 +1,38 @@
 #include <iostream>
-#include <thread>
 #include <vector>
 #include <chrono>
+#include <random>
+#include <algorithm>
+#include <pstl/execution>
+#include <pstl/algorithm>
 using namespace std;
 using namespace chrono;
+using namespace pstl;
 
-const unsigned long long COUNT = 10000000000;
-const unsigned int THREADS = std::thread::hardware_concurrency();
+const unsigned long long COUNT = 100'000'000;
 
 int main()
 {
-	auto worker = [](unsigned long long count)
-	{
-		int work = 0;
-		for(unsigned long long i = 0; i < count; ++i)
-			work += i * i;
-		return work;
-	};
+	random_device rd;
+	mt19937 mt(rd());
 
-	milliseconds base_line;
-	for(int t = 1; t <= THREADS; ++t)
-	{
-		vector<thread> vt;
+	vector<int> data(COUNT);
 
-		auto start = high_resolution_clock::now();
+	auto start = high_resolution_clock::now();
 
-		for(unsigned int i = 0; i < t; ++i)
-			vt.emplace_back(worker, COUNT / t);
+	generate(data.begin(), data.end(), mt);
+	sort(data.begin(), data.end());
+	
+	auto end = high_resolution_clock::now();
+	auto duration = duration_cast<milliseconds>(end - start);
+	cout << "STL duration = " << duration.count() / 1000.f << "s" << endl;
 
-		for(auto& t : vt)
-			t.join();
-		
-		auto end = high_resolution_clock::now();
-		auto duration = duration_cast<milliseconds>(end - start);
-		cout << t << " thread(s) duration = " << duration.count() / 1000.f << " s, speedup factor = ";
+	start = high_resolution_clock::now();
 
-		if(t == 1) base_line = duration;
+	generate(pstl::execution::par_unseq, data.begin(), data.end(), mt);
+	sort(pstl::execution::par_unseq, data.begin(), data.end());
 
-		auto speed_up = (float)base_line.count() / (float)duration.count();
-		cout << speed_up << endl;
-
-		if(t == THREADS / 2) cout << "hyper-threading" << endl;
-	}
+	end = high_resolution_clock::now();
+	duration = duration_cast<milliseconds>(end - start);
+	cout << "PSTL duration = " << duration.count() / 1000.f << "s" << endl;
 }
