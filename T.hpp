@@ -5,9 +5,9 @@
 
 struct T
 {
-	T() noexcept { std::cout << "T()" << std::endl; }
-	T(int i) noexcept : m_i(i) { std::cout << "T(" << m_i << ")" << std::endl; }
-	T(const std::string& s) noexcept : m_i(0) { std::cout << "T(\"" << s << "\")" << std::endl; }
+	T() noexcept : m_i(0) { std::cout << "T()" << std::endl; }
+	explicit T(int i) noexcept : m_i(i) { std::cout << "T(" << m_i << ")" << std::endl; }
+	explicit T(const std::string& s) noexcept : m_i(0) { std::cout << "T(\"" << s << "\")" << std::endl; }
 	T(const T& t) noexcept : m_i(t.m_i) { std::cout << "T(const T&)" << std::endl; }
 	T(T&& t) noexcept : m_i(t.m_i) { std::cout << "T(&&)" << std::endl; }
 	T& operator = (const T& rhs) noexcept { std::cout << "operator = (const T&)" << std::endl; m_i = rhs.m_i; return *this; }
@@ -22,9 +22,9 @@ private:
 
 struct Q
 {
-	Q() noexcept {}
-	Q(int i) noexcept : m_i(i) {}
-	Q(const std::string& s) noexcept : m_i(0) {}
+	Q() noexcept : m_i(0) {}
+	explicit Q(int i) noexcept : m_i(i) {}
+	explicit Q(const std::string& s) noexcept : m_i(0) {}
 	Q(const Q& q) noexcept : m_i(q.m_i) {}
 	Q(Q&& q) noexcept : m_i(q.m_i) {}
 	Q& operator = (const Q& rhs) noexcept { m_i = rhs.m_i; return *this; }

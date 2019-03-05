@@ -20,7 +20,7 @@ function check {
 	echo "* cppcheck --std=c++14 *"
 	echo "************************"
 	echo
-	cppcheck --std=c++14 *.hpp *.cpp
+	cppcheck --std=c++14 --enable=all *.hpp *.cpp
 	echo
 }
 
