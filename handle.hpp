@@ -1,6 +1,7 @@
 #pragma once
 
-template<
+template
+<
 	typename T,
 	template<typename> typename AcquirePolicy,
 	template<typename> typename ReleasePolicy
@@ -8,21 +9,17 @@ template<
 class RAII
 {
 public:
-	typedef T  val_type;
-	typedef T& ref_type;
-
-	explicit RAII(val_type h) : m_handle(h) { AcquirePolicy<T>::Execute(m_handle); }
+	explicit RAII(T h) : m_handle(h) { AcquirePolicy<T>::Execute(m_handle); }
 	RAII(const RAII&) = delete;
 	RAII(RAII&&) = default;
 	RAII& operator = (const RAII&) = delete;
 	RAII& operator = (RAII&&) = default;
 	~RAII() { ReleasePolicy<T>::Execute(m_handle); }
 
-	operator ref_type () { return m_handle; }
-	operator const ref_type () const { return m_handle; }
+	operator T() const { return m_handle; }
 
 private:
-	val_type m_handle;
+	T m_handle;
 };
 
 template<typename T> struct NoOpPolicy { static void Execute(T) noexcept {} };
