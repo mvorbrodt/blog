@@ -163,19 +163,19 @@ function build_gcc_debug {
 	fi
 }
 
-if [ "$1" == 'c' ]; then
+if   [ "$1" == 'c'  ]; then
 	build_clang
 elif [ "$1" == 'cd' ]; then
 	build_clang_debug
-elif [ "$1" == 'l' ]; then
+elif [ "$1" == 'l'  ]; then
 	build_llvm
 elif [ "$1" == 'ld' ]; then
 	build_llvm_debug
-elif [ "$1" == 'g' ]; then
+elif [ "$1" == 'g'  ]; then
 	build_gcc
 elif [ "$1" == 'gd' ]; then
 	build_gcc_debug
-elif [ "$1" == 'a' ]; then
+elif [ "$1" == 'a'  ]; then
 	build_clang
 	build_llvm
 	build_gcc
@@ -183,7 +183,7 @@ elif [ "$1" == 'ad' ]; then
 	build_clang_debug
 	build_llvm_debug
 	build_gcc_debug
-elif [ "$1" == 'x' ]; then
+elif [ "$1" == 'x'  ]; then
 	check
 else
 	help
