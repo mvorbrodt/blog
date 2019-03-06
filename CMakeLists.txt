@@ -12,7 +12,7 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS "-std=c++2a -Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -march=x86-64")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
 
