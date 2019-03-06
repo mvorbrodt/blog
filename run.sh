@@ -24,7 +24,7 @@ function build_clang {
 	clang++ \
 		-Ofast \
 		-march=native \
-		-std=c++2a \
+		-std=c++17 \
 		-lc++ \
 		-ltbb \
 		main.cpp \
@@ -45,7 +45,7 @@ function build_clang_debug {
 	clang++ \
 		-O0 \
 		-march=x86-64 \
-		-std=c++2a \
+		-std=c++17 \
 		-lc++ \
 		-ltbb \
 		main.cpp \
@@ -66,7 +66,7 @@ function build_llvm {
 	clang++-7 \
 		-Ofast \
 		-march=native\
-		-std=c++2a \
+		-std=c++17 \
 		-L/usr/local/opt/llvm/lib \
 		-lc++ \
 		-ltbb \
@@ -88,7 +88,7 @@ function build_llvm_debug {
 	clang++-7 \
 		-O0 \
 		-march=x86-64 \
-		-std=c++2a \
+		-std=c++17 \
 		-L/usr/local/opt/llvm/lib \
 		-lc++ \
 		-ltbb \
@@ -110,7 +110,7 @@ function build_gcc {
 	g++-8 \
 		-Ofast \
 		-march=native \
-		-std=c++2a \
+		-std=c++17 \
 		-I/usr/local/include \
 		-L/usr/local/opt/gcc/lib/ \
 		-L/usr/local/lib \
@@ -134,7 +134,7 @@ function build_gcc_debug {
 	g++-8 \
 		-O0 \
 		-march=x86-64 \
-		-std=c++2a \
+		-std=c++17 \
 		-I/usr/local/include \
 		-L/usr/local/opt/gcc/lib/ \
 		-L/usr/local/lib \
@@ -162,6 +162,11 @@ function check {
 		*.hpp *.cpp
 	echo
 }
+
+if [ "$#" -eq 0 ] || [ "$#" -ge 2 ]; then
+	help
+	exit
+fi
 
 case "$1" in
 	"c")
