@@ -48,6 +48,11 @@
 		5BE5C53D2230B2ED0005405E /* unordered.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = unordered.cpp; sourceTree = "<group>"; };
 		5BE5C53E2230B38F0005405E /* templates.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = templates.cpp; sourceTree = "<group>"; };
 		5BE5C53F2230B3F10005405E /* inverting.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = inverting.cpp; sourceTree = "<group>"; };
+		5BE5C5402230B7DC0005405E /* interview_6.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = interview_6.cpp; sourceTree = "<group>"; };
+		5BE5C5412230B84A0005405E /* interview_5.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = interview_5.cpp; sourceTree = "<group>"; };
+		5BE5C5422230B8920005405E /* interview_4.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = interview_4.cpp; sourceTree = "<group>"; };
+		5BE5C5432230B8F40005405E /* interview_2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = interview_2.cpp; sourceTree = "<group>"; };
+		5BE5C5442230B9340005405E /* interview_1.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = interview_1.cpp; sourceTree = "<group>"; };
 		5BFCF95422175231008F2B1F /* trace.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = trace.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -76,7 +81,12 @@
 				5BE5C53C2230B2940005405E /* atomics.cpp */,
 				5BE5C53D2230B2ED0005405E /* unordered.cpp */,
 				5BE5C53E2230B38F0005405E /* templates.cpp */,
+				5BE5C5402230B7DC0005405E /* interview_6.cpp */,
 				5BE5C53F2230B3F10005405E /* inverting.cpp */,
+				5BE5C5412230B84A0005405E /* interview_5.cpp */,
+				5BE5C5422230B8920005405E /* interview_4.cpp */,
+				5BE5C5432230B8F40005405E /* interview_2.cpp */,
+				5BE5C5442230B9340005405E /* interview_1.cpp */,
 			);
 			name = Main;
 			sourceTree = "<group>";
