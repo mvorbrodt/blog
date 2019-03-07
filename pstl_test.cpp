@@ -18,16 +18,15 @@ TEST_CASE("STL vs PSTL", "[benchmark]")
 
 	BENCHMARK("STL")
 	{
-		generate(data.begin(), data.end(), mt19937{seed});
-		sort(data.begin(), data.end());
-		is_sorted(data.begin(), data.end());
+		generate(begin(data), end(data), mt19937{seed});
+		sort(begin(data), end(data));
+		is_sorted(begin(data), end(data));
 	}
 
 	BENCHMARK("PSTL")
 	{
-		mt19937 mt(seed);
-		generate(pstl::execution::par_unseq, data.begin(), data.end(), mt19937{seed});
-		sort(pstl::execution::par_unseq, data.begin(), data.end());
-		is_sorted(pstl::execution::par_unseq, data.begin(), data.end());
+		generate(pstl::execution::par_unseq, begin(data), end(data), mt19937{seed});
+		sort(pstl::execution::par_unseq, begin(data), end(data));
+		is_sorted(pstl::execution::par_unseq, begin(data), end(data));
 	}
 }
