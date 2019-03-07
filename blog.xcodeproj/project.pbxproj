@@ -44,6 +44,10 @@
 		5BE5C52E2230AA930005405E /* membars.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = membars.cpp; sourceTree = "<group>"; };
 		5BE5C52F2230AD660005405E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		5BE5C5342230AD9B0005405E /* playground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = playground; sourceTree = BUILT_PRODUCTS_DIR; };
+		5BE5C53C2230B2940005405E /* atomics.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = atomics.cpp; sourceTree = "<group>"; };
+		5BE5C53D2230B2ED0005405E /* unordered.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = unordered.cpp; sourceTree = "<group>"; };
+		5BE5C53E2230B38F0005405E /* templates.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = templates.cpp; sourceTree = "<group>"; };
+		5BE5C53F2230B3F10005405E /* inverting.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = inverting.cpp; sourceTree = "<group>"; };
 		5BFCF95422175231008F2B1F /* trace.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = trace.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -69,6 +73,10 @@
 				5BE5C52C2230A9950005405E /* dekker_n.cpp */,
 				5BE5C52D2230AA2E0005405E /* dekker.cpp */,
 				5BE5C52E2230AA930005405E /* membars.cpp */,
+				5BE5C53C2230B2940005405E /* atomics.cpp */,
+				5BE5C53D2230B2ED0005405E /* unordered.cpp */,
+				5BE5C53E2230B38F0005405E /* templates.cpp */,
+				5BE5C53F2230B3F10005405E /* inverting.cpp */,
 			);
 			name = Main;
 			sourceTree = "<group>";
