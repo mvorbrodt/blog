@@ -10,7 +10,7 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED) # ${Boost_LIBRARIES}
 #find_package (Boost COMPONENTS REQUIRED program_options)
 find_package(TBB REQUIRED)
 find_package(Catch2 REQUIRED)
@@ -22,8 +22,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -march=x86-64")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 
+add_executable(playground main.cpp)
 add_executable(pstl pstl_test.cpp)
-target_link_libraries(pstl ${Boost_LIBRARIES} ${TBB_LIBRARIES} ${Catch2_LIBRARIES} ${GTest_LIBRARIES} ${benchmark_LIBRARIES})
+target_link_libraries(pstl ${TBB_LIBRARIES} ${Catch2_LIBRARIES} ${GTest_LIBRARIES} ${benchmark_LIBRARIES})
 add_executable(timer timer_test.cpp)
 add_executable(pool pool_test.cpp)
 add_executable(random random_test.cpp)
