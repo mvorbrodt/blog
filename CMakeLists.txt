@@ -22,10 +22,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -march=x86-64")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 
-add_executable(playground
-	main.cpp)
+add_executable(pstl
+	pstl.cpp)
 
-target_link_libraries(playground
+target_link_libraries(pstl
 	${Boost_LIBRARIES}
 	${TBB_LIBRARIES}
 	${Catch2_LIBRARIES}

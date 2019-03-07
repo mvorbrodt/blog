@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5B8522DE2135ABED0048744F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B8522DD2135ABED0048744F /* main.cpp */; };
+		5B8522DE2135ABED0048744F /* pstl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B8522DD2135ABED0048744F /* pstl.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,7 +29,7 @@
 		5B4763152208C19800EE4E20 /* event.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = event.hpp; sourceTree = "<group>"; };
 		5B6616C8222F6136009DD806 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		5B8522DA2135ABED0048744F /* Playground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Playground; sourceTree = BUILT_PRODUCTS_DIR; };
-		5B8522DD2135ABED0048744F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		5B8522DD2135ABED0048744F /* pstl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pstl.cpp; sourceTree = "<group>"; };
 		5B917BE822027B8900A849D5 /* handle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = handle.hpp; sourceTree = "<group>"; };
 		5BB0F01C22261454002E6270 /* mutex.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mutex.hpp; sourceTree = "<group>"; };
 		5BBB5616221331B800DD4E46 /* pool.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pool.hpp; sourceTree = "<group>"; };
@@ -99,7 +99,7 @@
 				5B4763152208C19800EE4E20 /* event.hpp */,
 				5BB0F01C22261454002E6270 /* mutex.hpp */,
 				5B21C859220742EC006CFB1D /* semaphore.hpp */,
-				5B8522DD2135ABED0048744F /* main.cpp */,
+				5B8522DD2135ABED0048744F /* pstl.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -160,7 +160,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5B8522DE2135ABED0048744F /* main.cpp in Sources */,
+				5B8522DE2135ABED0048744F /* pstl.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
