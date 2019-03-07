@@ -25,6 +25,14 @@
 /* Begin PBXFileReference section */
 		5B21C85822074112006CFB1D /* queue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = queue.hpp; sourceTree = "<group>"; };
 		5B21C859220742EC006CFB1D /* semaphore.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = semaphore.hpp; sourceTree = "<group>"; };
+		5B24689D22318BD30082CD17 /* class.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = class.cpp; sourceTree = "<group>"; };
+		5B24689E22318C830082CD17 /* queue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = queue.cpp; sourceTree = "<group>"; };
+		5B24689F22318CE80082CD17 /* cache.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cache.cpp; sourceTree = "<group>"; };
+		5B2468A022318D2B0082CD17 /* sorting.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sorting.cpp; sourceTree = "<group>"; };
+		5B2468A122318D870082CD17 /* aos_soa.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = aos_soa.cpp; sourceTree = "<group>"; };
+		5B2468A222318DD60082CD17 /* new.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = new.cpp; sourceTree = "<group>"; };
+		5B2468A322318E170082CD17 /* enum2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = enum2.cpp; sourceTree = "<group>"; };
+		5B2468A422318E620082CD17 /* enum.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = enum.cpp; sourceTree = "<group>"; };
 		5B4763142208BDD800EE4E20 /* T.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = T.hpp; sourceTree = "<group>"; };
 		5B4763152208C19800EE4E20 /* event.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = event.hpp; sourceTree = "<group>"; };
 		5B5BACB222309906008A7683 /* timer_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = timer_test.cpp; sourceTree = "<group>"; };
@@ -87,6 +95,14 @@
 				5BE5C5422230B8920005405E /* interview_4.cpp */,
 				5BE5C5432230B8F40005405E /* interview_2.cpp */,
 				5BE5C5442230B9340005405E /* interview_1.cpp */,
+				5B24689D22318BD30082CD17 /* class.cpp */,
+				5B24689E22318C830082CD17 /* queue.cpp */,
+				5B24689F22318CE80082CD17 /* cache.cpp */,
+				5B2468A022318D2B0082CD17 /* sorting.cpp */,
+				5B2468A122318D870082CD17 /* aos_soa.cpp */,
+				5B2468A222318DD60082CD17 /* new.cpp */,
+				5B2468A322318E170082CD17 /* enum2.cpp */,
+				5B2468A422318E620082CD17 /* enum.cpp */,
 			);
 			name = Main;
 			sourceTree = "<group>";
