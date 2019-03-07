@@ -77,18 +77,19 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="event.h" />
-    <ClInclude Include="handle.h" />
-    <ClInclude Include="pool.h" />
-    <ClInclude Include="queue.h" />
-    <ClInclude Include="semaphore.h" />
-    <ClInclude Include="T.h" />
-    <ClInclude Include="timer.h" />
-    <ClInclude Include="trace.h" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="LICENSE" />
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="event.hpp" />
+    <ClInclude Include="handle.hpp" />
+    <ClInclude Include="mutex.hpp" />
+    <ClInclude Include="pool.hpp" />
+    <ClInclude Include="queue.hpp" />
+    <ClInclude Include="semaphore.hpp" />
+    <ClInclude Include="T.hpp" />
+    <ClInclude Include="timer.hpp" />
+    <ClInclude Include="trace.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
