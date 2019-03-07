@@ -8,7 +8,7 @@
 #include <functional>
 #include <type_traits>
 #include <cassert>
-#include "queue.h"
+#include "queue.hpp"
 
 class simple_thread_pool
 {

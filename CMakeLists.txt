@@ -23,7 +23,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -march=x86-64")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 
 add_executable(pstl
-	pstl.cpp)
+	pstl_test.cpp)
 
 target_link_libraries(pstl
 	${Boost_LIBRARIES}
@@ -31,3 +31,12 @@ target_link_libraries(pstl
 	${Catch2_LIBRARIES}
 	${GTest_LIBRARIES}
 	${benchmark_LIBRARIES})
+
+add_executable(timer
+	timer_test.cpp)
+
+add_executable(pool
+	pool_test.cpp)
+
+add_executable(random
+	random_test.cpp)

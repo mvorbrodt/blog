@@ -7,7 +7,7 @@
 #include <set>
 #include <iterator>
 #include <cassert>
-#include "event.h"
+#include "event.hpp"
 
 class timer
 {

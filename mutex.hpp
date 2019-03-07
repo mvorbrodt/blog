@@ -14,8 +14,8 @@
 #include <atomic>
 #include <thread>
 #include <climits>
-#include "event.h"
-#include "semaphore.h"
+#include "event.hpp"
+#include "semaphore.hpp"
 
 class spinlock_mutex
 {

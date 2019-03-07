@@ -8,7 +8,7 @@
 #include <utility>
 #include <type_traits>
 #include <cassert>
-#include "semaphore.h"
+#include "semaphore.hpp"
 
 template<typename T>
 class simple_blocking_queue

@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5B8522DE2135ABED0048744F /* pstl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B8522DD2135ABED0048744F /* pstl.cpp */; };
+		5B5BACB322309906008A7683 /* timer_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B5BACB222309906008A7683 /* timer_test.cpp */; };
+		5B5BACB5223099BA008A7683 /* pool_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B5BACB4223099BA008A7683 /* pool_test.cpp */; };
+		5B5BACB722309A3D008A7683 /* random_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B5BACB622309A3D008A7683 /* random_test.cpp */; };
+		5B8522DE2135ABED0048744F /* pstl_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B8522DD2135ABED0048744F /* pstl_test.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,9 +30,12 @@
 		5B21C859220742EC006CFB1D /* semaphore.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = semaphore.hpp; sourceTree = "<group>"; };
 		5B4763142208BDD800EE4E20 /* T.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = T.hpp; sourceTree = "<group>"; };
 		5B4763152208C19800EE4E20 /* event.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = event.hpp; sourceTree = "<group>"; };
+		5B5BACB222309906008A7683 /* timer_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = timer_test.cpp; sourceTree = "<group>"; };
+		5B5BACB4223099BA008A7683 /* pool_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pool_test.cpp; sourceTree = "<group>"; };
+		5B5BACB622309A3D008A7683 /* random_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = random_test.cpp; sourceTree = "<group>"; };
 		5B6616C8222F6136009DD806 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		5B8522DA2135ABED0048744F /* Playground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Playground; sourceTree = BUILT_PRODUCTS_DIR; };
-		5B8522DD2135ABED0048744F /* pstl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pstl.cpp; sourceTree = "<group>"; };
+		5B8522DD2135ABED0048744F /* pstl_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pstl_test.cpp; sourceTree = "<group>"; };
 		5B917BE822027B8900A849D5 /* handle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = handle.hpp; sourceTree = "<group>"; };
 		5BB0F01C22261454002E6270 /* mutex.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mutex.hpp; sourceTree = "<group>"; };
 		5BBB5616221331B800DD4E46 /* pool.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pool.hpp; sourceTree = "<group>"; };
@@ -99,7 +105,10 @@
 				5B4763152208C19800EE4E20 /* event.hpp */,
 				5BB0F01C22261454002E6270 /* mutex.hpp */,
 				5B21C859220742EC006CFB1D /* semaphore.hpp */,
-				5B8522DD2135ABED0048744F /* pstl.cpp */,
+				5B8522DD2135ABED0048744F /* pstl_test.cpp */,
+				5B5BACB222309906008A7683 /* timer_test.cpp */,
+				5B5BACB4223099BA008A7683 /* pool_test.cpp */,
+				5B5BACB622309A3D008A7683 /* random_test.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -160,7 +169,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5B8522DE2135ABED0048744F /* pstl.cpp in Sources */,
+				5B5BACB722309A3D008A7683 /* random_test.cpp in Sources */,
+				5B5BACB5223099BA008A7683 /* pool_test.cpp in Sources */,
+				5B8522DE2135ABED0048744F /* pstl_test.cpp in Sources */,
+				5B5BACB322309906008A7683 /* timer_test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
