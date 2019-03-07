@@ -10,11 +10,12 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 
-find_package(Boost REQUIRED)
+# find_package(OpenSSL REQUIRED)
+# find_package(Boost REQUIRED)
 find_package(TBB REQUIRED)
 find_package(Catch2 REQUIRED)
-find_package(GTest REQUIRED)
-find_package(benchmark REQUIRED)
+# find_package(GTest REQUIRED)
+# find_package(benchmark REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
