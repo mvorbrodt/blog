@@ -73,6 +73,9 @@
 		5BBCD7852222D98E009E8CCF /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		5BCAE4FD2227445200FDADA2 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
 		5BDAA3ED21D8342900CE6375 /* timer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = timer.hpp; sourceTree = "<group>"; };
+		5BE5C52C2230A9950005405E /* dekker_n.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dekker_n.cpp; sourceTree = "<group>"; };
+		5BE5C52D2230AA2E0005405E /* dekker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dekker.cpp; sourceTree = "<group>"; };
+		5BE5C52E2230AA930005405E /* membars.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = membars.cpp; sourceTree = "<group>"; };
 		5BFCF95422175231008F2B1F /* trace.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = trace.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -115,6 +118,9 @@
 				5B5BACB222309906008A7683 /* timer_test.cpp */,
 				5B5BACB4223099BA008A7683 /* pool_test.cpp */,
 				5B5BACB622309A3D008A7683 /* random_test.cpp */,
+				5BE5C52C2230A9950005405E /* dekker_n.cpp */,
+				5BE5C52D2230AA2E0005405E /* dekker.cpp */,
+				5BE5C52E2230AA930005405E /* membars.cpp */,
 			);
 			name = Main;
 			sourceTree = "<group>";
