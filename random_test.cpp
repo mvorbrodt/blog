@@ -6,7 +6,7 @@
 using namespace std;
 using namespace chrono;
 
-const int COUNT = 100'000'000;
+const int COUNT = 10'000'000;
 
 int main()
 {

@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "5B8522D92135ABED0048744F"
-               BuildableName = "Playground"
-               BlueprintName = "Playground"
-               ReferencedContainer = "container:Playground.xcodeproj">
+               BlueprintIdentifier = "5B5BACFD2230A557008A7683"
+               BuildableName = "random"
+               BlueprintName = "random"
+               ReferencedContainer = "container:blog.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5B8522D92135ABED0048744F"
-            BuildableName = "Playground"
-            BlueprintName = "Playground"
-            ReferencedContainer = "container:Playground.xcodeproj">
+            BlueprintIdentifier = "5B5BACFD2230A557008A7683"
+            BuildableName = "random"
+            BlueprintName = "random"
+            ReferencedContainer = "container:blog.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -55,10 +55,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5B8522D92135ABED0048744F"
-            BuildableName = "Playground"
-            BlueprintName = "Playground"
-            ReferencedContainer = "container:Playground.xcodeproj">
+            BlueprintIdentifier = "5B5BACFD2230A557008A7683"
+            BuildableName = "random"
+            BlueprintName = "random"
+            ReferencedContainer = "container:blog.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -74,10 +74,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5B8522D92135ABED0048744F"
-            BuildableName = "Playground"
-            BlueprintName = "Playground"
-            ReferencedContainer = "container:Playground.xcodeproj">
+            BlueprintIdentifier = "5B5BACFD2230A557008A7683"
+            BuildableName = "random"
+            BlueprintName = "random"
+            ReferencedContainer = "container:blog.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
