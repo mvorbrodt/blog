@@ -12,21 +12,21 @@ const unsigned long long COUNT = 100'000'000;
 
 TEST_CASE("STL vs PSTL", "[benchmark]")
 {
-	random_device rd;
-	mt19937 mt(rd());
+	auto seed = random_device{}();
 
 	vector<int> data(COUNT);
 
 	BENCHMARK("STL")
 	{
-		generate(data.begin(), data.end(), mt);
+		generate(data.begin(), data.end(), mt19937{seed});
 		sort(data.begin(), data.end());
 		is_sorted(data.begin(), data.end());
 	}
 
 	BENCHMARK("PSTL")
 	{
-		generate(pstl::execution::par_unseq, data.begin(), data.end(), mt);
+		mt19937 mt(seed);
+		generate(pstl::execution::par_unseq, data.begin(), data.end(), mt19937{seed});
 		sort(pstl::execution::par_unseq, data.begin(), data.end());
 		is_sorted(pstl::execution::par_unseq, data.begin(), data.end());
 	}
