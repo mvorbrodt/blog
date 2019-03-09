@@ -58,12 +58,12 @@ function build_clang_debug {
 }
 
 function build_llvm {
-	echo "***************************************************"
-	echo "* clang++-7 -Ofast -march=native -std=c++2a -lc++ *"
-	echo "***************************************************"
+	echo "*************************************************"
+	echo "* clang-7 -Ofast -march=native -std=c++2a -lc++ *"
+	echo "*************************************************"
 	echo
 	rm -f playground
-	clang++-7 \
+	clang-7 \
 		-Ofast \
 		-march=native\
 		-std=c++17 \
@@ -80,12 +80,12 @@ function build_llvm {
 }
 
 function build_llvm_debug {
-	echo "************************************************"
-	echo "* clang++-7 -O0 -march=x86-64 -std=c++2a -lc++ *"
-	echo "************************************************"
+	echo "**********************************************"
+	echo "* clang-7 -O0 -march=x86-64 -std=c++2a -lc++ *"
+	echo "**********************************************"
 	echo
 	rm -f playground
-	clang++-7 \
+	clang-7 \
 		-O0 \
 		-march=x86-64 \
 		-std=c++17 \
