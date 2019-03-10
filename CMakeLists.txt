@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13.4)
 
 project(playground VERSION 0.1
-	DESCRIPTION "Samples from http://blog.vorbrodt.me/"
+	DESCRIPTION "Code samples from https://vorbrodt.blog"
 	LANGUAGES CXX)
 
 if(NOT CMAKE_BUILD_TYPE)

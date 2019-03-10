@@ -45,6 +45,8 @@
 		5BBB5616221331B800DD4E46 /* pool.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pool.hpp; sourceTree = "<group>"; };
 		5BBCD7842222D98D009E8CCF /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		5BBCD7852222D98E009E8CCF /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		5BC54FA42235344000C0098A /* protobuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = protobuf.cpp; sourceTree = "<group>"; };
+		5BC54FA52235344000C0098A /* protobuf.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = protobuf.proto; sourceTree = "<group>"; };
 		5BCAE4FD2227445200FDADA2 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
 		5BDAA3ED21D8342900CE6375 /* timer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = timer.hpp; sourceTree = "<group>"; };
 		5BE5C52C2230A9950005405E /* dekker_n.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dekker_n.cpp; sourceTree = "<group>"; };
@@ -79,6 +81,8 @@
 			isa = PBXGroup;
 			children = (
 				5BE5C52F2230AD660005405E /* main.cpp */,
+				5BC54FA42235344000C0098A /* protobuf.cpp */,
+				5BC54FA52235344000C0098A /* protobuf.proto */,
 				5B8522DD2135ABED0048744F /* pstl_test.cpp */,
 				5B5BACB222309906008A7683 /* timer_test.cpp */,
 				5B5BACB4223099BA008A7683 /* pool_test.cpp */,
