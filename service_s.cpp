@@ -18,7 +18,7 @@ class ServiceHandler : public ServiceIf
 {
 public:
 	ServiceHandler() = default;
-	
+
 	void ping() override { cout << "ping()" << endl; }
 	void hello(const string& msg) override { cout << msg << endl; }
 	void async_call() override { cout << "async_call()" << endl; }
