@@ -13,6 +13,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 find_package(TBB REQUIRED)
 find_package(Catch2 REQUIRED)
 find_package(Protobuf REQUIRED)
+find_package(Thrift REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
@@ -20,6 +21,21 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -march=x86-64")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 
 add_executable(playground main.cpp)
+
+add_custom_command(
+        OUTPUT ${PROJECT_SOURCE_DIR}/Service.h
+        OUTPUT ${PROJECT_SOURCE_DIR}/Service.cpp
+        OUTPUT ${PROJECT_SOURCE_DIR}/Service_server.skeleton.cpp
+        OUTPUT ${PROJECT_SOURCE_DIR}/service_constants.h
+        OUTPUT ${PROJECT_SOURCE_DIR}/service_constants.cpp
+        OUTPUT ${PROJECT_SOURCE_DIR}/service_types.h
+        OUTPUT ${PROJECT_SOURCE_DIR}/service_types.cpp
+        COMMAND thrift -out ${PROJECT_SOURCE_DIR}
+        -gen cpp ${PROJECT_SOURCE_DIR}/service.thrift)
+add_executable(service_c service_c.cpp Service.cpp service_constants.cpp service_types.cpp)
+target_link_libraries(service_c ${THRIFT_LIBRARIES})
+add_executable(service_s service_s.cpp Service.cpp service_constants.cpp service_types.cpp)
+target_link_libraries(service_s ${THRIFT_LIBRARIES})
 
 add_custom_command(
 	OUTPUT ${PROJECT_SOURCE_DIR}/protobuf.pb.h
