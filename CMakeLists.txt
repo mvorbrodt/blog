@@ -10,9 +10,9 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 
-find_package(Boost REQUIRED)
 find_package(TBB REQUIRED)
 find_package(Catch2 REQUIRED)
+find_package(Protobuf REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
@@ -20,8 +20,19 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -march=x86-64")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 
 add_executable(playground main.cpp)
+
+add_custom_command(
+	OUTPUT ${PROJECT_SOURCE_DIR}/protobuf.pb.h
+	OUTPUT ${PROJECT_SOURCE_DIR}/protobuf.pb.cc
+	COMMAND protoc -I=${PROJECT_SOURCE_DIR}
+	--cpp_out=${PROJECT_SOURCE_DIR}
+	${PROJECT_SOURCE_DIR}/protobuf.proto)
+add_executable(protobuf protobuf.cpp protobuf.pb.cc)
+target_link_libraries(protobuf ${Protobuf_LIBRARIES})
+
 add_executable(pstl pstl_test.cpp)
 target_link_libraries(pstl ${TBB_LIBRARIES})
+
 add_executable(timer timer_test.cpp)
 add_executable(pool pool_test.cpp)
 add_executable(random random_test.cpp)

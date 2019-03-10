@@ -1,0 +1,10 @@
+syntax = "proto2";
+
+package data;
+
+message Person
+{
+  required string name = 1;
+  required int32 dob = 2;
+  optional string email = 3;
+}
