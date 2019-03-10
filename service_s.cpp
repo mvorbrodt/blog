@@ -1,7 +1,6 @@
 #include <iostream>
-#include <thrift/transport/TSocket.h>
-#include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TServerSocket.h>
+#include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TTransportUtils.h>
 #include <thrift/server/TSimpleServer.h>
 #include "Service.h"
