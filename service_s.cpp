@@ -1,10 +1,9 @@
 #include <iostream>
-#include <thrift/protocol/TBinaryProtocol.h>
-#include <thrift/server/TSimpleServer.h>
-#include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TSocket.h>
+#include <thrift/protocol/TBinaryProtocol.h>
+#include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TTransportUtils.h>
-#include <thrift/TToString.h>
+#include <thrift/server/TSimpleServer.h>
 #include "Service.h"
 
 using namespace std;
@@ -31,13 +30,12 @@ public:
 
 	ServiceIf* getHandler(const ::apache::thrift::TConnectionInfo& connInfo) override
 	{
-		std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(connInfo.transport);
-		cout << endl;
+		auto sock = std::dynamic_pointer_cast<TSocket>(connInfo.transport);
 		cout << "Incoming connection" << endl;
-		cout << "SocketInfo : " << sock->getSocketInfo() << endl;
-		cout << "PeerHost   : " << sock->getPeerHost() << endl;
-		cout << "PeerAddress: " << sock->getPeerAddress() << endl;
-		cout << "PeerPort   : " << sock->getPeerPort() << endl;
+		cout << "\tSocketInfo : " << sock->getSocketInfo() << endl;
+		cout << "\tPeerHost   : " << sock->getPeerHost() << endl;
+		cout << "\tPeerAddress: " << sock->getPeerAddress() << endl;
+		cout << "\tPeerPort   : " << sock->getPeerPort() << endl;
 		return new ServiceHandler;
 	}
 
@@ -47,7 +45,7 @@ public:
 	}
 };
 
-int main()
+int main(int argc, char** argv)
 {
 	TSimpleServer server(
 		std::make_shared<ServiceProcessorFactory>(std::make_shared<ServiceCloneFactory>()),

@@ -1,6 +1,6 @@
 #include <iostream>
-#include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
+#include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TTransportUtils.h>
 #include "Service.h"
 
@@ -12,9 +12,10 @@ using namespace Service;
 
 int main(int argc, char** argv)
 {
-	std::shared_ptr<TTransport> socket(new TSocket("localhost", 9090));
-	std::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
-	std::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+	auto socket = make_shared<TSocket>("localhost", 9090);
+	auto transport = make_shared<TBufferedTransport>(socket);
+	auto protocol = make_shared<TBinaryProtocol>(transport);
+
 	ServiceClient client(protocol);
 
 	try
