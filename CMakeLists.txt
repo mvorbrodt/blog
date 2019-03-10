@@ -23,15 +23,15 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 add_executable(playground main.cpp)
 
 add_custom_command(
-        OUTPUT ${PROJECT_SOURCE_DIR}/Service.h
-        OUTPUT ${PROJECT_SOURCE_DIR}/Service.cpp
-        OUTPUT ${PROJECT_SOURCE_DIR}/Service_server.skeleton.cpp
-        OUTPUT ${PROJECT_SOURCE_DIR}/service_constants.h
-        OUTPUT ${PROJECT_SOURCE_DIR}/service_constants.cpp
-        OUTPUT ${PROJECT_SOURCE_DIR}/service_types.h
-        OUTPUT ${PROJECT_SOURCE_DIR}/service_types.cpp
-        COMMAND thrift -out ${PROJECT_SOURCE_DIR}
-        -gen cpp ${PROJECT_SOURCE_DIR}/service.thrift)
+	OUTPUT ${PROJECT_SOURCE_DIR}/Service.h
+	OUTPUT ${PROJECT_SOURCE_DIR}/Service.cpp
+	OUTPUT ${PROJECT_SOURCE_DIR}/Service_server.skeleton.cpp
+	OUTPUT ${PROJECT_SOURCE_DIR}/service_constants.h
+	OUTPUT ${PROJECT_SOURCE_DIR}/service_constants.cpp
+	OUTPUT ${PROJECT_SOURCE_DIR}/service_types.h
+	OUTPUT ${PROJECT_SOURCE_DIR}/service_types.cpp
+	COMMAND thrift -out ${PROJECT_SOURCE_DIR}
+	-gen cpp ${PROJECT_SOURCE_DIR}/service.thrift)
 add_executable(service_c service_c.cpp Service.cpp service_constants.cpp service_types.cpp)
 target_link_libraries(service_c ${THRIFT_LIBRARIES})
 add_executable(service_s service_s.cpp Service.cpp service_constants.cpp service_types.cpp)
