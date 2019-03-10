@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13.4)
 
-project(playground VERSION 0.1
+project(blog VERSION 0.1
 	DESCRIPTION "Code samples from https://vorbrodt.blog"
 	LANGUAGES CXX)
 
