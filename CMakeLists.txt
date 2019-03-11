@@ -14,6 +14,7 @@ find_package(TBB REQUIRED)
 find_package(Catch2 REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Thrift REQUIRED)
+find_package(Boost REQUIRED COMPONENTS serialization)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
@@ -21,6 +22,9 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -march=x86-64")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 
 add_executable(playground main.cpp)
+
+add_executable(xml xml.cpp)
+target_link_libraries(xml ${Boost_SERIALIZATION_LIBRARY})
 
 add_custom_command(
 	OUTPUT ${PROJECT_SOURCE_DIR}/ThriftService.h
