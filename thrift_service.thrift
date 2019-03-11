@@ -1,6 +1,6 @@
-namespace cpp Service
+namespace cpp ThriftService
 
-service Service
+service ThriftService
 {
 	void ping(),
 	void hello(1:string msg),

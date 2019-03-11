@@ -2,13 +2,13 @@
 #include <thrift/transport/TSocket.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TTransportUtils.h>
-#include "Service.h"
+#include "ThriftService.h"
 
 using namespace std;
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
 using namespace apache::thrift::transport;
-using namespace Service;
+using namespace ThriftService;
 
 int main(int argc, char** argv)
 {
@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 	auto transport = make_shared<TBufferedTransport>(socket);
 	auto protocol = make_shared<TBinaryProtocol>(transport);
 
-	ServiceClient client(protocol);
+	ThriftServiceClient client(protocol);
 
 	try
 	{

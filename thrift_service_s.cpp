@@ -3,19 +3,19 @@
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TTransportUtils.h>
 #include <thrift/server/TSimpleServer.h>
-#include "Service.h"
+#include "ThriftService.h"
 
 using namespace std;
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
 using namespace apache::thrift::transport;
 using namespace apache::thrift::server;
-using namespace Service;
+using namespace ThriftService;
 
-class ServiceHandler : public ServiceIf
+class ThriftServiceHandler : public ThriftServiceIf
 {
 public:
-	ServiceHandler() = default;
+	ThriftServiceHandler() = default;
 
 	void ping() override { cout << "ping()" << endl; }
 	void hello(const string& msg) override { cout << msg << endl; }
@@ -25,7 +25,7 @@ public:
 int main(int argc, char** argv)
 {
 	TSimpleServer server(
-		std::make_shared<ServiceProcessor>(std::make_shared<ServiceHandler>()),
+		std::make_shared<ThriftServiceProcessor>(std::make_shared<ThriftServiceHandler>()),
 		std::make_shared<TServerSocket>(9090),
 		std::make_shared<TBufferedTransportFactory>(),
 		std::make_shared<TBinaryProtocolFactory>());
