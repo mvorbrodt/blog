@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	// becomes this:
 	T* t4 = (T*)operator new(sizeof(size_t) + HOW_MANY * sizeof(T));
 	*((size_t*)t4) = HOW_MANY;
-	t4 = (T*)(((std::byte*)t4) + sizeof(size_t));
+	t4 = (T*)(((char*)t4) + sizeof(size_t));
 	for(size_t i = 0; i < HOW_MANY; ++i)
 	{
 		try
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 		{
 			for(size_t i2 = 0; i2 < i; ++i2)
 				t4[i2].~T();
-			t4 = (T*)(((std::byte*)t4) - sizeof(size_t));
+			t4 = (T*)(((char*)t4) - sizeof(size_t));
 			operator delete(t4);
 			throw;
 		}
@@ -60,10 +60,10 @@ int main(int argc, char** argv)
 	// this:
 	delete [] t3;
 	// becomes:
-	size_t how_many = *(size_t*)(((std::byte*)t4) - sizeof(size_t));
+	size_t how_many = *(size_t*)(((char*)t4) - sizeof(size_t));
 	for(size_t i = 0; i < how_many; ++i)
 		t4[i].~T();
-	t4 = (T*)(((std::byte*)t4) - sizeof(size_t));
+	t4 = (T*)(((char*)t4) - sizeof(size_t));
 	operator delete(t4);
 	
 	return 1;
