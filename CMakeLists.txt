@@ -15,6 +15,7 @@ find_package(Catch2 REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Thrift REQUIRED)
 find_package(Boost REQUIRED COMPONENTS serialization)
+find_package(GRPC REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
@@ -22,6 +23,24 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -march=x86-64")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 
 add_executable(playground main.cpp)
+
+add_custom_command(
+	OUTPUT ${PROJECT_SOURCE_DIR}/grpc_service.pb.h
+	OUTPUT ${PROJECT_SOURCE_DIR}/grpc_service.pb.cc
+	COMMAND protoc -I ${PROJECT_SOURCE_DIR}
+	--cpp_out=${PROJECT_SOURCE_DIR}
+	${PROJECT_SOURCE_DIR}/grpc_service.proto)
+add_custom_command(
+	OUTPUT ${PROJECT_SOURCE_DIR}/grpc_service.grpc.pb.h
+	OUTPUT ${PROJECT_SOURCE_DIR}/grpc_service.grpc.pb.cc
+	COMMAND protoc -I ${PROJECT_SOURCE_DIR}
+	--grpc_out=${PROJECT_SOURCE_DIR}
+	--plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN}
+	${PROJECT_SOURCE_DIR}/grpc_service.proto)
+add_executable(grpc_service_c grpc_service_c.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
+target_link_libraries(grpc_service_c ${Protobuf_LIBRARIES} ${GRPC_LIBRARIES})
+add_executable(grpc_service_s grpc_service_s.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
+target_link_libraries(grpc_service_s ${Protobuf_LIBRARIES} ${GRPC_LIBRARIES})
 
 add_executable(xml xml.cpp)
 target_link_libraries(xml ${Boost_SERIALIZATION_LIBRARY})

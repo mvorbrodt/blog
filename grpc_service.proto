@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+message Input
+{
+	string input = 1;
+}
+
+message Output
+{
+	string output = 1;
+}
+
+service gRPCService
+{
+	rpc hello(Input) returns (Output) {}
+}

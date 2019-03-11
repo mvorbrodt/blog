@@ -46,6 +46,9 @@
 		5BBCD7842222D98D009E8CCF /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		5BBCD7852222D98E009E8CCF /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		5BC2D15A2235E20700D1828F /* xml.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = xml.cpp; sourceTree = "<group>"; };
+		5BC2D15B22361A0A00D1828F /* grpc_service_c.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = grpc_service_c.cpp; sourceTree = "<group>"; };
+		5BC2D15C22361A0A00D1828F /* grpc_service_s.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = grpc_service_s.cpp; sourceTree = "<group>"; };
+		5BC2D15D22361A0A00D1828F /* grpc_service.proto */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.protobuf; path = grpc_service.proto; sourceTree = "<group>"; };
 		5BC54FA42235344000C0098A /* protobuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = protobuf.cpp; sourceTree = "<group>"; };
 		5BC54FA52235344000C0098A /* protobuf.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = protobuf.proto; sourceTree = "<group>"; };
 		5BCAE4FD2227445200FDADA2 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
@@ -85,6 +88,9 @@
 			isa = PBXGroup;
 			children = (
 				5BE5C52F2230AD660005405E /* main.cpp */,
+				5BC2D15C22361A0A00D1828F /* grpc_service_s.cpp */,
+				5BC2D15B22361A0A00D1828F /* grpc_service_c.cpp */,
+				5BC2D15D22361A0A00D1828F /* grpc_service.proto */,
 				5BC2D15A2235E20700D1828F /* xml.cpp */,
 				5BD49E4122353B0400540576 /* thrift_service_s.cpp */,
 				5BD49E4222353B0400540576 /* thrift_service_c.cpp */,
