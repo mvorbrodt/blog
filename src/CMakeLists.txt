@@ -1,7 +1,7 @@
 add_executable(playground main.cpp)
 
 add_executable(stacktrace stacktrace.cpp)
-target_link_libraries(stacktrace ${Boost_STACKTRACE_LIBRARY})
+target_link_libraries(stacktrace ${CMAKE_DL_LIBS} ${Boost_STACKTRACE_LIBRARY})
 
 add_executable(uuid uuid.cpp)
 
