@@ -21,12 +21,12 @@ public:
 		Output output;
 		ClientContext context;
 
-		input.set_input(msg);
+		input.set_input_msg(msg);
 
 		Status status = stub->hello(&context, input, &output);
 		if (status.ok())
 		{
-			return output.output();
+			return output.output_msg();
 		}
 		else
 		{

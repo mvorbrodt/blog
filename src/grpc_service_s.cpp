@@ -14,8 +14,8 @@ class gRPCServiceImpl final : public gRPCService::Service
 public:
 	Status hello(ServerContext* context, const Input* in, Output* out) override
 	{
-		cout << in->input() << endl;
-		out->set_output("gRPC server says hi!");
+		cout << in->input_msg() << endl;
+		out->set_output_msg("gRPC server says hi!");
 		return Status::OK;
 	}
 };

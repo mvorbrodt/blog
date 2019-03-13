@@ -2,12 +2,12 @@ syntax = "proto3";
 
 message Input
 {
-	string input = 1;
+	string input_msg = 1;
 }
 
 message Output
 {
-	string output = 1;
+	string output_msg = 1;
 }
 
 service gRPCService
