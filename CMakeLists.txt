@@ -17,6 +17,7 @@ find_package(Protobuf REQUIRED)
 find_package(Thrift REQUIRED)
 find_package(Boost REQUIRED COMPONENTS serialization)
 find_package(GRPC REQUIRED)
+find_package(SOCI REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
