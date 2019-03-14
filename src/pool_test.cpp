@@ -2,6 +2,7 @@
 #include <catch2/catch.hpp>
 #include <cstdlib>
 #include "pool.hpp"
+
 using namespace std;
 
 const int COUNT = 1'000'000;

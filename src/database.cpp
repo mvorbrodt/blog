@@ -3,6 +3,7 @@
 #include <exception>
 #include <soci/soci.h>
 #include <soci/mysql/soci-mysql.h>
+
 using namespace soci;
 using namespace std;
 

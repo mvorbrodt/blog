@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
+
 using namespace std;
 
 mutex cout_lock;

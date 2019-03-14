@@ -1,6 +1,7 @@
 #include <iostream>
 #include <utility>
 #include <cstdlib>
+
 using namespace std;
 
 #define VIRTUAL_FUNCTION_1 0

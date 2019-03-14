@@ -2,6 +2,7 @@
 #include <mutex>
 #include <thread>
 #include "queue.hpp"
+
 using namespace std;
 
 const int COUNT = 10;

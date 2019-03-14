@@ -1,6 +1,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "trace.hpp"
+
 using namespace std;
 
 const int COUNT = 10'000'000;

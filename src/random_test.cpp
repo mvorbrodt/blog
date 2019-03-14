@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 #include <random>
+
 using namespace std;
 
 const int COUNT = 10'000'000;

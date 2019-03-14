@@ -1,6 +1,7 @@
 #include <iostream>
 #define BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED
 #include <boost/stacktrace.hpp>
+
 using namespace std;
 using namespace boost::stacktrace;
 

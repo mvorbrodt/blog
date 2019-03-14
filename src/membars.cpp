@@ -1,6 +1,7 @@
 #include <iostream>
 #include <atomic>
 #include <thread>
+
 using namespace std;
 
 //#define ATOMIC_FENCE

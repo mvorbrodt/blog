@@ -2,6 +2,7 @@
 #include <atomic>
 #include <thread>
 #include <vector>
+
 using namespace std;
 
 const int COUNT = 5;
