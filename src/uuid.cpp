@@ -8,7 +8,8 @@ using namespace boost::uuids;
 
 int main(int argc, char** argv)
 {
-	uuid id = random_generator()();
+	auto gen = random_generator();
+	uuid id = gen();
 
 	cout << id << endl;
 
