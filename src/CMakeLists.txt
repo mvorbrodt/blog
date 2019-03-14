@@ -1,9 +1,9 @@
 add_executable(playground main.cpp)
 
 add_executable(database database.cpp)
-set_source_files_properties(database.cpp PROPERTIES COMPILE_FLAGS -std=c++11)
+set_source_files_properties(database.cpp PROPERTIES COMPILE_FLAGS --std=c++11)
 target_include_directories(database PUBLIC ${SOCI_INCLUDE_DIRS})
-target_link_libraries(database ${SOCI_LIBRARY})
+target_link_libraries(database ${SOCI_LIBRARY} ${SOCI_mysql_PLUGIN} ${MYSQL_CLIENT_LIBS})
 
 add_executable(stacktrace stacktrace.cpp)
 target_link_libraries(stacktrace ${CMAKE_DL_LIBS} ${Boost_STACKTRACE_LIBRARY})
