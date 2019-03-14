@@ -6,20 +6,20 @@ target_include_directories(database PUBLIC ${SOCI_INCLUDE_DIRS})
 target_link_libraries(database ${SOCI_LIBRARY} ${SOCI_mysql_PLUGIN} ${MYSQL_CLIENT_LIBS})
 
 add_executable(stacktrace stacktrace.cpp)
-target_link_libraries(stacktrace ${CMAKE_DL_LIBS} ${Boost_STACKTRACE_LIBRARY})
+target_link_libraries(stacktrace ${CMAKE_DL_LIBS} ${Boost_STACKTRACE_BASIC_LIBRARY})
 
 add_executable(uuid uuid.cpp)
 
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.pb.h
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.pb.cc
-	COMMAND protoc -I ${CMAKE_CURRENT_SOURCE_DIR}
+	COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}
 	--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.proto)
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.grpc.pb.h
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.grpc.pb.cc
-	COMMAND protoc -I ${CMAKE_CURRENT_SOURCE_DIR}
+	COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}
 	--grpc_out=${CMAKE_CURRENT_SOURCE_DIR}
 	--plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN}
 	${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.proto)
@@ -39,7 +39,7 @@ add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service_constants.cpp
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service_types.h
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service_types.cpp
-	COMMAND thrift -out ${CMAKE_CURRENT_SOURCE_DIR}
+	COMMAND ${THRIFT_COMPILER} -out ${CMAKE_CURRENT_SOURCE_DIR}
 	-gen cpp ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service.thrift)
 add_executable(thrift_service_c thrift_service_c.cpp ThriftService.cpp thrift_service_constants.cpp thrift_service_types.cpp)
 target_link_libraries(thrift_service_c ${THRIFT_LIBRARIES})
@@ -49,7 +49,7 @@ target_link_libraries(thrift_service_s ${THRIFT_LIBRARIES})
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/protobuf.pb.h
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/protobuf.pb.cc
-	COMMAND protoc -I=${CMAKE_CURRENT_SOURCE_DIR}
+	COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} -I=${CMAKE_CURRENT_SOURCE_DIR}
 	--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/protobuf.proto)
 add_executable(protobuf protobuf.cpp protobuf.pb.cc)
