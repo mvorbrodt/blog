@@ -1,5 +1,8 @@
 add_executable(playground main.cpp)
 
+add_executable(cpu_timer cpu_timer.cpp)
+target_link_libraries(cpu_timer ${Boost_TIMER_LIBRARY})
+
 add_executable(database database.cpp)
 set_source_files_properties(database.cpp PROPERTIES COMPILE_FLAGS --std=c++11)
 target_include_directories(database PUBLIC ${SOCI_INCLUDE_DIRS})
