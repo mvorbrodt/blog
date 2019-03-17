@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.0.0)
 
 project(blog VERSION 0.1
 	DESCRIPTION "Code samples from https://vorbrodt.blog"
@@ -12,14 +12,18 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 find_package(Threads REQUIRED)
 find_package(TBB REQUIRED)
-find_package(Catch2 REQUIRED)
+find_package(Boost REQUIRED COMPONENTS serialization stacktrace_basic timer)
+
 find_package(Protobuf REQUIRED)
 find_package(Thrift REQUIRED)
-find_package(Boost REQUIRED COMPONENTS serialization stacktrace_basic timer)
 find_package(GRPC REQUIRED)
+
 find_package(MYSQL REQUIRED)
 find_package(SOCI REQUIRED)
-find_package(FMT REQUIRED)
+
+find_package(Catch2 REQUIRED)
+find_package(Benchmark REQUIRED)
+find_package(Hayai REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++17")
