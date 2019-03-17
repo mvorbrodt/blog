@@ -16,6 +16,7 @@ struct Person
 	string EMail;
 };
 
+namespace soci {
 template<>
 struct type_conversion<Person>
 {
@@ -40,6 +41,7 @@ struct type_conversion<Person>
 		ind = i_ok;
 	}
 };
+}
 
 int main()
 {
