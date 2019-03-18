@@ -4,8 +4,8 @@
 #include <soci/soci.h>
 #include <soci/mysql/soci-mysql.h>
 
-using namespace soci;
 using namespace std;
+using namespace soci;
 
 struct Person
 {
@@ -16,31 +16,32 @@ struct Person
 	string EMail;
 };
 
-namespace soci {
-template<>
-struct type_conversion<Person>
+namespace soci
 {
-	typedef values base_type;
-
-	static void from_base(const values& v, indicator, Person& p)
+	template<>
+	struct type_conversion<Person>
 	{
-		p.ID = v.get<int>("ID");
-		p.FirstName = v.get<string>("FirstName");
-		p.LastName = v.get<string>("LastName");
-		p.DOB = v.get<int>("DOB");
-		p.EMail = v.get<string>("EMail");
-	}
+		typedef values base_type;
 
-	static void to_base(const Person& p, values& v, indicator& ind)
-	{
-		v.set("ID", p.ID);
-		v.set("FirstName", p.FirstName);
-		v.set("LastName", p.LastName);
-		v.set("DOB", p.DOB);
-		v.set("EMail", p.EMail);
-		ind = i_ok;
-	}
-};
+		static void from_base(const values& v, indicator, Person& p)
+		{
+			p.ID = v.get<int>("ID");
+			p.FirstName = v.get<string>("FirstName");
+			p.LastName = v.get<string>("LastName");
+			p.DOB = v.get<int>("DOB");
+			p.EMail = v.get<string>("EMail");
+		}
+
+		static void to_base(const Person& p, values& v, indicator& ind)
+		{
+			v.set("ID", p.ID);
+			v.set("FirstName", p.FirstName);
+			v.set("LastName", p.LastName);
+			v.set("DOB", p.DOB);
+			v.set("EMail", p.EMail);
+			ind = i_ok;
+		}
+	};
 }
 
 int main()
