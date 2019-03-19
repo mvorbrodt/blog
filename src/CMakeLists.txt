@@ -6,6 +6,8 @@
 
 add_executable(playground main.cpp)
 
+add_executable(ranges ranges.cpp)
+
 add_executable(plugin_load plugin_load.cpp)
 target_link_libraries(plugin_load ${CMAKE_DL_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 add_library(plugin SHARED plugin_lib.cpp)
