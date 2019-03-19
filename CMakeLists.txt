@@ -12,7 +12,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 find_package(Threads REQUIRED)
 find_package(TBB REQUIRED)
-find_package(Boost REQUIRED COMPONENTS serialization stacktrace_basic timer)
+find_package(Boost REQUIRED COMPONENTS serialization stacktrace_basic timer filesystem system)
 
 find_package(Protobuf REQUIRED)
 find_package(Thrift REQUIRED)
@@ -32,6 +32,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
+set(LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
 
 add_subdirectory(src)
 

@@ -6,6 +6,10 @@
 
 add_executable(playground main.cpp)
 
+add_executable(plugin plugin.cpp)
+target_link_libraries(plugin ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+add_library(plugin_lib SHARED plugin_lib.cpp)
+
 add_executable(benchmark-nonius benchmark-nonius.cpp)
 
 add_executable(benchmark-celero benchmark-celero.cpp)
