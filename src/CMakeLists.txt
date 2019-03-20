@@ -6,6 +6,8 @@
 
 add_executable(playground main.cpp)
 
+add_executable(colors colors.cpp)
+
 add_executable(otp otp.cpp)
 target_link_libraries(otp -loath)
 
