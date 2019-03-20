@@ -6,6 +6,9 @@
 
 add_executable(playground main.cpp)
 
+add_executable(otp otp.cpp)
+target_link_libraries(otp -loath)
+
 add_executable(ranges ranges.cpp)
 
 add_executable(plugin_load plugin_load.cpp)
