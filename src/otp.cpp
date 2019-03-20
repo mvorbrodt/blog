@@ -7,6 +7,13 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+	auto result = oath_init();
+	if(result != OATH_OK)
+	{
+		cerr << oath_strerror(result) << endl;
+		return -1;
+	}
+
 	const char secret[] = "00112233445566778899";
 	const auto time_step = OATH_TOTP_DEFAULT_TIME_STEP_SIZE;
 	const auto digits = 6;
@@ -17,7 +24,7 @@ int main(int argc, char** argv)
 		auto left = time_step - (t % time_step);
 
 		char otp[digits + 1] = {};
-		auto result = oath_totp_generate(
+		result = oath_totp_generate(
 			secret,
 			sizeof(secret),
 			t,
@@ -26,14 +33,19 @@ int main(int argc, char** argv)
 			digits,
 			otp);
 
-		if(result == OATH_OK)
+		if(result != OATH_OK)
 		{
-			cout << "OTP: " << otp << " (" << left << ") \r";
-			cout.flush();
+			cerr << oath_strerror(result) << endl;
+			return -1;
 		}
+
+		cout << "OTP: " << otp << " (" << left << ") \r";
+		cout.flush();
 
 		this_thread::sleep_for(1s);
 	}
+
+	oath_done();
 
 	return 1;
 }
