@@ -1,10 +1,7 @@
-# get_cmake_property(_variableNames VARIABLES)
-# list (SORT _variableNames)
-# foreach (_variableName ${_variableNames})
-# 	message(STATUS "${_variableName}=${${_variableName}}")
-# endforeach()
-
 add_executable(playground main.cpp)
+
+add_executable(compression compression.cpp)
+target_link_libraries(compression ${LZ4_LIBRARY})
 
 add_executable(options options.cpp)
 target_link_libraries(options ${Boost_PROGRAM_OPTIONS_LIBRARY})
