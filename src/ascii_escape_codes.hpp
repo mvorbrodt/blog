@@ -51,45 +51,45 @@ namespace ascii_escape_codes
 		inline std::ostream& operator << (std::ostream& os, const name##_color&) \
 		{ os << "\x1b[" #code "m"; return os; }
 
-	COLOR_ENTRY(black,   30)
-	COLOR_ENTRY(red,     31)
-	COLOR_ENTRY(green,   32)
-	COLOR_ENTRY(yellow,  33)
-	COLOR_ENTRY(blue,    34)
+	COLOR_ENTRY(black, 30)
+	COLOR_ENTRY(red, 31)
+	COLOR_ENTRY(green, 32)
+	COLOR_ENTRY(yellow, 33)
+	COLOR_ENTRY(blue, 34)
 	COLOR_ENTRY(magenta, 35)
-	COLOR_ENTRY(cyan,    36)
-	COLOR_ENTRY(white,   37)
+	COLOR_ENTRY(cyan, 36)
+	COLOR_ENTRY(white, 37)
 
-	COLOR_ENTRY(black_bg,   40)
-	COLOR_ENTRY(red_bg,     41)
-	COLOR_ENTRY(green_bg,   42)
-	COLOR_ENTRY(yellow_bg,  43)
-	COLOR_ENTRY(blue_bg,    44)
+	COLOR_ENTRY(black_bg, 40)
+	COLOR_ENTRY(red_bg, 41)
+	COLOR_ENTRY(green_bg, 42)
+	COLOR_ENTRY(yellow_bg, 43)
+	COLOR_ENTRY(blue_bg, 44)
 	COLOR_ENTRY(magenta_bg, 45)
-	COLOR_ENTRY(cyan_bg,    46)
-	COLOR_ENTRY(white_bg,   47)
+	COLOR_ENTRY(cyan_bg, 46)
+	COLOR_ENTRY(white_bg, 47)
 
-	COLOR_ENTRY(bright_black,   90)
-	COLOR_ENTRY(bright_red,     91)
-	COLOR_ENTRY(bright_green,   92)
-	COLOR_ENTRY(bright_yellow,  93)
-	COLOR_ENTRY(bright_blue,    94)
+	COLOR_ENTRY(bright_black, 90)
+	COLOR_ENTRY(bright_red, 91)
+	COLOR_ENTRY(bright_green, 92)
+	COLOR_ENTRY(bright_yellow, 93)
+	COLOR_ENTRY(bright_blue, 94)
 	COLOR_ENTRY(bright_magenta, 95)
-	COLOR_ENTRY(bright_cyan,    96)
-	COLOR_ENTRY(bright_white,   97)
+	COLOR_ENTRY(bright_cyan, 96)
+	COLOR_ENTRY(bright_white, 97)
 
-	COLOR_ENTRY(bright_black_bg,   100)
-	COLOR_ENTRY(bright_red_bg,     101)
-	COLOR_ENTRY(bright_green_bg,   102)
-	COLOR_ENTRY(bright_yellow_bg,  103)
-	COLOR_ENTRY(bright_blue_bg,    104)
+	COLOR_ENTRY(bright_black_bg, 100)
+	COLOR_ENTRY(bright_red_bg, 101)
+	COLOR_ENTRY(bright_green_bg, 102)
+	COLOR_ENTRY(bright_yellow_bg, 103)
+	COLOR_ENTRY(bright_blue_bg, 104)
 	COLOR_ENTRY(bright_magenta_bg, 105)
-	COLOR_ENTRY(bright_cyan_bg,    106)
-	COLOR_ENTRY(bright_white_bg,   107)
+	COLOR_ENTRY(bright_cyan_bg, 106)
+	COLOR_ENTRY(bright_white_bg, 107)
 
 	struct color_n
 	{
-		color_n(unsigned char n) : m_n(n) {}
+		explicit color_n(unsigned char n) : m_n(n) {}
 		friend std::ostream& operator << (std::ostream& os, const color_n& n);
 	private:
 		unsigned char m_n;
@@ -97,7 +97,7 @@ namespace ascii_escape_codes
 
 	struct color_bg_n
 	{
-		color_bg_n(unsigned char n) : m_n(n) {}
+		explicit color_bg_n(unsigned char n) : m_n(n) {}
 		friend std::ostream& operator << (std::ostream& os, const color_bg_n& n);
 	private:
 		unsigned char m_n;
