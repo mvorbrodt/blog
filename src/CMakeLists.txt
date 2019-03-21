@@ -6,6 +6,9 @@
 
 add_executable(playground main.cpp)
 
+add_executable(options options.cpp)
+target_link_libraries(options ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
 add_executable(colors colors.cpp)
 
 add_executable(otp otp.cpp)

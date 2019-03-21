@@ -12,7 +12,12 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 find_package(Threads REQUIRED)
 find_package(TBB REQUIRED)
-find_package(Boost REQUIRED COMPONENTS serialization stacktrace_basic timer filesystem system)
+find_package(Boost REQUIRED COMPONENTS
+	serialization
+	stacktrace_basic
+	filesystem
+	system
+	program_options)
 find_package(range-v3 REQUIRED)
 
 find_package(Protobuf REQUIRED)
