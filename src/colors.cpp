@@ -6,14 +6,12 @@ using namespace ascii_escape_codes;
 
 int main(int argc, char** argv)
 {
-	cout << reset;
 	cout << bold << "BOLD" << reset << endl;
 	cout << faint << "FAINT" << reset << endl;
 	cout << italic << "ITALIC" << reset << endl;
 	cout << underline << "UNDERLINE" << reset << endl;
 	cout << slow_blink << "SLOW BLINK" << reset << endl;
-	cout << inverse << "REVERSE" << reset << endl;
-	cout << endl;
+	cout << inverse << "INVERSE" << reset << endl << endl;
 
 	for(int n = 0; n <= 255; ++n)
 		cout << color_n(n) << "X";
