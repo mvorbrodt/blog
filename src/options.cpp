@@ -37,10 +37,10 @@ int main(int argc, char** argv)
 	if(vm.count("float")) cout << "Float value was set to " << f << endl;
 	if(vm.count("string")) cout << "String value was set to \"" << s << "\"" << endl;
 	if(vm.count("int_list"))
-		for(auto it : vm["int_list"].as<vector<int>>())
+		for(auto it : vi)
 			cout << "List of ints value was set to " << it << endl;
 	if(vm.count("string_list"))
-		for(auto& it : vm["string_list"].as<vector<string>>())
+		for(auto& it : vs)
 			cout << "List of strings value was set to \"" << it << "\"" << endl;
 
 	return 1;

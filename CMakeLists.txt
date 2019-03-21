@@ -17,6 +17,7 @@ find_package(Boost REQUIRED COMPONENTS
 	stacktrace_basic
 	filesystem
 	system
+	timer
 	program_options)
 find_package(range-v3 REQUIRED)
 
