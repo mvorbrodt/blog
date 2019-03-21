@@ -2,8 +2,10 @@
 #include <thread>
 #include <cstdlib>
 #include <liboath/oath.h>
+#include "ascii_escape_codes.hpp"
 
 using namespace std;
+using namespace ascii_escape_codes;
 
 int main(int argc, char** argv)
 {
@@ -39,7 +41,9 @@ int main(int argc, char** argv)
 			return -1;
 		}
 
-		cout << "OTP: " << otp << " (" << left << ") \r";
+		cout << bold << "OTP: " << reset
+			<< bright_red << otp << reset
+			<< slow_blink << " (" << left << ") \r" << reset;
 		cout.flush();
 
 		this_thread::sleep_for(1s);
