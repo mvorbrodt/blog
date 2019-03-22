@@ -1,8 +1,5 @@
 #include <iostream>
-#include <string>
 #include <vector>
-#include <iterator>
-#include <algorithm>
 #include <lz4.h>
 
 using namespace std;
