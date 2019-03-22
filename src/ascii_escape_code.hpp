@@ -5,7 +5,7 @@
 #define ASCII_ESCAPE_CODE(name, code) \
 	static inline struct name##_ascii_escape_code {} name; \
 	inline std::ostream& operator << (std::ostream& os, const name##_ascii_escape_code&) \
-	{ os << "\x1b[" #code "m"; return os; }
+	{ os << "\x1B[" #code "m"; return os; }
 
 namespace ascii_escape_code
 {
@@ -38,14 +38,6 @@ namespace ascii_escape_code
 	ASCII_ESCAPE_CODE(inverse_off, 27)
 	ASCII_ESCAPE_CODE(reveal, 28)
 	ASCII_ESCAPE_CODE(not_crossed_out, 29)
-	ASCII_ESCAPE_CODE(default_foreground_color, 39)
-	ASCII_ESCAPE_CODE(default_background_color, 49)
-	ASCII_ESCAPE_CODE(framed, 51)
-	ASCII_ESCAPE_CODE(encircled, 52)
-	ASCII_ESCAPE_CODE(overlined, 53)
-	ASCII_ESCAPE_CODE(not_framed_or_encircled, 54)
-	ASCII_ESCAPE_CODE(not_overlined, 55)
-
 	ASCII_ESCAPE_CODE(black, 30)
 	ASCII_ESCAPE_CODE(red, 31)
 	ASCII_ESCAPE_CODE(green, 32)
@@ -54,7 +46,7 @@ namespace ascii_escape_code
 	ASCII_ESCAPE_CODE(magenta, 35)
 	ASCII_ESCAPE_CODE(cyan, 36)
 	ASCII_ESCAPE_CODE(white, 37)
-
+	ASCII_ESCAPE_CODE(default_foreground_color, 39)
 	ASCII_ESCAPE_CODE(black_bg, 40)
 	ASCII_ESCAPE_CODE(red_bg, 41)
 	ASCII_ESCAPE_CODE(green_bg, 42)
@@ -63,7 +55,12 @@ namespace ascii_escape_code
 	ASCII_ESCAPE_CODE(magenta_bg, 45)
 	ASCII_ESCAPE_CODE(cyan_bg, 46)
 	ASCII_ESCAPE_CODE(white_bg, 47)
-
+	ASCII_ESCAPE_CODE(default_background_color, 49)
+	ASCII_ESCAPE_CODE(framed, 51)
+	ASCII_ESCAPE_CODE(encircled, 52)
+	ASCII_ESCAPE_CODE(overlined, 53)
+	ASCII_ESCAPE_CODE(not_framed_or_encircled, 54)
+	ASCII_ESCAPE_CODE(not_overlined, 55)
 	ASCII_ESCAPE_CODE(bright_black, 90)
 	ASCII_ESCAPE_CODE(bright_red, 91)
 	ASCII_ESCAPE_CODE(bright_green, 92)
@@ -72,7 +69,6 @@ namespace ascii_escape_code
 	ASCII_ESCAPE_CODE(bright_magenta, 95)
 	ASCII_ESCAPE_CODE(bright_cyan, 96)
 	ASCII_ESCAPE_CODE(bright_white, 97)
-
 	ASCII_ESCAPE_CODE(bright_black_bg, 100)
 	ASCII_ESCAPE_CODE(bright_red_bg, 101)
 	ASCII_ESCAPE_CODE(bright_green_bg, 102)
@@ -90,6 +86,9 @@ namespace ascii_escape_code
 		unsigned char m_n;
 	};
 
+	inline std::ostream& operator << (std::ostream& os, const color_n& n)
+	{ os << "\x1B[38;5;" << (int)n.m_n << "m"; return os; }
+
 	struct color_bg_n
 	{
 		explicit color_bg_n(unsigned char n) : m_n(n) {}
@@ -98,11 +97,8 @@ namespace ascii_escape_code
 		unsigned char m_n;
 	};
 
-	inline std::ostream& operator << (std::ostream& os, const color_n& n)
-	{ os << "\x1b[38;5;" << (int)n.m_n << "m"; return os; }
-
 	inline std::ostream& operator << (std::ostream& os, const color_bg_n& n)
-	{ os << "\x1b[48;5;" << (int)n.m_n << "m"; return os; }
+	{ os << "\x1B[48;5;" << (int)n.m_n << "m"; return os; }
 
 	struct color_rgb
 	{
@@ -112,6 +108,9 @@ namespace ascii_escape_code
 		unsigned char m_r, m_g, m_b;
 	};
 
+	inline std::ostream& operator << (std::ostream& os, const color_rgb& c)
+	{ os << "\x1B[38;2;" << (int)c.m_r << ";" << (int)c.m_g << ";" << (int)c.m_b << "m"; return os; }
+
 	struct color_bg_rgb
 	{
 		color_bg_rgb(unsigned char r, unsigned char g, unsigned char b) : m_r(r), m_g(g), m_b(b) {}
@@ -120,9 +119,6 @@ namespace ascii_escape_code
 		unsigned char m_r, m_g, m_b;
 	};
 
-	inline std::ostream& operator << (std::ostream& os, const color_rgb& c)
-	{ os << "\x1b[38;2;" << (int)c.m_r << ";" << (int)c.m_g << ";" << (int)c.m_b << "m"; return os; }
-
 	inline std::ostream& operator << (std::ostream& os, const color_bg_rgb& c)
-	{ os << "\x1b[48;2;" << (int)c.m_r << ";" << (int)c.m_g << ";" << (int)c.m_b << "m"; return os; }
+	{ os << "\x1B[48;2;" << (int)c.m_r << ";" << (int)c.m_g << ";" << (int)c.m_b << "m"; return os; }
 }
