@@ -4,6 +4,7 @@
 #include <iterator>
 #include <algorithm>
 #include <lz4.h>
+#include "base64.hpp"
 
 using namespace std;
 
@@ -25,16 +26,18 @@ void lz4_decompress(const buffer& in, buffer& out)
 
 int main(int argc, char** argv)
 {
-	string s{"This is our data that will be repeated 1000 times and compressed :o)"};
-	buffer data;
-	for(int copies = 0; copies < 1000; ++copies)
-		copy(begin(s), end(s), back_inserter(data));
+	buffer data(1000, 'X');
 	buffer compressed(data.size()), decompressed(data.size());
 
 	lz4_compress(data, compressed);
 	cout << "LZ4 compress, bytes in: " << data.size() << ", bytes out: " << compressed.size() << endl;
 
-	lz4_decompress(compressed, decompressed);
+	auto base64_encoded = base64::encode(compressed.data(), compressed.size());
+	auto base64_decoded = base64::decode(base64_encoded);
+
+	cout << "Compressed and base64 encoded: " << base64_encoded << endl;
+
+	lz4_decompress(buffer(begin(base64_decoded), end(base64_decoded)), decompressed);
 	cout << "LZ4 decompress, bytes in: " << compressed.size() << ", bytes out: " << decompressed.size() << endl;
 
 	if(data != decompressed) cerr << "Oh snap! Data mismatch!" << endl;
