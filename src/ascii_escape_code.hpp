@@ -2,13 +2,13 @@
 
 #include <ostream>
 
+#define ASCII_ESCAPE_CODE(name, code) \
+	static inline struct name##_ascii_escape_code {} name; \
+	inline std::ostream& operator << (std::ostream& os, const name##_ascii_escape_code&) \
+	{ os << "\x1b[" #code "m"; return os; }
+
 namespace ascii_escape_code
 {
-	#define ASCII_ESCAPE_CODE(name, code) \
-		static inline struct name##_ascii_escape_code {} name; \
-		inline std::ostream& operator << (std::ostream& os, const name##_ascii_escape_code&) \
-		{ os << "\x1b[" #code "m"; return os; }
-
 	ASCII_ESCAPE_CODE(reset, 0)
 	ASCII_ESCAPE_CODE(bold, 1)
 	ASCII_ESCAPE_CODE(faint, 2)

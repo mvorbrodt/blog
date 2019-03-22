@@ -1,5 +1,7 @@
 add_executable(playground main.cpp)
 
+add_executable(base64 base64.cpp)
+
 add_executable(compression compression.cpp)
 target_link_libraries(compression ${LZ4_LIBRARY})
 
