@@ -14,7 +14,7 @@ int main(int argc, char** argv)
 	xmlrpc_c::clientSimple client;
 	xmlrpc_c::value result;
 
-	client.call(serverUrl, methodName, "s", &result, "XMLRPC client says hellp!");
+	client.call(serverUrl, methodName, "s", &result, "XMLRPC client says hello!");
 
 	auto reply = xmlrpc_c::value_string(result);
 
