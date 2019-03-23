@@ -8,8 +8,6 @@
 using namespace std;
 using namespace ascii_escape_code;
 
-using buffer = vector<base64::byte>;
-
 int main(int argc, char** argv)
 {
 	string input
