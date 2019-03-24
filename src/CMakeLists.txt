@@ -1,5 +1,7 @@
 add_executable(playground main.cpp)
 
+add_executable(exceptions exceptions.cpp)
+
 add_executable(xmlrpc_c xmlrpc_c.cpp)
 set_source_files_properties(xmlrpc_c.cpp PROPERTIES COMPILE_FLAGS --std=c++11)
 target_link_libraries(xmlrpc_c -lxmlrpc++ -lxmlrpc_client++ -lxmlrpc_util++)
