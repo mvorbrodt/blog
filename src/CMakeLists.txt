@@ -1,5 +1,7 @@
 add_executable(playground main.cpp)
 
+add_executable(c_api_lambda c_api_lambda.cpp)
+
 add_executable(exceptions exceptions.cpp)
 
 add_executable(xmlrpc_c xmlrpc_c.cpp)
