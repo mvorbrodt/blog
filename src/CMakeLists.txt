@@ -1,5 +1,8 @@
 add_executable(playground main.cpp)
 
+add_executable(geoip geoip.cpp)
+target_link_libraries(geoip ${CURL_LIBRARY} ${CURLPP_LIBRARY})
+
 add_executable(c_api_lambda c_api_lambda.cpp)
 
 add_executable(exceptions exceptions.cpp)

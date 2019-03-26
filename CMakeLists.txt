@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(blog VERSION 0.1
 	DESCRIPTION "Code samples from https://vorbrodt.blog"
-	LANGUAGES CXX)
+	LANGUAGES C CXX)
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
@@ -32,6 +32,7 @@ find_package(Catch2 REQUIRED)
 find_package(Benchmark REQUIRED)
 find_package(hayai REQUIRED)
 find_package(lz4 REQUIRED)
+find_package(CURL REQUIRED)
 find_package(CURLpp REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++17")
