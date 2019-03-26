@@ -10,6 +10,9 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
+include_directories("/usr/local/include")
+link_directories("/usr/local/lib")
+
 find_package(Threads REQUIRED)
 find_package(TBB REQUIRED)
 find_package(Boost REQUIRED COMPONENTS
