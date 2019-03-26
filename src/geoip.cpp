@@ -8,13 +8,25 @@ using namespace std;
 
 int main()
 {
-	curlpp::Cleanup clean;
-	curlpp::Easy r;
-	std::ostringstream response;
+	try
+	{
+		curlpp::Cleanup clean;
 
-	r.setOpt(new curlpp::options::Url("http://ip-api.com/xml/8.8.4.4"));
-	r.setOpt(new curlpp::options::WriteStream(&response));
-	r.perform();
+		curlpp::Easy r;
+		std::ostringstream response;
 
-	cout << response.str() << endl;
+		r.setOpt(new curlpp::options::Url("http://ip-api.com/json/162.241.253.105"));
+		r.setOpt(new curlpp::options::WriteStream(&response));
+		r.perform();
+
+		cout << response.str() << endl;
+	}
+	catch(curlpp::LogicError& e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	catch(curlpp::RuntimeError& e)
+	{
+		std::cout << e.what() << std::endl;
+	}
 }
