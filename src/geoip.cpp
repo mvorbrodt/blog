@@ -3,30 +3,28 @@
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 using namespace std;
+using namespace boost::property_tree;
 
 int main()
 {
-	try
-	{
-		curlpp::Cleanup clean;
+	curlpp::Cleanup clean;
 
-		curlpp::Easy r;
-		std::ostringstream response;
+	curlpp::Easy request;
+	std::stringstream response;
 
-		r.setOpt(new curlpp::options::Url("http://ip-api.com/json/162.241.253.105"));
-		r.setOpt(new curlpp::options::WriteStream(&response));
-		r.perform();
+	request.setOpt(new curlpp::options::Url("http://ip-api.com/json/vorbrodt.blog"));
+	request.setOpt(new curlpp::options::WriteStream(&response));
+	request.perform();
 
-		cout << response.str() << endl;
-	}
-	catch(curlpp::LogicError& e)
+	ptree data;
+	read_json(response, data);
+
+	for(auto& it : data)
 	{
-		std::cout << e.what() << std::endl;
-	}
-	catch(curlpp::RuntimeError& e)
-	{
-		std::cout << e.what() << std::endl;
+		cout << it.first << " = " << it.second.data() << endl;
 	}
 }
