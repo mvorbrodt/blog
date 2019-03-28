@@ -5,11 +5,9 @@
 #include <curlpp/Options.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include "ascii_escape_code.hpp"
 
 using namespace std;
 using namespace boost::property_tree;
-using namespace ascii_escape_code;
 
 int main()
 {
@@ -34,6 +32,6 @@ int main()
 	}
 	catch(exception& e)
 	{
-		cerr << bold << bright_red << slow_blink << e.what() << reset << endl;
+		cerr << e.what() << endl;
 	}
 }
