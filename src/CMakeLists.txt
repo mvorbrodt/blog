@@ -1,5 +1,7 @@
 add_executable(playground main.cpp)
 
+add_executable(sso sso.cpp)
+
 add_executable(fmt fmt.cpp)
 target_link_libraries(fmt -lfmt)
 

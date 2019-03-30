@@ -32,6 +32,7 @@ int main()
 	fmt::printf("The answer is %.2f\n", 42.f);
 	fmt::fprintf(cout, "The answer is %.2f\n", 42.f);
 	fmt::fprintf(stdout, "The answer is %.2f\n", 42.f);
+
 	auto msg3 = fmt::sprintf("The answer is %.2f\n", 42.f);
 	fmt::printf("%s", msg3);
 
@@ -41,7 +42,7 @@ int main()
 	std::time_t t = std::time(nullptr);
 	fmt::print("The date is {:%Y-%m-%d}.\n", *std::localtime(&t));
 
-	print("{:-<30}\n", "left aligned");
-	print("{:->30}\n", "right aligned");
-	print("{:-^30}\n", "centered");
+	fmt::print("{:-<30}\n", "left aligned");
+	fmt::print("{:->30}\n", "right aligned");
+	fmt::print("{:-^30}\n", "centered");
 }
