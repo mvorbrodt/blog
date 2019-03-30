@@ -1,39 +1,47 @@
+#include <iostream>
 #include <string>
+#include <cstdlib>
 #include <fmt/core.h>
+#include <fmt/format.h>
 #include <fmt/time.h>
 #include <fmt/color.h>
+#include <fmt/printf.h>
 
 using namespace std;
 using namespace fmt;
 
 int main()
 {
-	auto msg = fmt::format("The answer is {}.", 42);
-	fmt::print("{}\n", msg);
+	auto msg1 = fmt::format("The answer is {}", 42);
+	auto msg2 = "{0}{1}"_format("The answer is ", 42);
+
+	fmt::print("{}\n", msg1);
+	fmt::print("{}\n", msg2);
 
 	fmt::memory_buffer out;
-	format_to(out, "For a moment, {} happened.", "nothing");
+	format_to(out, "The answer is {0}", "42");
 	fmt::print("{}\n", out.data());
+	fmt::print(cout, "{}\n", out.data());
+	fmt::print(stdout, "{}\n", out.data());
 
-	fmt::print(stderr, "Don't {}\n", "panic");
+	fmt::print("{1} {0}\n", 42, "The answer is");
 
-	fmt::print("I'd rather be {1} than {0}.\n", "right", "happy");
+	fmt::print("{first} {second}\n", fmt::arg("first", "The answer is"), fmt::arg("second", 42));
+	fmt::print("{second} {first}\n", "second"_a="The answer is", "first"_a=42);
 
-	fmt::print("Hello, {name}! The answer is {number}.\n", fmt::arg("name", "Martin"), fmt::arg("number", 42));
-	fmt::print("Hello, {name}! The answer is {number}.\n", "name"_a="Martin", "number"_a=42);
+	fmt::printf("The answer is %.2f\n", 42.f);
+	fmt::fprintf(cout, "The answer is %.2f\n", 42.f);
+	fmt::fprintf(stdout, "The answer is %.2f\n", 42.f);
+	auto msg3 = fmt::sprintf("The answer is %.2f\n", 42.f);
+	fmt::printf("%s", msg3);
 
-	msg = "{0}{1}{0}"_format("abra", "cad");
-	fmt::print("{}\n", msg);
-
-	try
-	{
-		fmt::format("The answer is {:d}", "forty-two");
-	}
-	catch(fmt::format_error& e)
-	{
-		fmt::print("{}\n", e.what());
-	}
+	fmt::print(fmt::emphasis::bold, "The text is bold\n");
+	fmt::print(fmt::fg(fmt::color::red) | fmt::bg(fmt::color::green), "The color is red and green\n");
 
 	std::time_t t = std::time(nullptr);
-	fmt::print(fmt::fg(color::red) | fmt::bg(fmt::color::green), "The date is {:%Y-%m-%d}.\n", *std::localtime(&t));
+	fmt::print("The date is {:%Y-%m-%d}.\n", *std::localtime(&t));
+
+	print("{:-<30}\n", "left aligned");
+	print("{:->30}\n", "right aligned");
+	print("{:-^30}\n", "centered");
 }
