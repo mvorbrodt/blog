@@ -1,5 +1,8 @@
 add_executable(playground main.cpp)
 
+add_executable(fmt fmt.cpp)
+target_link_libraries(fmt -lfmt)
+
 add_executable(geoip geoip.cpp)
 target_link_libraries(geoip ${CURL_LIBRARY} ${CURLPP_LIBRARY})
 
