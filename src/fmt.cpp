@@ -41,7 +41,7 @@ int main()
 	fmt::print(fmt::fg(fmt::color::red) | fmt::bg(fmt::color::green), "The color is red and green\n");
 
 	std::time_t t = std::time(nullptr);
-	fmt::print("The date is {:%Y-%m-%d}.\n", *std::localtime(&t));
+	fmt::print("The date and time is {:%Y-%m-%d %H:%M:%S}\n", *std::localtime(&t));
 
 	fmt::print("{:-<30}\n", "left aligned");
 	fmt::print("{:->30}\n", "right aligned");
