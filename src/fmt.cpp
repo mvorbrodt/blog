@@ -20,11 +20,12 @@ int main()
 
 	fmt::memory_buffer out;
 	format_to(out, "The answer is {0}", "42");
-	fmt::print("{}\n", out.data());
-	fmt::print(cout, "{}\n", out.data());
-	fmt::print(stdout, "{}\n", out.data());
+	auto msg3 = string(out.begin(), out.end());
+	fmt::print("{}\n", msg3);
 
 	fmt::print("{1} {0}\n", 42, "The answer is");
+	fmt::print(cout, "{1} {0}\n", 42, "The answer is");
+	fmt::print(stdout, "{1} {0}\n", 42, "The answer is");
 
 	fmt::print("{first} {second}\n", fmt::arg("first", "The answer is"), fmt::arg("second", 42));
 	fmt::print("{second} {first}\n", "second"_a="The answer is", "first"_a=42);
@@ -33,8 +34,8 @@ int main()
 	fmt::fprintf(cout, "The answer is %.2f\n", 42.f);
 	fmt::fprintf(stdout, "The answer is %.2f\n", 42.f);
 
-	auto msg3 = fmt::sprintf("The answer is %.2f\n", 42.f);
-	fmt::printf("%s", msg3);
+	auto msg4 = fmt::sprintf("The answer is %.2f\n", 42.f);
+	fmt::printf("%s", msg4);
 
 	fmt::print(fmt::emphasis::bold, "The text is bold\n");
 	fmt::print(fmt::fg(fmt::color::red) | fmt::bg(fmt::color::green), "The color is red and green\n");
