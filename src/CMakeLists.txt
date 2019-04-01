@@ -1,8 +1,6 @@
-add_executable(playground main.cpp)
-
 add_executable(crypto crypto.cpp)
 target_include_directories(crypto PUBLIC "/usr/local/include/botan-2/")
-target_link_libraries(crypto ${CRYPTOPP_LIBRARIES} ${WOLFSSL_LIBRARY} -lbotan-2)
+target_link_libraries(crypto ${CRYPTOPP_LIBRARIES} ${WOLFSSL_LIBRARY} ${BOTAN_LINK_LIBRARIES})
 
 add_executable(sso sso.cpp)
 
@@ -53,7 +51,7 @@ target_link_libraries(benchmark-hayai ${HAYAI_LIBRARIES})
 add_executable(benchmark-catch benchmark-catch.cpp)
 
 add_executable(benchmark-google benchmark-google.cpp)
-target_link_libraries(benchmark-google -lbenchmark)
+target_link_libraries(benchmark-google ${benchmark_LIBRARY})
 
 add_executable(cpu_timer cpu_timer.cpp)
 target_link_libraries(cpu_timer ${Boost_TIMER_LIBRARY})
