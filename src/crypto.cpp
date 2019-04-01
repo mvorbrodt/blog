@@ -17,8 +17,8 @@ string Hash_CryptoPP(const string& msg)
 	std::string digest(hash.DigestSize(), '*');
 	stringstream output;
 
-	hash.Update((const CryptoPP::byte*)msg.data(), msg.size());
-	hash.Final((CryptoPP::byte*)&digest[0]);
+	hash.Update((const unsigned char*)msg.data(), msg.size());
+	hash.Final((unsigned char*)&digest[0]);
 
 	CryptoPP::HexEncoder encoder(new CryptoPP::FileSink(output));
 	CryptoPP::StringSource(digest, true, new CryptoPP::Redirector(encoder));
