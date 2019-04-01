@@ -50,8 +50,8 @@ set(LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
 
 add_subdirectory(src)
 
- get_cmake_property(_variableNames VARIABLES)
- list (SORT _variableNames)
- foreach (_variableName ${_variableNames})
-     message(STATUS "${_variableName}=${${_variableName}}")
- endforeach()
+# get_cmake_property(_variableNames VARIABLES)
+# list (SORT _variableNames)
+# foreach (_variableName ${_variableNames})
+#     message(STATUS "${_variableName}=${${_variableName}}")
+# endforeach()
