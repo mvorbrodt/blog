@@ -37,6 +37,7 @@ find_package(CURLpp REQUIRED)
 find_package(FMT REQUIRED)
 find_package(cryptopp REQUIRED)
 find_package(wolfssl REQUIRED)
+find_package(botan REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++17")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
