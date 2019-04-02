@@ -1,3 +1,5 @@
+add_executable(try_block try_block.cpp)
+
 add_executable(crypto crypto.cpp)
 target_include_directories(crypto PUBLIC "${BOTAN_INCLUDE_DIRS}")
 target_link_libraries(crypto ${CRYPTOPP_LIBRARIES} ${WOLFSSL_LIBRARY} ${BOTAN_LIBRARIES})
