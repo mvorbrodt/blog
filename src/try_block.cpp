@@ -23,8 +23,31 @@ struct Q
 	P m_P;
 };
 
+void eat_it()
+{
+	try
+	{
+		throw runtime_error("System error from eat_it()");
+	}
+	catch(exception& e)
+	{
+		cout << "Swallowing: " << e.what() << endl;
+	}
+}
+
+void eat_it_sugar() try
+{
+	throw runtime_error("System error from eat_it_sugar()");
+}
+catch(exception& e)
+{
+	cout << "Swallowing: " << e.what() << endl;
+}
+
 int main() try
 {
+	eat_it();
+	eat_it_sugar();
 	Q q;
 }
 catch(exception& e)
