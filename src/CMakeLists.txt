@@ -1,5 +1,5 @@
+add_executable(attributes attributes.cpp)
 add_executable(bad_pointer bad_pointer.cpp)
-
 add_executable(try_block try_block.cpp)
 
 add_executable(crypto crypto.cpp)
@@ -15,7 +15,6 @@ add_executable(geoip geoip.cpp)
 target_link_libraries(geoip ${CURL_LIBRARY} ${CURLPP_LIBRARY})
 
 add_executable(c_api_lambda c_api_lambda.cpp)
-
 add_executable(exceptions exceptions.cpp)
 
 add_executable(xmlrpc_c xmlrpc_c.cpp)
