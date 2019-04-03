@@ -1,3 +1,5 @@
+add_executable(bad_pointer bad_pointer.cpp)
+
 add_executable(try_block try_block.cpp)
 
 add_executable(crypto crypto.cpp)
