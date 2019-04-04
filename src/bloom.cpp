@@ -11,12 +11,12 @@ int main()
 
 	bloom_filter<string> bloom(128);
 
-	for(auto& _ : set1)
-		bloom.add(_);
+	for(auto& s : set1)
+		bloom.add(s);
 
-	for(auto& _ : set1)
-		cout << "Contains \"" << _ << "\" : " << bloom.contains(_) << endl;
+	for(auto& s : set1)
+		cout << "Contains \"" << s << "\" : " << bloom.contains(s) << endl;
 
-	for(auto& _ : set2)
-		cout << "Contains \"" << _ << "\" : " << bloom.contains(_) << endl;
+	for(auto& s : set2)
+		cout << "Contains \"" << s << "\" : " << bloom.contains(s) << endl;
 }
