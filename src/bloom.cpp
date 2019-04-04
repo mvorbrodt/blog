@@ -9,7 +9,7 @@ int main()
 	string set1[] = {"Martin", "Vorbrodt", "C++", "Blog"};
 	string set2[] = {"Not", "In", "The", "Set"};
 
-	BloomFilter<string> bloom(128);
+	bloom_filter<string> bloom(128);
 
 	for(auto& _ : set1)
 		bloom.add(_);
