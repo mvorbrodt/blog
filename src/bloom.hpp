@@ -15,7 +15,7 @@ public:
 		m_bits[bits % m_bits.size()] = true;
 	}
 
-	bool contains(const std::string& data)
+	bool contains(const key& data)
 	{
 		auto bits = hash{}(data);
 		return m_bits[bits % m_bits.size()];
