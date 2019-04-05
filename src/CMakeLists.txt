@@ -1,3 +1,4 @@
+add_executable(file_io file_io.cpp)
 add_executable(bloom bloom.cpp)
 add_executable(attributes attributes.cpp)
 add_executable(bad_pointer bad_pointer.cpp)
