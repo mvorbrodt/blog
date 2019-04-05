@@ -10,7 +10,11 @@ template<typename Key, typename Hash = std::hash<Key>>
 class basic_bloom_filter
 {
 public:
-	basic_bloom_filter(std::size_t size) : m_bits(size) {}
+	basic_bloom_filter(std::size_t size)
+	: m_bits(size)
+	{
+		assert(size > 0);
+	}
 
 	void add(const Key& key)
 	{
