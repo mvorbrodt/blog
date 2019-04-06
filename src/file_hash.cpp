@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 		using Buffer = vector<char>;
 		Buffer buffer(READ_SIZE);
 
-		auto hash_sha1 = Botan::HashFunction::create_or_throw("SHA-1");
+		auto sha1 = Botan::HashFunction::create_or_throw("SHA-1");
 
 		ifstream ifs;
 
@@ -39,14 +39,14 @@ int main(int argc, char** argv)
 			buffer.resize(bytes_to_read);
 			ifs.read(buffer.data(), buffer.size());
 
-			hash_sha1->update((uint8_t*)buffer.data(), buffer.size());
+			sha1->update((uint8_t*)buffer.data(), buffer.size());
 
 			bytes_left -= bytes_to_read;
 		}
 
 		ifs.close();
 
-		cout << Botan::hex_encode(hash_sha1->final()) << " " << argv[1] << endl;
+		cout << Botan::hex_encode(sha1->final()) << " " << argv[1] << endl;
 	}
 	catch(exception& e)
 	{
