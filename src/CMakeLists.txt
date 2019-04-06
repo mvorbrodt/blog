@@ -1,3 +1,5 @@
+add_executable(alignas alignas.cpp)
+
 add_executable(file_hash file_hash.cpp)
 target_include_directories(file_hash PUBLIC "${BOTAN_INCLUDE_DIRS}")
 target_link_libraries(file_hash ${BOTAN_LIBRARIES})
