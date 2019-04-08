@@ -37,10 +37,10 @@ struct S
 		delete m_resource;
 	}
 
-void swap(S& s) noexcept
-{
-	std::swap(m_resource, s.m_resource);
-}
+	void swap(S& s) noexcept
+	{
+		std::swap(m_resource, s.m_resource);
+	}
 
 	int* m_resource;
 };
