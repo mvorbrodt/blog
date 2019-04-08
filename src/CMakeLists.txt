@@ -1,3 +1,4 @@
+add_executable(assignment assignment.cpp)
 add_executable(hash hash.cpp)
 add_executable(alignas alignas.cpp)
 
