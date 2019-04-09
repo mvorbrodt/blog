@@ -1,3 +1,4 @@
+add_executable(multi_hash multi_hash.cpp)
 add_executable(pragma pragma.cpp)
 add_executable(assignment assignment.cpp)
 add_executable(hash hash.cpp)
