@@ -1,5 +1,5 @@
 add_executable(opengl opengl.cpp)
-target_link_libraries(opengl ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${GLUT_glut_LIBRARY} -lglfw -lglad -ldl)
+target_link_libraries(opengl ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${GLUT_glut_LIBRARY} ${GLEW_LIBRARY})
 
 add_executable(multi_hash multi_hash.cpp)
 add_executable(pragma pragma.cpp)
