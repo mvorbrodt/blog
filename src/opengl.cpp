@@ -33,11 +33,10 @@ void draw()
 	glLoadIdentity();
 	glTranslatef(0.0, 0.0, -3.0);
 	glRotatef(30, 1.0, 0.0, 0.0);
-	glRotatef(rotation, 0.0, 1.0, 0.0);
+	glRotatef(++rotation, 0.0, 1.0, 0.0);
 	glColor3f(0.0, 0.0, 0.0);
 	glutWireTeapot(1.0);
 	glutSwapBuffers();
-	rotation += 0.5;
 }
 int main(int argc, char** argv)
 {
