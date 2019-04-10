@@ -1,13 +1,18 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 
 using namespace std;
 
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
+
 	if (!glfwInit())
 		return -1;
 
