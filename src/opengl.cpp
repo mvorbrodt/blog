@@ -5,8 +5,6 @@
 #include <GL/glut.h>
 #endif
 
-using namespace std;
-
 void init()
 {
 	glewExperimental=true;
