@@ -27,12 +27,14 @@ void reshape(int w, int h)
 void draw()
 {
 	static float rotation{};
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(0.5, 0.5, 0.5, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0.0, 0.0, -3.0);
+	glRotatef(30, 1.0, 0.0, 0.0);
 	glRotatef(rotation, 0.0, 1.0, 0.0);
+	glColor3f(0.0, 0.0, 0.0);
 	glutWireTeapot(1.0);
 	glutSwapBuffers();
 	rotation += 0.5;
