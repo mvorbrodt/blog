@@ -1,12 +1,13 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <GLUT/glut.h>
+#include <GL/glut.h>
 
 using namespace std;
 
-int main()
+int main(int argc, char** argv)
 {
+	glutInit(&argc, argv);
 	if (!glfwInit())
 		return -1;
 
