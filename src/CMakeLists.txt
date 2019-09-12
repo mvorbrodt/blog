@@ -1,7 +1,3 @@
-add_executable(opengl opengl.cpp)
-set_source_files_properties(opengl.cpp PROPERTIES COMPILE_FLAGS -DGL_SILENCE_DEPRECATION)
-target_link_libraries(opengl ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${GLUT_glut_LIBRARY} ${GLEW_LIBRARY})
-
 add_executable(multi_hash multi_hash.cpp)
 add_executable(pragma pragma.cpp)
 add_executable(assignment assignment.cpp)
