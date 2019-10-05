@@ -15,7 +15,8 @@ class simple_blocking_queue
 {
 public:
 	template<typename Q = T>
-	typename std::enable_if<std::is_copy_constructible<Q>::value, void>::type
+	typename std::enable_if<
+		std::is_copy_constructible<Q>::value, void>::type
 	push(const T& item)
 	{
 		{
@@ -26,7 +27,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_move_constructible<Q>::value, void>::type
+	typename std::enable_if<
+		std::is_move_constructible<Q>::value, void>::type
 	push(T&& item)
 	{
 		{
@@ -37,7 +39,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_copy_constructible<Q>::value, bool>::type
+	typename std::enable_if<
+		std::is_copy_constructible<Q>::value, bool>::type
 	try_push(const T& item)
 	{
 		{
@@ -50,7 +53,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_move_constructible<Q>::value, bool>::type
+	typename std::enable_if<
+		std::is_move_constructible<Q>::value, bool>::type
 	try_push(T&& item)
 	{
 		{
@@ -63,7 +67,9 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_copy_assignable<Q>::value and not std::is_move_assignable<Q>::value, bool>::type
+	typename std::enable_if<
+		std::is_copy_assignable<Q>::value and not
+		std::is_move_assignable<Q>::value, bool>::type
 	pop(T& item)
 	{
 		std::unique_lock lock(m_mutex);
@@ -75,7 +81,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_move_assignable<Q>::value, bool>::type
+	typename std::enable_if<
+		std::is_move_assignable<Q>::value, bool>::type
 	pop(T& item)
 	{
 		std::unique_lock lock(m_mutex);
@@ -87,7 +94,9 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_copy_assignable<Q>::value and not std::is_move_assignable<Q>::value, bool>::type
+	typename std::enable_if<
+		std::is_copy_assignable<Q>::value and not
+		std::is_move_assignable<Q>::value, bool>::type
 	try_pop(T& item)
 	{
 		std::unique_lock lock(m_mutex, std::try_to_lock);
@@ -98,7 +107,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_move_assignable<Q>::value, bool>::type
+	typename std::enable_if<
+		std::is_move_assignable<Q>::value, bool>::type
 	try_pop(T& item)
 	{
 		std::unique_lock lock(m_mutex, std::try_to_lock);
@@ -135,10 +145,6 @@ private:
 	std::condition_variable m_ready;
 	bool m_done = false;
 };
-
-
-
-
 
 template<typename T>
 class blocking_queue
@@ -541,10 +547,6 @@ private:
 	std::mutex m_cs;
 };
 
-
-
-
-
 template<typename T>
 class atomic_blocking_queue
 {
@@ -568,7 +570,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_nothrow_copy_constructible<Q>::value, void>::type
+	typename std::enable_if<
+		std::is_nothrow_copy_constructible<Q>::value, void>::type
 	push(const T& item) noexcept
 	{
 		m_openSlots.wait();
@@ -585,7 +588,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_nothrow_move_constructible<Q>::value, void>::type
+	typename std::enable_if<
+		std::is_nothrow_move_constructible<Q>::value, void>::type
 	push(T&& item) noexcept
 	{
 		m_openSlots.wait();
@@ -602,7 +606,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_nothrow_copy_constructible<Q>::value, bool>::type
+	typename std::enable_if<
+		std::is_nothrow_copy_constructible<Q>::value, bool>::type
 	try_push(const T& item) noexcept
 	{
 		auto result = m_openSlots.wait_for(std::chrono::seconds(0));
@@ -621,7 +626,8 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_nothrow_move_constructible<Q>::value, bool>::type
+	typename std::enable_if<
+		std::is_nothrow_move_constructible<Q>::value, bool>::type
 	try_push(T&& item) noexcept
 	{
 		auto result = m_openSlots.wait_for(std::chrono::seconds(0));

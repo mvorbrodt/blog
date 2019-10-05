@@ -68,10 +68,6 @@ private:
 	Threads m_threads;
 };
 
-
-
-
-
 class thread_pool
 {
 public:
