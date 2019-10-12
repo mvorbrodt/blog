@@ -16,7 +16,7 @@ void DO_SOME_WORK(const char* msg)
 		lock_guard guard(cout_lock);
 		cout << msg << " @ " << ctime(&t);
 	}
-	this_thread::sleep_for(milliseconds(rand() % 1));
+	this_thread::sleep_for(milliseconds(rand() % 10));
 }
 
 void BAD()
