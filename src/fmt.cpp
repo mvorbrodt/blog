@@ -3,8 +3,12 @@
 #include <cstdlib>
 #include <fmt/core.h>
 #include <fmt/format.h>
-#include <fmt/time.h>
 #include <fmt/color.h>
+#include <fmt/chrono.h>
+#include <fmt/compile.h>
+#include <fmt/locale.h>
+#include <fmt/ostream.h>
+#include <fmt/posix.h>
 #include <fmt/printf.h>
 
 using namespace std;
