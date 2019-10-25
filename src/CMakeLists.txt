@@ -1,3 +1,4 @@
+add_executable(unique unique.cpp)
 add_executable(deadlock deadlock.cpp)
 add_executable(multi_hash multi_hash.cpp)
 add_executable(pragma pragma.cpp)

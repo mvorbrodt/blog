@@ -1,38 +1,68 @@
 #pragma once
 
 #include <iostream>
-#include <string>
 
 struct T
 {
-	T() noexcept : m_i(0) { std::cout << "T()" << std::endl; }
-	explicit T(int i) noexcept : m_i(i) { std::cout << "T(" << m_i << ")" << std::endl; }
-	explicit T(const std::string& s) noexcept : m_i(0) { std::cout << "T(\"" << s << "\")" << std::endl; }
-	T(const T& t) noexcept : m_i(t.m_i) { std::cout << "T(const T&)" << std::endl; }
-	T(T&& t) noexcept : m_i(t.m_i) { std::cout << "T(&&)" << std::endl; }
-	T& operator = (const T& rhs) noexcept { std::cout << "operator = (const T&)" << std::endl; m_i = rhs.m_i; return *this; }
-	T& operator = (T&& rhs) noexcept { std::cout << "operator = (T&&)" << std::endl; m_i = rhs.m_i; return *this; }
-	~T() noexcept { std::cout << "~T()" << std::endl; }
+	T() : instance_number(instance_counter++)
+	{ std::cout << "T" << get_instance_number() << "::T()" << std::endl; }
 
-	operator int () const { std::cout << "T::operator int ()" << std::endl; return m_i; }
+	T(int x) : instance_number(instance_counter++)
+	{ std::cout << "T" << get_instance_number() << "::T(int x = " << x << ")" << std::endl; }
+
+	T(const T& t) : instance_number(instance_counter++)
+	{ std::cout << "T" << get_instance_number() << "::T(const T" << t.get_instance_number() << " &)" << std::endl; }
+
+	T(T&& t) : instance_number(instance_counter++)
+	{ std::cout << "T" << get_instance_number() << "::(T" << t.get_instance_number() << " &&)" << std::endl; }
+
+	T& operator = (const T& rhs)
+	{ std::cout << "T" << get_instance_number() << "::operator = (const T" << rhs.get_instance_number() << " &)" << std::endl; return *this; }
+
+	T& operator = (T&& rhs)
+	{ std::cout << "T" << get_instance_number() << "::operator = (T" << rhs.get_instance_number() << " &&)" << std::endl; return *this; }
+
+	virtual ~T()
+	{ std::cout << "T" << get_instance_number() << "::~T()" << std::endl; }
+
+	virtual void foo() const
+	{ std::cout << "T" << get_instance_number() << "::foo()" << std::endl; }
+
+protected:
+	int get_instance_number() const
+	{ return instance_number; }
 
 private:
-	int m_i;
+	inline static int instance_counter = 1;
+	const int instance_number = 0;
 };
 
-struct Q
+struct Q : public T
 {
-	Q() noexcept : m_i(0) {}
-	explicit Q(int i) noexcept : m_i(i) {}
-	explicit Q(const std::string& s) noexcept : m_i(0) {}
-	Q(const Q& q) noexcept : m_i(q.m_i) {}
-	Q(Q&& q) noexcept : m_i(q.m_i) {}
-	Q& operator = (const Q& rhs) noexcept { m_i = rhs.m_i; return *this; }
-	Q& operator = (Q&& rhs) noexcept { m_i = rhs.m_i; return *this; }
-	~Q() noexcept { }
-	
-	operator int () const { return m_i; }
-	
-private:
-	int m_i;
+	Q() : T()
+	{ std::cout << "Q" << get_instance_number() << "::Q()" << std::endl; }
+
+	Q(int x) : T(x)
+	{ std::cout << "Q" << get_instance_number() << "::Q(int x = " << x << ")" << std::endl; }
+
+	Q(const Q& q) : T(q)
+	{ std::cout << "Q" << get_instance_number() << "::Q(const Q" << q.get_instance_number() << " &)" << std::endl; }
+
+	Q(Q&& q) : T(q)
+	{ std::cout << "Q" << get_instance_number() << "::Q(Q" << q.get_instance_number() << " &&)" << std::endl; }
+
+	Q& operator = (const Q& rhs)
+	{ std::cout << "Q" << get_instance_number() << "::operator = (const Q" << rhs.get_instance_number() << " &)" << std::endl; return *this; }
+
+	Q& operator = (Q&& rhs)
+	{ std::cout << "Q" << get_instance_number() << "::operator = (Q" << rhs.get_instance_number() << " &&)" << std::endl; return *this; }
+
+	~Q()
+	{ std::cout << "Q" << get_instance_number() << "::~Q()" << std::endl; }
+
+	virtual void foo() const final override
+	{ std::cout << "Q" << get_instance_number() << "::foo()" << std::endl; }
+
+	void bar() const
+	{ std::cout << "Q" << get_instance_number() << "::bar()" << std::endl; }
 };
