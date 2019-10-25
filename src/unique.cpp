@@ -37,6 +37,7 @@ int main()
 
 	auto t2 = source();
 	NOT_sink(t2);   // "t2" still pointing to resource after this call
+	assert(t2);
 	sink(move(t2)); // and now it's gone...
 	assert(!t2);
 
@@ -45,7 +46,7 @@ int main()
 
 	auto t3 = source();
 	auto t4 = pass_thru(move(t3)); // Effectively moves the ownership from "t3" to "t4"
-	assert(!t3);
+	assert(!t3 && t4);
 
 	pass_thru(source()); // Takes ownership, but deletes the resource since nobody captures the return value
 
@@ -53,11 +54,7 @@ int main()
 	T_s_ptr t6 = move(t4); // unique_ptr's must be explicitly std::move'ed to shared_ptr's
 	assert(!t4);
 
-	auto t7 = source();    // Create another unique'ly owned resource
-	T_s_ptr t8 = move(t7); // and transfer it (explicitly!) to shared ownership
-	assert(!t7);
-
-	shared(t8); // No transfer of ownership, just using a shared resource here...
+	shared(t6); // No transfer of ownership, just using a shared resource here...
 
 	// PRIMITIVE ARRAYS...
 
