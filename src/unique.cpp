@@ -52,7 +52,7 @@ int main()
 
 	T_s_ptr t5 = source(); // Create and "upgrade" from unique to shared ownership
 	T_s_ptr t6 = move(t4); // unique_ptr's must be explicitly std::move'ed to shared_ptr's
-	assert(!t4);
+	assert(!t4 && t5 && t6);
 
 	shared(t6); // No transfer of ownership, just using a shared resource here...
 
@@ -63,7 +63,7 @@ int main()
 	auto a1 = make_unique<int[]>(N);   // Allocates N int's, size of array is lost, values are undefined
 	auto a2 = vector<int>(N, int{42}); // Allocates and value-initializes N int's, size is known, values are well defined
 	auto a3 = move(a1);                // Transfer ownership of from "a1" to "a3"
-	assert(!a1);
+	assert(!a1 && a3);
 
 	a3[N - 1] = 1; // Access the last int of the array
 
@@ -72,7 +72,7 @@ int main()
 	auto a4 = make_unique<T[]>(N); // Create an array of N T's, size is lost, T must have a default constructor
 	auto a5 = vector<T>(N, T{42}); // Create a vector of N T's, size is known, initialize with custom T
 	auto a6 = move(a4);            // Transfer ownership from "a4" to "a6"
-	assert(!a4);
+	assert(!a4 && a6);
 
 	a6[N - 1].foo(); // Access the last T of the array
 }
