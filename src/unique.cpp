@@ -13,18 +13,18 @@ using namespace std;
 using T_u_ptr = unique_ptr<T>;
 using T_s_ptr = shared_ptr<T>;
 
-// Create and giving away explicit ownership...
+// Creates and gives away explicit ownership...
 T_u_ptr source() { return make_unique<T>(); }
 
-// Assume explicit ownership, "t" gets deallocated at the end of this function
+// Assumes explicit ownership, "t" gets deallocated at the end of this function
 void sink(T_u_ptr t) { t->foo(); }
 
-// NOT assuming explicit ownership because we're taking by reference
+// Does NOT assume explicit ownership because we're taking by reference
 void NOT_sink(T_u_ptr& t) { t->foo(); }
 
 // Assumes ownership, but then hands it back... if the caller captures the return value,
 // otherwise releases the resource
-T_u_ptr pass_thru(T_u_ptr t) { t->foo(); return t; }
+T_u_ptr sink_or_pass_thru(T_u_ptr t) { t->foo(); return t; }
 
 // Just a function that takes a shared_ptr...
 void shared(T_s_ptr t) { t->foo(); }
@@ -33,25 +33,25 @@ int main()
 {
 	auto t1 = source();
 	sink(move(t1)); // We have to std::move it, because copy-constructor of unique_ptr = delete,
-	                // by using std::move we're forcing the use of the move constructor,
-	                // this would have worked without std::move if using std::auto_ptr and
-	                // it would have stole the ownership without warning us!!!
+	                // by using std::move we're forcing the use of the move constructor (if one exists),
+	                // this would have worked without std::move if using std::auto_ptr (now deprecate4d)
+	                // and it would have stole the ownership without warning us!!!
 	assert(!t1);    // "t1" is now pointing to null because of the std::move above
 
 	auto t2 = source();
 	NOT_sink(t2);   // "t2" still pointing to resource after this call
 	assert(t2);
-	sink(move(t2)); // and now it's gone...
+	sink(move(t2)); // and now "t2" is gone...
 	assert(!t2);
 
 	sink(source()); // No need for explicit std::move, temporary is captured as r-value reference
-	                // so the unique_ptr's move constructor is invoked
+	                // so the unique_ptr's move constructor is automatically invoked
 
 	auto t3 = source();
-	auto t4 = pass_thru(move(t3)); // Effectively moves the ownership from "t3" to "t4"
+	auto t4 = sink_or_pass_thru(move(t3)); // Effectively moves the ownership from "t3" to "t4"
 	assert(!t3 && t4);
 
-	pass_thru(source()); // Takes ownership, but deletes the resource since nobody captures the return value
+	sink_or_pass_thru(source()); // Takes ownership, but deletes the resource since nobody captures the return value
 
 	T_s_ptr t5 = source(); // Create and "upgrade" from unique to shared ownership
 	T_s_ptr t6 = move(t4); // unique_ptr's must be explicitly std::move'ed to shared_ptr's
