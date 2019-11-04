@@ -3,38 +3,23 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <exception>
+#include <algorithm>
+#include <iterator>
 
 using namespace std;
 
-struct M
-{
-	M(const char* s) : m_s(s) { cout << "M::M(m_s = '" << m_s << "')" << endl; }
-	~M() { cout << "M::~M(m_s = '" << m_s << "')" << endl; }
-
-	string m_s;
-};
-
-struct S
-{
-	S() : S(2019) { cout << "S::S() throws..." << endl; throw runtime_error("BOOM!"); }
-	S(int i) : S("C++") { cout << "S::S(int i = '" << i << "')" << endl; }
-	S(const char* s) : m_pM(make_unique<M>("by pointer")), m_vM("by value")
-		{ cout << "S::S(const char* s = '" << s << "')" << endl; }
-	~S() { cout << "S::~S() cleans up..." << endl; }
-
-	M m_vM;
-	unique_ptr<M> m_pM = nullptr;
-};
-
 int main()
 {
-	try
-	{
-		S s;
-	}
-	catch(exception& e)
-	{
-		cout << e.what() << endl;
-	}
+	using XnXs = pair<int, int>;
+	using Xs = vector<XnXs>;
+	using XsPush = back_insert_iterator<Xs>;
+
+	int N = 10, S = 1;
+	Xs ints;
+
+	generate_n(XsPush(ints), N, [n = S]() mutable
+		{ auto p = make_pair(n, n * n); ++n; return p; });
+
+	for_each(begin(ints), end(ints), [](auto& p)
+		{ cout << p.first << ", " << p.second << endl; });
 }
