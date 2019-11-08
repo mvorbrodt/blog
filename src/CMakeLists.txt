@@ -22,8 +22,8 @@ target_link_libraries(crypto ${CRYPTOPP_LIBRARIES} ${WOLFSSL_LIBRARY} ${BOTAN_LI
 
 add_executable(sso sso.cpp)
 
-add_executable(fmt fmt.cpp)
-target_link_libraries(fmt -lfmt)
+# add_executable(fmt fmt.cpp)
+# target_link_libraries(fmt -lfmt)
 
 add_executable(geoip geoip.cpp)
 target_link_libraries(geoip ${CURL_LIBRARY} ${CURLPP_LIBRARY})
