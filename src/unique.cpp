@@ -1,11 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
-#ifdef NDEBUG
-#undef NDEBUG
 #include <cassert>
-#define NDEBUG
-#endif
 #include "T.hpp"
 
 using namespace std;
