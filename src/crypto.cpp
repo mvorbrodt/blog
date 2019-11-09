@@ -5,9 +5,9 @@
 #include <cryptopp/sha.h>
 #include <cryptopp/hex.h>
 #include <cryptopp/files.h>
+#include <botan/hash.h>
+#include <botan/hex.h>
 #include <wolfssl/wolfcrypt/sha.h>
-#include <botan-2/botan/hash.h>
-#include <botan-2/botan/hex.h>
 
 using namespace std;
 

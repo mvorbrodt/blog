@@ -2,8 +2,8 @@
 #include <fstream>
 #include <ios>
 #include <vector>
-#include <botan-2/botan/hash.h>
-#include <botan-2/botan/hex.h>
+#include <botan/hash.h>
+#include <botan/hex.h>
 
 using namespace std;
 

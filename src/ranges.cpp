@@ -4,8 +4,8 @@
 #include <range/v3/view.hpp>
 
 using namespace std;
-namespace r = ranges;
-namespace rv = ranges::views;
+namespace r = ::ranges;
+namespace rv = ::ranges::views;
 
 int main(int argc, char** argv)
 {

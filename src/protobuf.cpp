@@ -4,7 +4,7 @@
 
 using namespace std;
 
-int main(int argc, char** argv)
+int main()
 {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
@@ -25,5 +25,4 @@ int main(int argc, char** argv)
 	cout << "EMail = " << p2.email() << endl;
 	
 	google::protobuf::ShutdownProtobufLibrary();
-	return 1;
 }

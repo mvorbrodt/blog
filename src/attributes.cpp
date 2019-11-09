@@ -34,7 +34,7 @@ struct [[deprecated("Use Q instead")]] P {};
 int main()
 {
 	[[maybe_unused]] int unused = 1;
-	P p;
+	[[maybe_unused]] P p;
 
 	no_discard(0);
 	no_discard_struct();

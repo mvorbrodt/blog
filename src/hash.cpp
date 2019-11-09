@@ -34,7 +34,7 @@ int main()
 	for(char c = 'A'; c <= 'C'; ++c)
 		cout << "Hash of '" << c << "': " << hash<char>{}(c) << endl;
 
-	for(float f = 1.1; f < 1.4; f += 0.1)
+	for(float f = 1.1f; f < 1.4f; f += 0.1f)
 		cout << "Hash of '" << f << "': " << hash<float>{}(f) << endl;
 
 	char* p = new char[3];

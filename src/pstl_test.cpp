@@ -1,4 +1,5 @@
 #define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 #include <vector>
 #include <random>
@@ -19,15 +20,15 @@ TEST_CASE("STL vs PSTL", "[benchmark]")
 
 	BENCHMARK("STL")
 	{
-		generate(begin(data), end(data), mt19937{seed});
+		generate(begin(data), end(data), mt19937{ seed });
 		sort(begin(data), end(data));
 		is_sorted(begin(data), end(data));
-	}
+	};
 
 	BENCHMARK("PSTL")
 	{
-		generate(pstl::execution::par_unseq, begin(data), end(data), mt19937{seed});
+		generate(pstl::execution::par_unseq, begin(data), end(data), mt19937{ seed });
 		sort(pstl::execution::par_unseq, begin(data), end(data));
 		is_sorted(pstl::execution::par_unseq, begin(data), end(data));
-	}
+	};
 }

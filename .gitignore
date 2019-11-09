@@ -4,6 +4,10 @@ CMakeCache.txt
 CMakeFiles/
 Makefile
 cmake_install.cmake
+*.sln
+*.vcxproj
+*.filters
+*.user
 src/CMakeFiles/
 src/Makefile
 src/cmake_install.cmake
@@ -20,4 +24,8 @@ src/thrift_service_constants.cpp
 src/thrift_service_constants.h
 src/thrift_service_types.cpp
 src/thrift_service_types.h
+src/*.vcxproj
+src/*.filters
+src/*.dir
 bin/
+x64/

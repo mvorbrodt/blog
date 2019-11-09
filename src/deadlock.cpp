@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <mutex>
 #include <thread>
@@ -91,7 +92,7 @@ void GOOD()
 
 int main()
 {
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 	//BAD();
 	GOOD();
 }

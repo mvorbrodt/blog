@@ -72,7 +72,7 @@ struct Persons
 	}
 };
 
-int main(int argc, char** argv)
+int main()
 {
 	VP v1;
 	v1.reserve(ELEMS);
@@ -102,6 +102,4 @@ int main(int argc, char** argv)
 	sum += p.averageDob();
 	end_time = high_resolution_clock::now();
 	cout << "SoA duration " << duration_cast<microseconds>(end_time - start_time).count() / 1000.f << " ms" << endl;
-	
-	return sum;
 }

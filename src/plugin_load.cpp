@@ -8,6 +8,12 @@ using namespace boost::filesystem;
 
 int main(int argc, char** argv)
 {
+	if (argc != 2)
+	{
+		cerr << "USAGE: " << argv[0] << " [path to plugin.dll]" << endl;
+		return 1;
+	}
+
 	path lib_path(argv[1]);
 
 	typedef const char* (plugin_name_t)();
@@ -18,6 +24,4 @@ int main(int argc, char** argv)
 
 	cout << "Plugin name    : " << plugin_name() << endl;
 	cout << "Plugin version : " << plugin_version() << endl;
-
-	return 1;
 }
