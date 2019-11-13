@@ -32,10 +32,10 @@ add_executable(c_api_lambda c_api_lambda.cpp)
 add_executable(exceptions exceptions.cpp)
 
 add_executable(xmlrpc_c xmlrpc_c.cpp)
-set_source_files_properties(xmlrpc_c.cpp PROPERTIES COMPILE_FLAGS --std=c++11)
+set_source_files_properties(xmlrpc_c.cpp PROPERTIES COMPILE_FLAGS --std=c++98)
 target_link_libraries(xmlrpc_c -lxmlrpc++ -lxmlrpc_client++ -lxmlrpc_util++)
 add_executable(xmlrpc_s xmlrpc_s.cpp)
-set_source_files_properties(xmlrpc_s.cpp PROPERTIES COMPILE_FLAGS --std=c++11)
+set_source_files_properties(xmlrpc_s.cpp PROPERTIES COMPILE_FLAGS --std=c++98)
 target_link_libraries(xmlrpc_s -lxmlrpc++ -lxmlrpc_server++ -lxmlrpc_server_abyss++ -lxmlrpc_util++)
 
 add_executable(base64 base64.cpp)
