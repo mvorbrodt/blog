@@ -36,6 +36,7 @@ int main()
 	property<T> p10{"C++11"};
 	string s = "C++17";
 	property<T> p11(s);
+	property<T> p12(std::move(s));
 
 	p11 = p10;
 	p11 = std::move(p10);
