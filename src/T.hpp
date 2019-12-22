@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 
 struct T
 {
@@ -9,6 +10,15 @@ struct T
 
 	T(int x) : instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(int x = " << x << ")" << std::endl; }
+
+	T(const char* s) : instance_number(instance_counter++)
+	{ std::cout << "T" << get_instance_number() << "::T(const char* s = " << s << ")" << std::endl; }
+
+	T(const std::string& s) : instance_number(instance_counter++)
+	{ std::cout << "T" << get_instance_number() << "::T(const std::string& s = " << s << ")" << std::endl; }
+
+	T(std::string&& s) : instance_number(instance_counter++)
+	{ std::cout << "T" << get_instance_number() << "::T(std::string&& s = " << s << ")" << std::endl; }
 
 	T(const T& t) : instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(const T" << t.get_instance_number() << " &)" << std::endl; }
@@ -44,6 +54,15 @@ struct Q : public T
 
 	Q(int x) : T(x)
 	{ std::cout << "Q" << get_instance_number() << "::Q(int x = " << x << ")" << std::endl; }
+
+	Q(const char* s)
+	{ std::cout << "Q" << get_instance_number() << "::Q(const char* s = " << s << ")" << std::endl; }
+
+	Q(const std::string& s)
+	{ std::cout << "Q" << get_instance_number() << "::Q(const std::string& s = " << s << ")" << std::endl; }
+
+	Q(std::string&& s)
+	{ std::cout << "Q" << get_instance_number() << "::Q(std::string&& s = " << s << ")" << std::endl; }
 
 	Q(const Q& q) : T(q)
 	{ std::cout << "Q" << get_instance_number() << "::Q(const Q" << q.get_instance_number() << " &)" << std::endl; }

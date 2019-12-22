@@ -1,5 +1,6 @@
 #include <iostream>
 #include "property.hpp"
+#include "T.hpp"
 
 using namespace std;
 
@@ -31,4 +32,11 @@ int main()
 	int xyz = cp1;
 
 	cout << cp1 << ", " << p2 << ", " << p3 << endl;
+
+	property<T> p10{"C++11"};
+	string s = "C++17";
+	property<T> p11(s);
+
+	p11 = p10;
+	p11 = std::move(p10);
 }
