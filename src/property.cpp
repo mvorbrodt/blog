@@ -1,6 +1,6 @@
 #include <iostream>
-#include "property.hpp"
 #include "T.hpp"
+#include "property.hpp"
 
 using namespace std;
 
@@ -40,4 +40,8 @@ int main()
 
 	p11 = p10;
 	p11 = std::move(p10);
+
+	property<Q> p13{"C++20"};
+	p12 = p13;
+	p12 = std::move(p13);
 }
