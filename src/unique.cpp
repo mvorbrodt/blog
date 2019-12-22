@@ -29,7 +29,7 @@ int main()
 	auto t1 = source();
 	sink(move(t1)); // We have to std::move it, because copy-constructor of unique_ptr = delete,
 	                // by using std::move we're forcing the use of the move constructor (if one exists),
-	                // this would have worked without std::move if using std::auto_ptr (now deprecate4d)
+	                // this would have worked without std::move if using std::auto_ptr (now deprecated)
 	                // and it would have stole the ownership without warning us!!!
 	assert(!t1);    // "t1" is now pointing to null because of the std::move above
 
