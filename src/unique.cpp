@@ -1,4 +1,3 @@
-#include <iostream>
 #include <memory>
 #include <vector>
 #include <cassert>
@@ -18,7 +17,7 @@ void sink(T_u_ptr t) { t->foo(); }
 // Does NOT assume explicit ownership because we're taking by reference
 void NOT_sink(T_u_ptr& t) { t->foo(); }
 
-// Assumes ownership, but then hands it back... if the caller captures the return value,
+// Assumes ownership, but then hands it back if the caller captures the return value,
 // otherwise releases the resource
 T_u_ptr sink_or_pass_thru(T_u_ptr t) { t->foo(); return t; }
 
