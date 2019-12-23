@@ -52,12 +52,16 @@ int main()
 	*pp2 = 42;
 	cout << "property<int*> = " << *pp2 << " -> " << pp2 << endl;
 	cout << "property<int*> = " << *pp3 << " -> " << pp3 << endl;
+	property<int*> x1;
+	x1 = std::move(pp2);
 
 	property<int[]> ap1{new int[3]}, ap2{new int[1]};
 	property<const int[]> ap3(std::move(ap1));
 	ap2[1] = 42;
 	cout << "property<int[]> = " << ap2[1] << " -> " << ap2 << endl;
 	cout << "property<int[]> = " << ap3[1] << " -> " << ap3 << endl;
+	property<int[]> x2;
+	x2 = std::move(ap2);
 
 	property<T*> pp4{new T}, pp5{new T};
 	property<const T*> pp6(std::move(pp4));

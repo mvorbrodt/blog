@@ -5,8 +5,6 @@
 #include <algorithm>
 #include <functional>
 #include <type_traits>
-#include <iostream>
-using namespace std;
 
 template<typename T>
 struct default_property_policy
@@ -27,7 +25,7 @@ struct default_property_policy<T*>
 	type copy_out(type v) const { return v; }
 	type&& move_out(type&& v) { return std::move(v); }
 	void copy_in(type& v, const type& nv) { v = nv; }
-	void move_in(type& v, type&& nv) { v = std::move(nv); nv = nullptr; }
+	void move_in(type& v, type&& nv) { v = std::move(nv); }
 };
 
 template<typename T>
@@ -38,7 +36,7 @@ struct default_property_policy<T[]>
 	type copy_out(type v) const { return v; }
 	type&& move_out(type&& v) { return std::move(v); }
 	void copy_in(type& v, const type& nv) { v = nv; }
-	void move_in(type& v, type&& nv) { v = std::move(nv); nv = nullptr; }
+	void move_in(type& v, type&& nv) { v = std::move(nv); }
 };
 
 template<typename T, typename P = default_property_policy<T>>
@@ -102,20 +100,14 @@ public:
 		return *this;
 	}
 
-	template<typename U = type>
-	typename std::enable_if<std::is_pointer<U>::value,
-	typename std::add_lvalue_reference<
-	typename std::remove_pointer<U>::type>::type>::type
-	operator * () const { return *m_value; }
-
-	operator const T& () const { return P::copy_out(m_value); }
+	operator const type& () const { return P::copy_out(m_value); }
 
 	using update_event_proc_t = std::function<void(const property&)>;
 	void operator += (const update_event_proc_t& proc) const { m_update_event_proc_list.push_back(proc); }
 	void operator += (update_event_proc_t&& proc) const { m_update_event_proc_list.emplace_back(std::move(proc)); }
 
 private:
-	T m_value = T{};
+	type m_value = type{};
 
 	using update_event_proc_list_t = std::vector<update_event_proc_t>;
 	mutable update_event_proc_list_t m_update_event_proc_list;
@@ -135,14 +127,18 @@ public:
 
 	typedef T* type;
 
+	property() = default;
 	property(type v) : m_value(v) {}
 
+	property(const property&) = delete;
 	property(property&& p) : m_value(p.P::move_out(std::forward<type>(p.m_value))) { p.m_value = nullptr; }
 
+	template<typename T2, typename P2> property(const property<T2*, P2>&) = delete;
 	template<typename T2, typename P2> property(property<T2*, P2>&& p) : m_value(p.P2::move_out(std::forward<T2*>(p.m_value))) { p.m_value = nullptr; }
 
 	~property() { delete m_value; }
 
+	property& operator = (const type&) = delete;
 	property& operator = (type&& v)
 	{
 		P::move_in(m_value, std::forward<type>(v));
@@ -150,6 +146,7 @@ public:
 		return *this;
 	}
 
+	property& operator = (const property&) = delete;
 	property& operator = (property&& p)
 	{
 		P::move_in(m_value, p.P::move_out(std::forward<type>(p.m_value)));
@@ -157,6 +154,7 @@ public:
 		return *this;
 	}
 
+	template<typename T2, typename P2> property& operator = (const property<T2*, P2>&) = delete;
 	template<typename T2, typename P2> property& operator = (property<T2*, P2>&& p)
 	{
 		P::move_in(m_value, p.P2::move_out(std::forward<T2*>(p.m_value)));
@@ -195,14 +193,18 @@ public:
 
 	typedef T* type;
 
+	property() = default;
 	property(type v) : m_value(v) {}
 
+	property(const property&) = delete;
 	property(property&& p) : m_value(p.P::move_out(std::forward<type>(p.m_value))) { p.m_value = nullptr; }
 
+	template<typename T2, typename P2> property(const property<T2[], P2>&) = delete;
 	template<typename T2, typename P2> property(property<T2[], P2>&& p) : m_value(p.P2::move_out(std::forward<T2*>(p.m_value))) { p.m_value = nullptr; }
 
 	~property() { delete [] m_value; }
 
+	property& operator = (const type&) = delete;
 	property& operator = (type&& v)
 	{
 		P::move_in(m_value, std::forward<type>(v));
@@ -210,6 +212,7 @@ public:
 		return *this;
 	}
 
+	property& operator = (const property&) = delete;
 	property& operator = (property&& p)
 	{
 		P::move_in(m_value, p.P::move_out(std::forward<type>(p.m_value)));
@@ -217,6 +220,7 @@ public:
 		return *this;
 	}
 
+	template<typename T2, typename P2> property& operator = (const property<T2[], P2>&) = delete;
 	template<typename T2, typename P2> property& operator = (property<T2[], P2>&& p)
 	{
 		P::move_in(m_value, p.P2::move_out(std::forward<T2*>(p.m_value)));
