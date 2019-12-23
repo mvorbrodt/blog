@@ -7,7 +7,7 @@ using namespace std;
 int main()
 {
 	property<int> p1 = 44, p2 = 66;
-	property<float> p3(p2);
+	property<const float> p3(p2);
 	const property<double> p4(p3), p5(p2);
 
 	p1 += [](auto new_value) { cout << "p1 updated with value: " << new_value << endl; };
@@ -44,4 +44,36 @@ int main()
 	property<Q> p13{"C++20"};
 	p12 = p13;
 	p12 = std::move(p13);
+
+
+
+	property<int*> pp1{new int}, pp2{new int};
+	property<const int*> pp3(std::move(pp1));
+	*pp2 = 42;
+	cout << "property<int*> = " << *pp2 << " -> " << pp2 << endl;
+	cout << "property<int*> = " << *pp3 << " -> " << pp3 << endl;
+
+	property<int[]> ap1{new int[3]}, ap2{new int[1]};
+	property<const int[]> ap3(std::move(ap1));
+	ap2[1] = 42;
+	cout << "property<int[]> = " << ap2[1] << " -> " << ap2 << endl;
+	cout << "property<int[]> = " << ap3[1] << " -> " << ap3 << endl;
+
+	property<T*> pp4{new T}, pp5{new T};
+	property<const T*> pp6(std::move(pp4));
+	cout << "property<T*> = " << *pp5 << " -> " << pp5 << endl;
+	cout << "property<T*> = " << *pp6 << " -> " << pp6 << endl;
+
+	property<T[]> ap4{new T[3]}, ap5{new T[1]};
+	property<const T[]> ap6(std::move(ap4));
+	cout << "property<T[]> = " << ap5[1] << " -> " << ap5 << endl;
+	cout << "property<T[]> = " << ap6[1] << " -> " << ap6 << endl;
+
+	property<Q*> pp7{new Q};
+	property<T*> pp8(std::move(pp7));
+	cout << "property<Q*> = " << *pp8 << " -> " << pp8 << endl;
+
+	property<Q[]> ap7{new Q[1]};
+	property<T[]> ap8(std::move(ap7));
+	cout << "property<Q[]> = " << *ap8 << " -> " << ap8 << endl;
 }

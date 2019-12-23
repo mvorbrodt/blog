@@ -4,14 +4,41 @@
 #include <utility>
 #include <algorithm>
 #include <functional>
+#include <type_traits>
+#include <iostream>
+using namespace std;
 
 template<typename T>
 struct default_property_policy
 {
-	auto copy_out(const T& v) const { return v; }
-	auto move_out(T&& v) { return std::move(v); }
-	template<typename U> void copy_in(T& v, const U& nv) { v = nv; }
-	template<typename U> void move_in(T& v, U&& nv) { v = std::move(nv); }
+	typedef T type;
+
+	const type& copy_out(const type& v) const { return v; }
+	type&& move_out(type&& v) { return std::move(v); }
+	void copy_in(type& v, const type& nv) { v = nv; }
+	void move_in(type& v, type&& nv) { v = std::move(nv); }
+};
+
+template<typename T>
+struct default_property_policy<T*>
+{
+	typedef T* type;
+
+	type copy_out(type v) const { return v; }
+	type&& move_out(type&& v) { return std::move(v); }
+	void copy_in(type& v, const type& nv) { v = nv; }
+	void move_in(type& v, type&& nv) { v = std::move(nv); nv = nullptr; }
+};
+
+template<typename T>
+struct default_property_policy<T[]>
+{
+	typedef T* type;
+
+	type copy_out(type v) const { return v; }
+	type&& move_out(type&& v) { return std::move(v); }
+	void copy_in(type& v, const type& nv) { v = nv; }
+	void move_in(type& v, type&& nv) { v = std::move(nv); nv = nullptr; }
 };
 
 template<typename T, typename P = default_property_policy<T>>
@@ -20,27 +47,29 @@ class property : private P
 public:
 	template<typename T2, typename P2> friend class property;
 
+	typedef T type;
+
 	property() = default;
 
-	property(const T& v) : m_value(v) {}
-	property(T&& v) : m_value(std::move(v)) {}
+	property(const type& v) : m_value(v) {}
+	property(type&& v) : m_value(std::move(v)) {}
 
 	property(const property& p) : m_value(p.P::copy_out(p.m_value)) {}
-	property(property&& p) : m_value(p.P::move_out(std::forward<T>(p.m_value))) {}
+	property(property&& p) : m_value(p.P::move_out(std::forward<type>(p.m_value))) {}
 
 	template<typename T2, typename P2> property(const property<T2, P2>& p) : m_value(p.P2::copy_out(p.m_value)) {}
 	template<typename T2, typename P2> property(property<T2, P2>&& p) : m_value(p.P2::move_out(std::forward<T2>(p.m_value))) {}
 
-	property& operator = (const T& v)
+	property& operator = (const type& v)
 	{
 		P::copy_in(m_value, v);
 		fire_update_event();
 		return *this;
 	}
 
-	property& operator = (T&& v)
+	property& operator = (type&& v)
 	{
-		P::move_in(m_value, std::forward<T>(v));
+		P::move_in(m_value, std::forward<type>(v));
 		fire_update_event();
 		return *this;
 	}
@@ -54,7 +83,7 @@ public:
 
 	property& operator = (property&& p)
 	{
-		P::move_in(m_value, p.P::move_out(std::forward<T>(p.m_value)));
+		P::move_in(m_value, p.P::move_out(std::forward<type>(p.m_value)));
 		fire_update_event();
 		return *this;
 	}
@@ -73,9 +102,15 @@ public:
 		return *this;
 	}
 
-	operator auto () const { return P::copy_out(m_value); }
+	template<typename U = type>
+	typename std::enable_if<std::is_pointer<U>::value,
+	typename std::add_lvalue_reference<
+	typename std::remove_pointer<U>::type>::type>::type
+	operator * () const { return *m_value; }
 
-	using update_event_proc_t = std::function<void(const T&)>;
+	operator const T& () const { return P::copy_out(m_value); }
+
+	using update_event_proc_t = std::function<void(const property&)>;
 	void operator += (const update_event_proc_t& proc) const { m_update_event_proc_list.push_back(proc); }
 	void operator += (update_event_proc_t&& proc) const { m_update_event_proc_list.emplace_back(std::move(proc)); }
 
@@ -88,6 +123,126 @@ private:
 	void fire_update_event() const
 	{
 		std::for_each(std::cbegin(m_update_event_proc_list), std::cend(m_update_event_proc_list),
-			[this](auto& proc) { proc(m_value); });
+			[this](auto& proc) { proc(*this); });
+	}
+};
+
+template<typename T, typename P>
+class property<T*, P> : private P
+{
+public:
+	template<typename T2, typename P2> friend class property;
+
+	typedef T* type;
+
+	property(type v) : m_value(v) {}
+
+	property(property&& p) : m_value(p.P::move_out(std::forward<type>(p.m_value))) { p.m_value = nullptr; }
+
+	template<typename T2, typename P2> property(property<T2*, P2>&& p) : m_value(p.P2::move_out(std::forward<T2*>(p.m_value))) { p.m_value = nullptr; }
+
+	~property() { delete m_value; }
+
+	property& operator = (type&& v)
+	{
+		P::move_in(m_value, std::forward<type>(v));
+		fire_update_event();
+		return *this;
+	}
+
+	property& operator = (property&& p)
+	{
+		P::move_in(m_value, p.P::move_out(std::forward<type>(p.m_value)));
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename T2, typename P2> property& operator = (property<T2*, P2>&& p)
+	{
+		P::move_in(m_value, p.P2::move_out(std::forward<T2*>(p.m_value)));
+		fire_update_event();
+		return *this;
+	}
+
+	typename std::add_lvalue_reference<
+	typename std::remove_pointer<type>::type>::type
+	operator * () const { return *m_value; }
+
+	operator const type () const { return P::copy_out(m_value); }
+
+	using update_event_proc_t = std::function<void(const property&)>;
+	void operator += (const update_event_proc_t& proc) const { m_update_event_proc_list.push_back(proc); }
+	void operator += (update_event_proc_t&& proc) const { m_update_event_proc_list.emplace_back(std::move(proc)); }
+
+private:
+	type m_value = nullptr;
+
+	using update_event_proc_list_t = std::vector<update_event_proc_t>;
+	mutable update_event_proc_list_t m_update_event_proc_list;
+
+	void fire_update_event() const
+	{
+		std::for_each(std::cbegin(m_update_event_proc_list), std::cend(m_update_event_proc_list),
+			[this](auto& proc) { proc(*this); });
+	}
+};
+
+template<typename T, typename P>
+class property<T[], P> : private P
+{
+public:
+	template<typename T2, typename P2> friend class property;
+
+	typedef T* type;
+
+	property(type v) : m_value(v) {}
+
+	property(property&& p) : m_value(p.P::move_out(std::forward<type>(p.m_value))) { p.m_value = nullptr; }
+
+	template<typename T2, typename P2> property(property<T2[], P2>&& p) : m_value(p.P2::move_out(std::forward<T2*>(p.m_value))) { p.m_value = nullptr; }
+
+	~property() { delete [] m_value; }
+
+	property& operator = (type&& v)
+	{
+		P::move_in(m_value, std::forward<type>(v));
+		fire_update_event();
+		return *this;
+	}
+
+	property& operator = (property&& p)
+	{
+		P::move_in(m_value, p.P::move_out(std::forward<type>(p.m_value)));
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename T2, typename P2> property& operator = (property<T2[], P2>&& p)
+	{
+		P::move_in(m_value, p.P2::move_out(std::forward<T2*>(p.m_value)));
+		fire_update_event();
+		return *this;
+	}
+
+	typename std::add_lvalue_reference<
+	typename std::remove_pointer<type>::type>::type
+	operator [] (std::size_t i) const { return m_value[i]; }
+
+	operator const type () const { return P::copy_out(m_value); }
+
+	using update_event_proc_t = std::function<void(const property&)>;
+	void operator += (const update_event_proc_t& proc) const { m_update_event_proc_list.push_back(proc); }
+	void operator += (update_event_proc_t&& proc) const { m_update_event_proc_list.emplace_back(std::move(proc)); }
+
+private:
+	type m_value = nullptr;
+
+	using update_event_proc_list_t = std::vector<update_event_proc_t>;
+	mutable update_event_proc_list_t m_update_event_proc_list;
+
+	void fire_update_event() const
+	{
+		std::for_each(std::cbegin(m_update_event_proc_list), std::cend(m_update_event_proc_list),
+			[this](auto& proc) { proc(*this); });
 	}
 };

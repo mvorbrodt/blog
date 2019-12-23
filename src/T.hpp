@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <ostream>
 #include <string>
 
 struct T
@@ -38,9 +39,7 @@ struct T
 	virtual void foo() const
 	{ std::cout << "T" << get_instance_number() << "::foo()" << std::endl; }
 
-protected:
-	int get_instance_number() const
-	{ return instance_number; }
+	int get_instance_number() const { return instance_number; }
 
 private:
 	inline static int instance_counter = 1;
@@ -85,3 +84,15 @@ struct Q : public T
 	void bar() const
 	{ std::cout << "Q" << get_instance_number() << "::bar()" << std::endl; }
 };
+
+std::ostream& operator << (std::ostream& os, const T& t)
+{
+	os << "T" << t.get_instance_number();
+	return os;
+}
+
+std::ostream& operator << (std::ostream& os, const Q& q)
+{
+	os << "Q" << q.get_instance_number();
+	return os;
+}
