@@ -24,7 +24,6 @@ struct default_property_policy<T*>
 
 	type copy_out(type v) const { return v; }
 	type&& move_out(type&& v) { return std::move(v); }
-	void copy_in(type& v, const type& nv) { v = nv; }
 	void move_in(type& v, type&& nv) { v = std::move(nv); }
 };
 
@@ -35,7 +34,6 @@ struct default_property_policy<T[]>
 
 	type copy_out(type v) const { return v; }
 	type&& move_out(type&& v) { return std::move(v); }
-	void copy_in(type& v, const type& nv) { v = nv; }
 	void move_in(type& v, type&& nv) { v = std::move(nv); }
 };
 
