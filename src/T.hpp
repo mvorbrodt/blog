@@ -3,6 +3,7 @@
 #include <iostream>
 #include <ostream>
 #include <string>
+#include <utility>
 
 struct T
 {
@@ -11,6 +12,9 @@ struct T
 
 	T(int x) : instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(int x = " << x << ")" << std::endl; }
+
+	T(int x, int y, int z) : instance_number(instance_counter++)
+	{ std::cout << "T" << get_instance_number() << "::T(int x = " << x << ", int y = " << y << ", int z = " << z << ")" << std::endl; }
 
 	T(const char* s) : instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(const char* s = " << s << ")" << std::endl; }
@@ -54,19 +58,22 @@ struct Q : public T
 	Q(int x) : T(x)
 	{ std::cout << "Q" << get_instance_number() << "::Q(int x = " << x << ")" << std::endl; }
 
-	Q(const char* s)
+	Q(int x, int y, int z) : T(x, y, z)
+	{ std::cout << "T" << get_instance_number() << "::Q(int x = " << x << ", int y = " << y << ", int z = " << z << ")" << std::endl; }
+
+	Q(const char* s) : T(s)
 	{ std::cout << "Q" << get_instance_number() << "::Q(const char* s = " << s << ")" << std::endl; }
 
-	Q(const std::string& s)
+	Q(const std::string& s) : T(s)
 	{ std::cout << "Q" << get_instance_number() << "::Q(const std::string& s = " << s << ")" << std::endl; }
 
-	Q(std::string&& s)
+	Q(std::string&& s) : T(std::forward<std::string>(s))
 	{ std::cout << "Q" << get_instance_number() << "::Q(std::string&& s = " << s << ")" << std::endl; }
 
 	Q(const Q& q) : T(q)
 	{ std::cout << "Q" << get_instance_number() << "::Q(const Q" << q.get_instance_number() << " &)" << std::endl; }
 
-	Q(Q&& q) : T(q)
+	Q(Q&& q) : T(std::forward<Q>(q))
 	{ std::cout << "Q" << get_instance_number() << "::Q(Q" << q.get_instance_number() << " &&)" << std::endl; }
 
 	Q& operator = (const Q& rhs)
@@ -75,7 +82,7 @@ struct Q : public T
 	Q& operator = (Q&& rhs)
 	{ std::cout << "Q" << get_instance_number() << "::operator = (Q" << rhs.get_instance_number() << " &&)" << std::endl; return *this; }
 
-	~Q()
+	virtual ~Q()
 	{ std::cout << "Q" << get_instance_number() << "::~Q()" << std::endl; }
 
 	virtual void foo() const final override

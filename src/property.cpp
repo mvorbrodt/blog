@@ -6,7 +6,9 @@ using namespace std;
 
 int main()
 {
-	property<int> p1 = 44, p2 = 66;
+	auto p1 = make_property<int>(44);
+	auto p2 = make_property<int>(66);
+
 	property<const float> p3(p2);
 	const property<double> p4(p3), p5(p2);
 
@@ -36,7 +38,7 @@ int main()
 	property<T> p10{"C++11"};
 	string s = "C++17";
 	property<T> p11(s);
-	property<T> p12(std::move(s));
+	property<Q> p12(std::move(s));
 
 	p11 = p10;
 	p11 = std::move(p10);
@@ -80,4 +82,12 @@ int main()
 	property<Q[]> ap7{new Q[1]};
 	property<T[]> ap8(std::move(ap7));
 	cout << "property<Q[]> = " << *ap8 << " -> " << ap8 << endl;
+
+
+
+	property<T> p14{1, 2, 3};
+	auto p15 = make_property<T>(4, 5, 6);
+
+	property<Q> p16{7, 8, 9};
+	auto p17 = make_property<Q>(10, 11, 12);
 }
