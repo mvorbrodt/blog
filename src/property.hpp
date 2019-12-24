@@ -24,7 +24,7 @@ struct default_property_policy<T*>
 
 	type copy_out(type v) const { return v; }
 	type&& move_out(type&& v) { return std::move(v); }
-	void move_in(type& v, type&& nv) { v = std::move(nv); }
+	void move_in(type& v, type&& nv) { delete v; v = nv; nv = nullptr; }
 };
 
 template<typename T>
@@ -34,7 +34,7 @@ struct default_property_policy<T[]>
 
 	type copy_out(type v) const { return v; }
 	type&& move_out(type&& v) { return std::move(v); }
-	void move_in(type& v, type&& nv) { v = std::move(nv); }
+	void move_in(type& v, type&& nv) { delete [] v; v = nv; nv = nullptr; }
 };
 
 template<typename T, typename P = default_property_policy<T>>
@@ -44,6 +44,7 @@ public:
 	template<typename T2, typename P2> friend class property;
 
 	typedef T type;
+	typedef T value_type;
 
 	property() = default;
 
@@ -124,6 +125,7 @@ public:
 	template<typename T2, typename P2> friend class property;
 
 	typedef T* type;
+	typedef T value_type;
 
 	property() = default;
 	property(type v) : m_value(v) {}
@@ -160,9 +162,7 @@ public:
 		return *this;
 	}
 
-	typename std::add_lvalue_reference<
-	typename std::remove_pointer<type>::type>::type
-	operator * () const { return *m_value; }
+	value_type& operator * () const { return *m_value; }
 
 	operator const type () const { return P::copy_out(m_value); }
 
@@ -190,6 +190,7 @@ public:
 	template<typename T2, typename P2> friend class property;
 
 	typedef T* type;
+	typedef T value_type;
 
 	property() = default;
 	property(type v) : m_value(v) {}
@@ -226,9 +227,7 @@ public:
 		return *this;
 	}
 
-	typename std::add_lvalue_reference<
-	typename std::remove_pointer<type>::type>::type
-	operator [] (std::size_t i) const { return m_value[i]; }
+	value_type& operator [] (std::size_t i) const { return m_value[i]; }
 
 	operator const type () const { return P::copy_out(m_value); }
 
