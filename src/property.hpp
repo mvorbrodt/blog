@@ -41,7 +41,8 @@ template<typename T, typename P = default_property_execution_policy<T>>
 class property : private P
 {
 public:
-	template<typename T2, typename P2> friend class property;
+	template<typename T2, typename P2>
+	friend class property;
 
 	typedef T type;
 	typedef T value_type;
@@ -143,7 +144,8 @@ template<typename T, typename P>
 class property<T*, P> : private P
 {
 public:
-	template<typename T2, typename P2> friend class property;
+	template<typename T2, typename P2>
+	friend class property;
 
 	typedef T* type;
 	typedef T value_type;
@@ -233,7 +235,8 @@ template<typename T, typename P>
 class property<T[], P> : private P
 {
 public:
-	template<typename T2, typename P2> friend class property;
+	template<typename T2, typename P2>
+	friend class property;
 
 	typedef T* type;
 	typedef T value_type;
