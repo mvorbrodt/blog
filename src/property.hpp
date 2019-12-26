@@ -7,11 +7,11 @@
 template<typename T>
 struct default_property_execution_policy
 {
-	const T& execute_copy_out(const T& v) const noexcept(true)
-	{ return v; }
+	auto execute_copy_out(const T& v) const noexcept(true)
+	{ return std::forward<decltype(v)>(v); }
 
-	T&& execute_move_out(T&& v) noexcept(true)
-	{ return std::forward<T>(v); }
+	auto execute_move_out(T&& v) noexcept(true)
+	{ return std::forward<decltype(v)>(v); }
 
 	void execute_copy_in(T& v, const T& nv)
 	noexcept(noexcept(v = nv))
@@ -25,11 +25,11 @@ struct default_property_execution_policy
 template<typename T>
 struct default_property_execution_policy<T*>
 {
-	T* execute_copy_out(T* v) const noexcept(true)
+	auto execute_copy_out(T* v) const noexcept(true)
 	{ return v; }
 
-	T*&& execute_move_out(T*&& v) noexcept(true)
-	{ return std::forward<T*>(v); }
+	auto&& execute_move_out(T*&& v) noexcept(true)
+	{ return std::forward<decltype(v)>(v); }
 
 	void execute_move_in(T*& v, T*&& nv)
 	noexcept(noexcept(delete v))
@@ -39,11 +39,11 @@ struct default_property_execution_policy<T*>
 template<typename T>
 struct default_property_execution_policy<T[]>
 {
-	T* execute_copy_out(T* v) const noexcept(true)
+	auto execute_copy_out(T* v) const noexcept(true)
 	{ return v; }
 
-	T*&& execute_move_out(T*&& v) noexcept(true)
-	{ return std::forward<T*>(v); }
+	auto&& execute_move_out(T*&& v) noexcept(true)
+	{ return std::forward<decltype(v)>(v); }
 
 	void execute_move_in(T*& v, T*&& nv)
 	noexcept(noexcept(delete [] v))
@@ -61,41 +61,48 @@ public:
 	using update_event_proc_list_t = std::vector<update_event_proc_t>;
 
 	property()
-	noexcept(noexcept(T()) &&
-	noexcept(update_event_proc_list_t()))
+	noexcept(
+		noexcept(T()) &&
+		noexcept(update_event_proc_list_t()))
 	= default;
 
 	template<typename... A>
 	property(A&&... v)
-	noexcept(noexcept(T(std::forward<A>(v)...)) &&
-	noexcept(update_event_proc_list_t()))
+	noexcept(
+		noexcept(T(std::forward<A>(v)...)) &&
+		noexcept(update_event_proc_list_t()))
 	: m_value(std::forward<A>(v)...) {}
 
 	property(const property& p)
-	noexcept(noexcept(T(p.P::execute_copy_out(p.m_value))) &&
-	noexcept(update_event_proc_list_t()))
+	noexcept(
+		noexcept(T(p.P::execute_copy_out(p.m_value))) &&
+		noexcept(update_event_proc_list_t()))
 	: m_value(p.P::execute_copy_out(p.m_value)) {}
 
 	property(property&& p)
-	noexcept(noexcept(T(std::move(p.P::execute_move_out(std::forward<T>(p.m_value))))) &&
-	noexcept(update_event_proc_list_t()))
+	noexcept(
+		noexcept(T(std::move(p.P::execute_move_out(std::forward<T>(p.m_value))))) &&
+		noexcept(update_event_proc_list_t()))
 	: m_value(std::move(p.P::execute_move_out(std::forward<T>(p.m_value)))) {}
 
 	template<typename T2, typename P2>
 	property(const property<T2, P2>& p)
-	noexcept(noexcept(T(p.P2::execute_copy_out(p.m_value))) &&
-	noexcept(update_event_proc_list_t()))
+	noexcept(
+		noexcept(T(p.P2::execute_copy_out(p.m_value))) &&
+		noexcept(update_event_proc_list_t()))
 	: m_value(p.P2::execute_copy_out(p.m_value)) {}
 
 	template<typename T2, typename P2>
 	property(property<T2, P2>&& p)
-	noexcept(noexcept(T(std::move(p.P2::execute_move_out(std::forward<T2>(p.m_value))))) &&
-	noexcept(update_event_proc_list_t()))
+	noexcept(
+		noexcept(T(std::move(p.P2::execute_move_out(std::forward<T2>(p.m_value))))) &&
+		noexcept(update_event_proc_list_t()))
 	: m_value(std::move(p.P2::execute_move_out(std::forward<T2>(p.m_value)))) {}
 
 	~property()
-	noexcept(noexcept(m_value.~T()) &&
-	noexcept(m_update_event_proc_list.~update_event_proc_list_t()))
+	noexcept(
+		noexcept(m_value.~T()) &&
+		noexcept(m_update_event_proc_list.~update_event_proc_list_t()))
 	= default;
 
 	property& operator = (const T& v)
@@ -149,8 +156,8 @@ public:
 	}
 
 	operator const T& () const
-	noexcept(noexcept(P::execute_copy_out(m_value)))
-	{ return P::execute_copy_out(m_value); }
+	noexcept(noexcept(std::forward<T>(P::execute_copy_out(m_value))))
+	{ return std::forward<T>(P::execute_copy_out(m_value)); }
 
 	void operator += (const update_event_proc_t& proc) const noexcept(false)
 	{ m_update_event_proc_list.push_back(proc); }
