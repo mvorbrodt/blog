@@ -132,7 +132,6 @@ target_link_libraries(grpc_service_s PRIVATE protobuf::libprotoc protobuf::libpr
 
 
 
-#get_target_property(THRIFT_COMPILER_EXECUTABLE thrift::thrift IMPORTED_LOCATION_RELEASE)
 add_custom_command(
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/ThriftService.h"
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/ThriftService.cpp"
@@ -141,7 +140,7 @@ add_custom_command(
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/thrift_service_constants.cpp"
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/thrift_service_types.h"
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/thrift_service_types.cpp"
-	COMMAND "C:\\Code\\vcpkg\\installed\\x64-windows\\tools\\thrift\\thrift.exe" #${THRIFT_COMPILER_EXECUTABLE}
+	COMMAND "${THRIFT_BIN_DIR}\\thrift.exe"
 	ARGS -out ${CMAKE_CURRENT_SOURCE_DIR}
 		-gen cpp ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service.thrift)
 add_executable(thrift_service_c thrift_service_c.cpp ThriftService.cpp thrift_service_constants.cpp thrift_service_types.cpp)
