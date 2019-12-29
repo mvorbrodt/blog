@@ -62,7 +62,8 @@ public:
 
 private:
 	using Proc = std::function<void(void)>;
-	blocking_queue<Proc> m_queue;
+	using Queue = blocking_queue<Proc>;
+	Queue m_queue;
 
 	using Threads = std::vector<std::thread>;
 	Threads m_threads;
@@ -126,7 +127,8 @@ public:
 
 private:
 	using Proc = std::function<void(void)>;
-	using Queues = std::vector<simple_blocking_queue<Proc>>;
+	using Queue = simple_blocking_queue<Proc>;
+	using Queues = std::vector<Queue>;
 	Queues m_queues;
 
 	using Threads = std::vector<std::thread>;
