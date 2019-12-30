@@ -25,9 +25,9 @@ public:
 		{
 			m_threads.emplace_back([this]()
 			{
-				Proc f;
 				while(true)
 				{
+					Proc f;
 					m_queue.pop(f);
 					if(!f)
 					{
@@ -89,9 +89,10 @@ public:
 
 		auto worker = [this](auto i)
 		{
-			Proc f;
 			while(true)
 			{
+				Proc f;
+
 				for(auto n = 0; n < m_count; ++n)
 					if(m_queues[(i + n) % m_count].try_pop(f))
 						break;
@@ -100,7 +101,6 @@ public:
 					break;
 
 				f();
-				f = nullptr;
 			}
 		};
 
