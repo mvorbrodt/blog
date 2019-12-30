@@ -5,29 +5,31 @@
 #include <thread>
 #include <memory>
 #include <future>
+#include <stdexcept>
 #include <functional>
 #include <type_traits>
-#include <cassert>
 #include "queue.hpp"
 
 class simple_thread_pool
 {
 public:
-	simple_thread_pool(
-		unsigned int threads = std::thread::hardware_concurrency(),
-		unsigned int queueDepth = std::thread::hardware_concurrency())
+	explicit simple_thread_pool(
+		std::size_t threads = std::thread::hardware_concurrency(),
+		std::size_t queueDepth = std::thread::hardware_concurrency() * K)
 	: m_queue(queueDepth)
 	{
-		assert(queueDepth != 0);
-		assert(threads != 0);
-		for(unsigned int i = 0; i < threads; ++i)
+		if(!threads || !queueDepth)
+			throw std::invalid_argument("Invalid thread count or queue depth!");
+
+		for(auto i = 0; i < threads; ++i)
+		{
 			m_threads.emplace_back([this]()
 			{
+				Proc f;
 				while(true)
 				{
-					Proc f;
 					m_queue.pop(f);
-					if(f == nullptr)
+					if(!f)
 					{
 						m_queue.push(nullptr);
 						break;
@@ -35,6 +37,7 @@ public:
 					f();
 				}
 			});
+		}
 	}
 
 	~simple_thread_pool() noexcept
@@ -47,17 +50,21 @@ public:
 	template<typename F, typename... Args>
 	void enqueue_work(F&& f, Args&&... args)
 	{
-		m_queue.push([=]() { f(args...); });
+		m_queue.push([=]() { f(std::forward<Args>(args)...); });
 	}
 
 	template<typename F, typename... Args>
 	auto enqueue_task(F&& f, Args&&... args) -> std::future<typename std::result_of<F(Args...)>::type>
 	{
-		using return_type = typename std::result_of<F(Args...)>::type;
-		auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
-		std::future<return_type> res = task->get_future();
+		using task_return_type = typename std::result_of<F(Args...)>::type;
+		using task_type = std::packaged_task<task_return_type()>;
+
+		auto task = std::make_shared<task_type>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+		auto result = task->get_future();
+
 		m_queue.push([task](){ (*task)(); });
-		return res;
+
+		return result;
 	}
 
 private:
@@ -67,27 +74,37 @@ private:
 
 	using Threads = std::vector<std::thread>;
 	Threads m_threads;
+
+	inline static const unsigned int K = 3;
 };
 
 class thread_pool
 {
 public:
-	explicit thread_pool(unsigned int threads = std::thread::hardware_concurrency())
+	explicit thread_pool(std::size_t threads = std::thread::hardware_concurrency())
 	: m_queues(threads), m_count(threads)
 	{
-		assert(threads != 0);
-		auto worker = [this](unsigned int i)
+		if(!threads)
+			throw std::invalid_argument("Invalid thread count!");
+
+		auto worker = [this](auto i)
 		{
+			Proc f;
 			while(true)
 			{
-				Proc f;
-				for(unsigned int n = 0; n < m_count; ++n)
-					if(m_queues[(i + n) % m_count].try_pop(f)) break;
-				if(!f && !m_queues[i].pop(f)) break;
+				for(auto n = 0; n < m_count; ++n)
+					if(m_queues[(i + n) % m_count].try_pop(f))
+						break;
+
+				if(!f && !m_queues[i].pop(f))
+					break;
+
 				f();
+				f = nullptr;
 			}
 		};
-		for(unsigned int i = 0; i < threads; ++i)
+
+		for(auto i = 0; i < threads; ++i)
 			m_threads.emplace_back(worker, i);
 	}
 
@@ -102,27 +119,34 @@ public:
 	template<typename F, typename... Args>
 	void enqueue_work(F&& f, Args&&... args)
 	{
-		auto work = [f,args...]() { f(args...); };
-		unsigned int i = m_index++;
-		for(unsigned int n = 0; n < m_count * K; ++n)
-			if(m_queues[(i + n) % m_count].try_push(work)) return;
-		m_queues[i % m_count].push(work);
+		auto work = [=]() { f(std::forward<Args>(args)...); };
+		auto i = m_index++;
+
+		for(auto n = 0; n < m_count * K; ++n)
+			if(m_queues[(i + n) % m_count].try_push(std::move(work)))
+				return;
+
+		m_queues[i % m_count].push(std::move(work));
 	}
 
 	template<typename F, typename... Args>
 	auto enqueue_task(F&& f, Args&&... args) -> std::future<typename std::result_of<F(Args...)>::type>
 	{
-		using return_type = typename std::result_of<F(Args...)>::type;
-		auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
-		std::future<return_type> res = task->get_future();
+		using task_return_type = typename std::result_of<F(Args...)>::type;
+		using task_type = std::packaged_task<task_return_type()>;
 
+		auto task = std::make_shared<task_type>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 		auto work = [task](){ (*task)(); };
-		unsigned int i = m_index++;
-		for(unsigned int n = 0; n < m_count * K; ++n)
-			if(m_queues[(i + n) % m_count].try_push(work)) return res;
-		m_queues[i % m_count].push(work);
+		auto result = task->get_future();
+		auto i = m_index++;
 
-		return res;
+		for(auto n = 0; n < m_count * K; ++n)
+			if(m_queues[(i + n) % m_count].try_push(std::move(work)))
+				return result;
+
+		m_queues[i % m_count].push(std::move(work));
+
+		return result;
 	}
 
 private:
