@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const int COUNT = 1'000'000;
+const int COUNT = 10'000'000;
 const int REPS = 10;
 
 TEST_CASE("simple_thread_pool vs thread_pool", "[benchmark]")
