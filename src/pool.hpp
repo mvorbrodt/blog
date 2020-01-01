@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tuple>
 #include <atomic>
 #include <vector>
 #include <thread>
@@ -13,13 +14,10 @@
 class simple_thread_pool
 {
 public:
-	explicit simple_thread_pool(
-		std::size_t threads = std::thread::hardware_concurrency(),
-		std::size_t queueDepth = std::thread::hardware_concurrency() * K)
-	: m_queue(queueDepth)
+	explicit simple_thread_pool(std::size_t threads = std::thread::hardware_concurrency())
 	{
-		if(!threads || !queueDepth)
-			throw std::invalid_argument("Invalid thread count or queue depth!");
+		if(!threads)
+			throw std::invalid_argument("Invalid thread count!");
 
 		for(auto i = 0; i < threads; ++i)
 		{
@@ -40,7 +38,7 @@ public:
 		}
 	}
 
-	~simple_thread_pool() noexcept
+	~simple_thread_pool()
 	{
 		m_queue.push(nullptr);
 		for(auto& thread : m_threads)
@@ -50,7 +48,7 @@ public:
 	template<typename F, typename... Args>
 	void enqueue_work(F&& f, Args&&... args)
 	{
-		m_queue.push([=]() { f(std::forward<Args>(args)...); });
+		m_queue.push([p = std::forward<F>(f), t = std::make_tuple(std::forward<Args>(args)...)]() { std::apply(p, t); });
 	}
 
 	template<typename F, typename... Args>
@@ -62,7 +60,7 @@ public:
 		auto task = std::make_shared<task_type>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 		auto result = task->get_future();
 
-		m_queue.push([task](){ (*task)(); });
+		m_queue.push([task]() { (*task)(); });
 
 		return result;
 	}
@@ -74,8 +72,6 @@ private:
 
 	using Threads = std::vector<std::thread>;
 	Threads m_threads;
-
-	inline static const unsigned int K = 3;
 };
 
 class thread_pool
@@ -119,7 +115,7 @@ public:
 	template<typename F, typename... Args>
 	void enqueue_work(F&& f, Args&&... args)
 	{
-		auto work = [=]() { f(std::forward<Args>(args)...); };
+		auto work = [p = std::forward<F>(f), t = std::make_tuple(std::forward<Args>(args)...)]() { std::apply(p, t); };
 		auto i = m_index++;
 
 		for(auto n = 0; n < m_count * K; ++n)
@@ -136,7 +132,7 @@ public:
 		using task_type = std::packaged_task<task_return_type()>;
 
 		auto task = std::make_shared<task_type>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
-		auto work = [task](){ (*task)(); };
+		auto work = [task]() { (*task)(); };
 		auto result = task->get_future();
 		auto i = m_index++;
 
@@ -151,7 +147,7 @@ public:
 
 private:
 	using Proc = std::function<void(void)>;
-	using Queue = simple_blocking_queue<Proc>;
+	using Queue = blocking_queue<Proc>;
 	using Queues = std::vector<Queue>;
 	Queues m_queues;
 

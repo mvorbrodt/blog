@@ -1,39 +1,77 @@
-#define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_ENABLE_BENCHMARKING
-#include <catch2/catch.hpp>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <locale>
+#include <chrono>
+#include <atomic>
 #include <cstdlib>
+#include <cstdint>
 #include "pool.hpp"
+#include "ascii_escape_code.hpp"
 
 using namespace std;
+using namespace std::chrono;
+using namespace ascii_escape_code;
 
-const int COUNT = 10'000'000;
-const int REPS = 10;
-
-TEST_CASE("simple_thread_pool vs thread_pool", "[benchmark]")
+std::string with_commas(uint64_t value)
 {
-	BENCHMARK("simple_thread_pool")
-	{
-		srand(0);
-		simple_thread_pool tp;
-		for (int i = 0; i < COUNT; ++i)
-			tp.enqueue_work([i]()
-				{
-					int reps = REPS + (REPS * (rand() % 5));
-					for (int n = 0; n < reps; ++n)
-						int x = i + rand();
-				});
-	};
+	std::stringstream ss;
+	ss.imbue(std::locale(""));
+	ss << std::fixed << value;
+	return ss.str();
+}
 
-	BENCHMARK("thread_pool")
+template<typename PT>
+void benchmark(const char* pool_name, uint64_t tasks, uint64_t reps)
+{
+	cout << black << bold << pool_name << normal << " (" << red << with_commas(tasks) << black << " tasks, " << red << with_commas(reps) << black << " reps)" << flush;
+
+	atomic_uint64_t result = 0;
+
+	auto start_time = high_resolution_clock::now();
 	{
-		srand(0);
-		thread_pool tp;
-		for (int i = 0; i < COUNT; ++i)
-			tp.enqueue_work([i]()
+		PT pool;
+
+		for (uint64_t i = 1; i <= tasks; ++i)
+		{
+			pool.enqueue_work([&result](uint64_t r)
+			{
+				uint64_t sum = 0;
+				for (auto i = 1; i <= r; ++i)
 				{
-					int reps = REPS + (REPS * (rand() % 5));
-					for (int n = 0; n < reps; ++n)
-						int x = i + rand();
-				});
-	};
+					auto t = rand();
+					sum += t + 1;
+					sum -= t;
+				}
+				result += sum;
+			}, reps);
+		}
+	}
+	auto end_time = high_resolution_clock::now();
+
+	cout << "\t" << red << duration_cast<microseconds>(end_time - start_time).count() / 1000.f << " ms" << black;
+	cout << "\t(", (result == tasks * reps ? cout << green : cout << red), cout << with_commas(result) << reset << ")" << endl;
+}
+
+int main()
+{
+	uint64_t TASK_START = 1'000'000;
+	uint64_t TASK_STEP  = 100'000;
+	uint64_t TASK_STOP  = 1'000'000;
+
+	uint64_t REPS_START = 100;
+	uint64_t REPS_STEP  = 100;
+	uint64_t REPS_STOP  = 1'000;
+
+	for(auto t = TASK_START; t <= TASK_STOP; t += TASK_STEP)
+	{
+		if(TASK_START < TASK_STOP) cout << "********************************************************************************" << endl;
+		for(auto r = REPS_START; r <= REPS_STOP; r += REPS_STEP)
+		{
+			benchmark<simple_thread_pool>("simple  ", t, r);
+			benchmark<thread_pool>       ("advanced", t, r);
+			if(REPS_START < REPS_STOP) cout << endl;
+		}
+		if(TASK_START < TASK_STOP) cout << endl;
+	}
 }
