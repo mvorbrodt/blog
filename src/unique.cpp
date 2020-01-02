@@ -1,4 +1,3 @@
-#include <iostream>
 #include <memory>
 #include <vector>
 #include <cassert>
@@ -18,7 +17,7 @@ void sink(T_u_ptr t) { t->foo(); }
 // Does NOT assume explicit ownership because we're taking by reference
 void NOT_sink(T_u_ptr& t) { t->foo(); }
 
-// Assumes ownership, but then hands it back... if the caller captures the return value,
+// Assumes ownership, but then hands it back if the caller captures the return value,
 // otherwise releases the resource
 T_u_ptr sink_or_pass_thru(T_u_ptr t) { t->foo(); return t; }
 
@@ -30,7 +29,7 @@ int main()
 	auto t1 = source();
 	sink(move(t1)); // We have to std::move it, because copy-constructor of unique_ptr = delete,
 	                // by using std::move we're forcing the use of the move constructor (if one exists),
-	                // this would have worked without std::move if using std::auto_ptr (now deprecate4d)
+	                // this would have worked without std::move if using std::auto_ptr (now deprecated)
 	                // and it would have stole the ownership without warning us!!!
 	assert(!t1);    // "t1" is now pointing to null because of the std::move above
 

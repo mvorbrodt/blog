@@ -11,7 +11,7 @@
 #include "semaphore.hpp"
 
 template<typename T>
-class simple_blocking_queue
+class blocking_queue
 {
 public:
 	template<typename Q = T>
@@ -147,10 +147,10 @@ private:
 };
 
 template<typename T>
-class blocking_queue
+class fixed_blocking_queue
 {
 public:
-	explicit blocking_queue(unsigned int size)
+	explicit fixed_blocking_queue(unsigned int size)
 	: m_size(size), m_pushIndex(0), m_popIndex(0), m_count(0),
 	m_data((T*)operator new(size * sizeof(T))),
 	m_openSlots(size), m_fullSlots(0)
@@ -158,7 +158,7 @@ public:
 		assert(size != 0);
 	}
 
-	~blocking_queue() noexcept
+	~fixed_blocking_queue() noexcept
 	{
 		while (m_count--)
 		{

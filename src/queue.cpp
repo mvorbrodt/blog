@@ -9,9 +9,9 @@ const int COUNT = 10;
 
 int main(int argc, char** argv)
 {
-	blocking_queue<int> q(5);
+	fixed_blocking_queue<int> q(5);
 	mutex cout_lock;
-	
+
 	thread producer([&]() {
 		for(int i = 1; i <= COUNT; ++i)
 		{
@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 			}
 		}
 	});
-	
+
 	thread consumer([&]() {
 		for(int i = 1; i <= COUNT; ++i)
 		{
@@ -35,9 +35,9 @@ int main(int argc, char** argv)
 			}
 		}
 	});
-	
+
 	producer.join();
 	consumer.join();
-	
+
 	return 1;
 }

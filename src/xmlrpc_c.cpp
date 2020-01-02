@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 
 	client.call(serverUrl, methodName, "s", &result, "XMLRPC client says hello!");
 
-	auto reply = xmlrpc_c::value_string(result);
+	xmlrpc_c::value_string reply = xmlrpc_c::value_string(result);
 
 	cout << static_cast<string>(reply) << endl;
 
