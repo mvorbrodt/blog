@@ -55,7 +55,7 @@ void benchmark(const char* pool_name, uint64_t tasks, uint64_t reps)
 
 int main()
 {
-	uint64_t TASK_START = 1'000'000;
+	uint64_t TASK_START = 100'000;
 	uint64_t TASK_STEP  = 100'000;
 	uint64_t TASK_STOP  = 1'000'000;
 
