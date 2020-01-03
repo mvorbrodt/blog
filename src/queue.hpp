@@ -143,7 +143,7 @@ public:
 
 private:
 	std::queue<T> m_queue;
-	std::mutex m_mutex;
+	mutable std::mutex m_mutex;
 	std::condition_variable m_ready;
 	bool m_done = false;
 };
@@ -555,7 +555,7 @@ private:
 
 	semaphore m_openSlots;
 	semaphore m_fullSlots;
-	std::mutex m_cs;
+	mutable std::mutex m_cs;
 };
 
 template<typename T>
