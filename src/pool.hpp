@@ -104,7 +104,7 @@ public:
 			m_threads.emplace_back(worker, i);
 	}
 
-	~thread_pool() noexcept
+	~thread_pool()
 	{
 		for(auto& queue : m_queues)
 			queue.done();
