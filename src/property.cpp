@@ -85,9 +85,9 @@ int main()
 
 
 
-	property<T> p14{1, 2, 3};
+	property<T> p14({1, 2, 3});
 	auto p15 = make_property<T>(4, 5, 6);
 
-	property<Q> p16{7, 8, 9};
+	property<Q> p16({7, 8, 9});
 	auto p17 = make_property<Q>(10, 11, 12);
 }
