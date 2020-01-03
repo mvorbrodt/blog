@@ -1,13 +1,13 @@
 #pragma once
 
 #include <mutex>
-#include <condition_variable>
 #include <queue>
 #include <atomic>
 #include <chrono>
 #include <utility>
+#include <stdexcept>
 #include <type_traits>
-#include <cassert>
+#include <condition_variable>
 #include "semaphore.hpp"
 
 template<typename T>
@@ -15,8 +15,7 @@ class blocking_queue
 {
 public:
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_copy_constructible<Q>::value, void>::type
+	typename std::enable_if<std::is_copy_constructible<Q>::value, void>::type
 	push(const T& item)
 	{
 		{
@@ -27,25 +26,24 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_move_constructible<Q>::value, void>::type
+	typename std::enable_if<std::is_move_constructible<Q>::value, void>::type
 	push(T&& item)
 	{
 		{
 			std::unique_lock lock(m_mutex);
-			m_queue.emplace(std::move(item));
+			m_queue.emplace(std::forward<T>(item));
 		}
 		m_ready.notify_one();
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_copy_constructible<Q>::value, bool>::type
+	typename std::enable_if<std::is_copy_constructible<Q>::value, bool>::type
 	try_push(const T& item)
 	{
 		{
 			std::unique_lock lock(m_mutex, std::try_to_lock);
-			if(!lock) return false;
+			if(!lock)
+				return false;
 			m_queue.push(item);
 		}
 		m_ready.notify_one();
@@ -53,14 +51,14 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_move_constructible<Q>::value, bool>::type
+	typename std::enable_if<std::is_move_constructible<Q>::value, bool>::type
 	try_push(T&& item)
 	{
 		{
 			std::unique_lock lock(m_mutex, std::try_to_lock);
-			if(!lock) return false;
-			m_queue.emplace(std::move(item));
+			if(!lock)
+				return false;
+			m_queue.emplace(std::forward<T>(item));
 		}
 		m_ready.notify_one();
 		return true;
@@ -73,21 +71,24 @@ public:
 	pop(T& item)
 	{
 		std::unique_lock lock(m_mutex);
-		while(m_queue.empty() && !m_done) m_ready.wait(lock);
-		if(m_queue.empty()) return false;
+		while(m_queue.empty() && !m_done)
+			m_ready.wait(lock);
+		if(m_queue.empty())
+			return false;
 		item = m_queue.front();
 		m_queue.pop();
 		return true;
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_move_assignable<Q>::value, bool>::type
+	typename std::enable_if<std::is_move_assignable<Q>::value, bool>::type
 	pop(T& item)
 	{
 		std::unique_lock lock(m_mutex);
-		while(m_queue.empty() && !m_done) m_ready.wait(lock);
-		if(m_queue.empty()) return false;
+		while(m_queue.empty() && !m_done)
+			m_ready.wait(lock);
+		if(m_queue.empty())
+			return false;
 		item = std::move(m_queue.front());
 		m_queue.pop();
 		return true;
@@ -100,19 +101,20 @@ public:
 	try_pop(T& item)
 	{
 		std::unique_lock lock(m_mutex, std::try_to_lock);
-		if(!lock || m_queue.empty()) return false;
+		if(!lock || m_queue.empty())
+			return false;
 		item = m_queue.front();
 		m_queue.pop();
 		return true;
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_move_assignable<Q>::value, bool>::type
+	typename std::enable_if<std::is_move_assignable<Q>::value, bool>::type
 	try_pop(T& item)
 	{
 		std::unique_lock lock(m_mutex, std::try_to_lock);
-		if(!lock || m_queue.empty()) return false;
+		if(!lock || m_queue.empty())
+			return false;
 		item = std::move(m_queue.front());
 		m_queue.pop();
 		return true;
@@ -155,7 +157,8 @@ public:
 	m_data((T*)operator new(size * sizeof(T))),
 	m_openSlots(size), m_fullSlots(0)
 	{
-		assert(size != 0);
+		if(!size)
+			throw std::invalid_argument("Invalid queue size!");
 	}
 
 	~fixed_blocking_queue() noexcept
@@ -255,7 +258,8 @@ public:
 	try_push(const T& item) noexcept
 	{
 		auto result = m_openSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 		{
 			std::scoped_lock lock(m_cs);
 			new (m_data + m_pushIndex) T (item);
@@ -273,7 +277,8 @@ public:
 	try_push(const T& item)
 	{
 		auto result = m_openSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 		{
 			std::scoped_lock lock(m_cs);
 			try
@@ -299,7 +304,8 @@ public:
 	try_push(T&& item) noexcept
 	{
 		auto result = m_openSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 		{
 			std::scoped_lock lock(m_cs);
 			new (m_data + m_pushIndex) T (std::move(item));
@@ -317,7 +323,8 @@ public:
 	try_push(T&& item)
 	{
 		auto result = m_openSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 		{
 			std::scoped_lock lock(m_cs);
 			try
@@ -427,7 +434,8 @@ public:
 	try_pop(T& item) noexcept
 	{
 		auto result = m_fullSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 		{
 			std::scoped_lock lock(m_cs);
 			item = m_data[m_popIndex];
@@ -446,7 +454,8 @@ public:
 	try_pop(T& item)
 	{
 		auto result = m_fullSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 		{
 			std::scoped_lock lock(m_cs);
 			try
@@ -473,7 +482,8 @@ public:
 	try_pop(T& item) noexcept
 	{
 		auto result = m_fullSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 		{
 			std::scoped_lock lock(m_cs);
 			item = std::move(m_data[m_popIndex]);
@@ -492,7 +502,8 @@ public:
 	try_pop(T& item)
 	{
 		auto result = m_fullSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 		{
 			std::scoped_lock lock(m_cs);
 			try
@@ -556,7 +567,8 @@ public:
 	m_data((T*)operator new(size * sizeof(T))),
 	m_openSlots(size), m_fullSlots(0)
 	{
-		assert(size != 0);
+		if(!size)
+			throw std::invalid_argument("Invalid queue size!");
 	}
 
 	~atomic_blocking_queue() noexcept
@@ -570,8 +582,7 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_nothrow_copy_constructible<Q>::value, void>::type
+	typename std::enable_if<std::is_nothrow_copy_constructible<Q>::value, void>::type
 	push(const T& item) noexcept
 	{
 		m_openSlots.wait();
@@ -588,8 +599,7 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_nothrow_move_constructible<Q>::value, void>::type
+	typename std::enable_if<std::is_nothrow_move_constructible<Q>::value, void>::type
 	push(T&& item) noexcept
 	{
 		m_openSlots.wait();
@@ -606,12 +616,12 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_nothrow_copy_constructible<Q>::value, bool>::type
+	typename std::enable_if<std::is_nothrow_copy_constructible<Q>::value, bool>::type
 	try_push(const T& item) noexcept
 	{
 		auto result = m_openSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 
 		auto pushIndex = m_pushIndex.fetch_add(1);
 		new (m_data + (pushIndex % m_size)) T (item);
@@ -626,12 +636,12 @@ public:
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<
-		std::is_nothrow_move_constructible<Q>::value, bool>::type
+	typename std::enable_if<std::is_nothrow_move_constructible<Q>::value, bool>::type
 	try_push(T&& item) noexcept
 	{
 		auto result = m_openSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 
 		auto pushIndex = m_pushIndex.fetch_add(1);
 		new (m_data + (pushIndex % m_size)) T (std::move(item));
@@ -692,7 +702,8 @@ public:
 	try_pop(T& item) noexcept
 	{
 		auto result = m_fullSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 
 		auto popIndex = m_popIndex.fetch_add(1);
 		item = m_data[popIndex % m_size];
@@ -714,7 +725,8 @@ public:
 	try_pop(T& item) noexcept
 	{
 		auto result = m_fullSlots.wait_for(std::chrono::seconds(0));
-		if(!result) return false;
+		if(!result)
+			return false;
 
 		auto popIndex = m_popIndex.fetch_add(1);
 		item = std::move(m_data[popIndex % m_size]);

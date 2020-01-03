@@ -8,7 +8,6 @@
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
-#include <cassert>
 
 class semaphore
 {
@@ -37,7 +36,7 @@ public:
 	void wait() noexcept
 	{
 		std::unique_lock lock(m_mutex);
-		m_cv.wait(lock, [&]() { return m_count != 0; });
+		m_cv.wait(lock, [this]() { return m_count != 0; });
 		--m_count;
 	}
 
@@ -45,7 +44,8 @@ public:
 	bool wait_for(T&& t) noexcept
 	{
 		std::unique_lock lock(m_mutex);
-		if(!m_cv.wait_for(lock, t, [&]() { return m_count != 0; })) return false;
+		if(!m_cv.wait_for(lock, t, [this]() { return m_count != 0; }))
+			return false;
 		--m_count;
 		return true;
 	}
@@ -54,7 +54,8 @@ public:
 	bool wait_until(T&& t) noexcept
 	{
 		std::unique_lock lock(m_mutex);
-		if(!m_cv.wait_until(lock, t, [&]() { return m_count != 0; })) return false;
+		if(!m_cv.wait_until(lock, t, [this]() { return m_count != 0; }))
+			return false;
 		--m_count;
 		return true;
 	}
@@ -68,8 +69,8 @@ private:
 class fast_semaphore
 {
 public:
-	explicit fast_semaphore(int count = 0) noexcept
-	: m_count(count), m_semaphore(0) { assert(count > -1); }
+	explicit fast_semaphore(unsigned int count = 0) noexcept
+	: m_count(count), m_semaphore(0) {}
 
 	void post() noexcept
 	{
