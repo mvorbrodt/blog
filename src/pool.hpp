@@ -26,12 +26,8 @@ public:
 				while(true)
 				{
 					Proc f;
-					m_queue.pop(f);
-					if(!f)
-					{
-						m_queue.push(nullptr);
+					if(!m_queue.pop(f))
 						break;
-					}
 					f();
 				}
 			});
@@ -40,7 +36,7 @@ public:
 
 	~simple_thread_pool()
 	{
-		m_queue.push(nullptr);
+		m_queue.done();
 		for(auto& thread : m_threads)
 			thread.join();
 	}

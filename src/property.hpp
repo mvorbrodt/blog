@@ -73,9 +73,6 @@ public:
 
 	using update_event_proc_t = std::function<void(const property&)>;
 
-	void operator += (const update_event_proc_t& proc) const
-	{ m_update_event_proc_list.push_back(proc); }
-
 	void operator += (update_event_proc_t&& proc) const
 	{ m_update_event_proc_list.push_back(std::forward<update_event_proc_t>(proc)); }
 
@@ -85,7 +82,7 @@ private:
 	using update_event_proc_list_t = std::vector<update_event_proc_t>;
 	mutable update_event_proc_list_t m_update_event_proc_list;
 
-	void fire_update_event() const noexcept
+	void fire_update_event() const
 	{
 		for(auto& proc : m_update_event_proc_list)
 			{ try { proc(*this); } catch(...) {} };
@@ -152,9 +149,6 @@ public:
 	operator const T* () const { return m_value; }
 
 	using update_event_proc_t = std::function<void(const property&)>;
-
-	void operator += (const update_event_proc_t& proc) const
-	{ m_update_event_proc_list.push_back(proc); }
 
 	void operator += (update_event_proc_t&& proc) const
 	{ m_update_event_proc_list.push_back(std::forward<update_event_proc_t>(proc)); }
@@ -232,9 +226,6 @@ public:
 	operator const T* () const { return m_value; }
 
 	using update_event_proc_t = std::function<void(const property&)>;
-
-	void operator += (const update_event_proc_t& proc) const
-	{ m_update_event_proc_list.push_back(proc); }
 
 	void operator += (update_event_proc_t&& proc) const
 	{ m_update_event_proc_list.push_back(std::forward<update_event_proc_t>(proc)); }

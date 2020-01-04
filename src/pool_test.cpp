@@ -27,25 +27,23 @@ void benchmark(const char* pool_name, uint64_t tasks, uint64_t reps)
 	cout << black << bold << pool_name << normal << " (" << red << with_commas(tasks) << black << " tasks, " << red << with_commas(reps) << black << " reps)" << flush;
 
 	atomic_uint64_t result = 0;
+	auto work = [&result](uint64_t r)
+	{
+		uint64_t sum = 0;
+		for (auto i = 1; i <= r; ++i)
+		{
+			auto t = rand();
+			sum += t + 1;
+			sum -= t;
+		}
+		result += sum;
+	};
 
 	auto start_time = high_resolution_clock::now();
 	{
 		PT pool;
-
 		for (uint64_t i = 1; i <= tasks; ++i)
-		{
-			pool.enqueue_work([&result](uint64_t r)
-			{
-				uint64_t sum = 0;
-				for (auto i = 1; i <= r; ++i)
-				{
-					auto t = rand();
-					sum += t + 1;
-					sum -= t;
-				}
-				result += sum;
-			}, reps);
-		}
+			pool.enqueue_work(work, reps);
 	}
 	auto end_time = high_resolution_clock::now();
 
