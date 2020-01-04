@@ -84,7 +84,7 @@ public:
 			while(true)
 			{
 				Proc f;
-				for(auto n = 0; n < m_count; ++n)
+				for(auto n = 0; n < m_count * K; ++n)
 					if(m_queues[(i + n) % m_count].try_pop(f))
 						break;
 				if(!f && !m_queues[i].pop(f))
