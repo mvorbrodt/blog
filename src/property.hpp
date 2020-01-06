@@ -69,6 +69,100 @@ public:
 		return *this;
 	}
 
+
+
+	template<typename Q = T>
+	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	operator ++ ()
+	{
+		++m_value;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename Q = T>
+	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	operator ++ (int)
+	{
+		++m_value;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename Q = T>
+	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	operator += (const Q& nv)
+	{
+		m_value += nv;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename Q = T>
+	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	operator -= (const Q& nv)
+	{
+		m_value -= nv;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename Q = T>
+	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	operator *= (const Q& nv)
+	{
+		m_value *= nv;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename Q = T>
+	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	operator /= (const Q& nv)
+	{
+		m_value /= nv;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename Q = T>
+	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	operator += (const property& p)
+	{
+		m_value += p.m_value;;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename Q = T>
+	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	operator -= (const property& p)
+	{
+		m_value -= p.m_value;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename Q = T>
+	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	operator *= (const property& p)
+	{
+		m_value *= p.m_value;;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename Q = T>
+	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	operator /= (const property& p)
+	{
+		m_value /= p.m_value;
+		fire_update_event();
+		return *this;
+	}
+
+
+
 	operator const T& () const { return m_value; }
 
 	using update_event_proc_t = std::function<void(const property&)>;
