@@ -72,21 +72,21 @@ public:
 
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	typename std::enable_if<std::is_arithmetic_v<Q>, Q>::type
 	operator ++ ()
 	{
 		++m_value;
 		fire_update_event();
-		return *this;
+		return m_value;
 	}
 
 	template<typename Q = T>
-	typename std::enable_if<std::is_arithmetic_v<Q>, property&>::type
+	typename std::enable_if<std::is_arithmetic_v<Q>, Q>::type
 	operator ++ (int)
 	{
-		++m_value;
+		Q result = m_value++;
 		fire_update_event();
-		return *this;
+		return result;
 	}
 
 	template<typename Q = T>
