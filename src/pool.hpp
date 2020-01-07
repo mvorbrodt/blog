@@ -6,6 +6,7 @@
 #include <thread>
 #include <memory>
 #include <future>
+#include <utility>
 #include <stdexcept>
 #include <functional>
 #include <type_traits>
@@ -19,19 +20,19 @@ public:
 		if(!threads)
 			throw std::invalid_argument("Invalid thread count!");
 
-		for(auto i = 0; i < threads; ++i)
+		auto worker = [this]()
 		{
-			m_threads.emplace_back([this]()
+			while(true)
 			{
-				while(true)
-				{
-					Proc f;
-					if(!m_queue.pop(f))
-						break;
-					f();
-				}
-			});
-		}
+				Proc f;
+				if(!m_queue.pop(f))
+					break;
+				f();
+			}
+		};
+
+		for(auto i = 0; i < threads; ++i)
+			m_threads.emplace_back(worker);
 	}
 
 	~simple_thread_pool()
@@ -48,9 +49,9 @@ public:
 	}
 
 	template<typename F, typename... Args>
-	auto enqueue_task(F&& f, Args&&... args) -> std::future<typename std::result_of<F(Args...)>::type>
+	[[nodiscard]] auto enqueue_task(F&& f, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>>
 	{
-		using task_return_type = typename std::result_of<F(Args...)>::type;
+		using task_return_type = std::invoke_result_t<F, Args...>;
 		using task_type = std::packaged_task<task_return_type()>;
 
 		auto task = std::make_shared<task_type>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
@@ -112,16 +113,16 @@ public:
 		auto i = m_index++;
 
 		for(auto n = 0; n < m_count * K; ++n)
-			if(m_queues[(i + n) % m_count].try_push(std::move(work)))
+			if(m_queues[(i + n) % m_count].try_push(work))
 				return;
 
 		m_queues[i % m_count].push(std::move(work));
 	}
 
 	template<typename F, typename... Args>
-	auto enqueue_task(F&& f, Args&&... args) -> std::future<typename std::result_of<F(Args...)>::type>
+	[[nodiscard]] auto enqueue_task(F&& f, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>>
 	{
-		using task_return_type = typename std::result_of<F(Args...)>::type;
+		using task_return_type = std::invoke_result_t<F, Args...>;
 		using task_type = std::packaged_task<task_return_type()>;
 
 		auto task = std::make_shared<task_type>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
@@ -130,7 +131,7 @@ public:
 		auto i = m_index++;
 
 		for(auto n = 0; n < m_count * K; ++n)
-			if(m_queues[(i + n) % m_count].try_push(std::move(work)))
+			if(m_queues[(i + n) % m_count].try_push(work))
 				return result;
 
 		m_queues[i % m_count].push(std::move(work));

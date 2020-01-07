@@ -42,8 +42,11 @@ void benchmark(const char* pool_name, uint64_t tasks, uint64_t reps)
 	auto start_time = high_resolution_clock::now();
 	{
 		PT pool;
-		for (uint64_t i = 1; i <= tasks; ++i)
+		for (uint64_t i = 1; i <= tasks / 2; ++i)
+		{
 			pool.enqueue_work(work, reps);
+			[[maybe_unused]] auto p = pool.enqueue_task(work, reps);
+		}
 	}
 	auto end_time = high_resolution_clock::now();
 
