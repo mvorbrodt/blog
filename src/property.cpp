@@ -1,4 +1,6 @@
 #include <iostream>
+#include <memory>
+#include <vector>
 #include "T.hpp"
 #include "property.hpp"
 
@@ -6,15 +8,48 @@ using namespace std;
 
 int main()
 {
+	property<int*> pi = new int[2];
+	property<int> pi2;
+	cout << pi << endl;
+	*pi++ = 1;
+	cout << pi << endl;
+	*pi++ = 2;
+	cout << pi << endl;
+	pi -= 1;
+	--pi;
+	pi += pi2;
+	cout << pi << endl;
+	cout << pi[0] << ", " << pi[1] << endl << endl;
+
+	property<T> abc;
+	cout << abc.invoke(&T::get_instance_number) << endl << endl;
+	abc.invoke(&T::foo);
+
+	property<vector<int>> pv1 = make_property<vector<int>>(1, 2, 3, 4, 5);
+	pv1[1] = 1;
+	pv1.invoke(&vector<int>::size);
+	((vector<int>)pv1).size();
+
+	using up_t = std::unique_ptr<T>;
+	using sp_t = std::shared_ptr<T>;
+
+	property<up_t> up_p1 = make_unique<T>();
+	up_p1->get_instance_number();
+
+	property<sp_t> sp_p2 = make_property<sp_t>(new T);
+	sp_p2->get_instance_number();
+
+	return 1;
+
 	auto p1 = make_property<int>(44);
 	auto p2 = make_property<int>(66);
 
 	property<const float> p3(p2);
 	const property<double> p4(p3), p5(p2);
 
-	p1 += [](auto new_value) { cout << "p1 updated with value: " << new_value << endl; };
-	p2 += [](auto new_value) { cout << "p2 updated with value: " << new_value << endl; };
-	p3 += [](auto new_value) { cout << "p3 updated with value: " << new_value << endl; };
+	p1.add_update_event([](auto p) { cout << "p1 updated with value: " << p << endl; });
+	p2.add_update_event([](auto p) { cout << "p2 updated with value: " << p << endl; });
+	p3.add_update_event([](auto p) { cout << "p3 updated with value: " << p << endl; });
 
 	p2 = p1;
 	p2 = move(p1);
