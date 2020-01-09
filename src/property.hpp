@@ -7,13 +7,11 @@
 #include <initializer_list>
 #include <cstddef>
 
+// PROPERTY TEMPLATE
 template<typename T>
 class property
 {
 public:
-	template<typename U>
-	friend class property;
-
 	property() = default;
 
 	property(const T& v) : m_value(v) {}
@@ -26,6 +24,7 @@ public:
 	template<typename U> property(property<U>&& p) : m_value(std::move(p.m_value)) {}
 
 	template<typename U> property(std::initializer_list<U> l) : m_value(l) {}
+	template<typename... A> property(A&&... a) : m_value(std::forward<A>(a)...) {}
 
 	property& operator = (const T& v)
 	{
@@ -133,48 +132,53 @@ public:
 	operator const T& () const { return m_value; }
 
 	template<typename U = T>
-	std::enable_if_t<std::is_class_v<U>, T&>
+	std::enable_if_t<std::is_class_v<U>, U&>
 	operator -> () { return m_value; }
 
 	template<typename U = T>
-	std::enable_if_t<std::is_class_v<U>, const T&>
+	std::enable_if_t<std::is_class_v<U>, const U&>
 	operator -> () const { return m_value; }
 
-	template<typename F, typename... Args>
-	auto invoke(F&& f, Args&&... args) -> std::invoke_result_t<F, T, Args...>
-	{
-		return std::invoke(std::forward<F>(f), m_value, std::forward<Args>(args)...);
-	}
+	template<typename U = T>
+	std::enable_if_t<std::is_class_v<U>, decltype(std::declval<U>()[std::size_t{}])&>
+	operator [] (std::size_t i) { return m_value[i]; }
+
+	template<typename U = T>
+	std::enable_if_t<std::is_class_v<U>, const decltype(std::declval<U>()[std::size_t{}])&>
+	operator [] (std::size_t i) const { return m_value[i]; }
+
+	template<typename F, typename... A>
+	auto invoke(F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
+	{ return std::invoke(std::forward<F>(f), m_value, std::forward<A>(a)...); }
 
 	using update_event_t = std::function<void(const property&)>;
+	using update_event_list_t = std::vector<update_event_t>;
 
 	void add_update_event(update_event_t&& proc) const
-	{
-		m_update_events.push_back(std::forward<update_event_t>(proc));
-	}
+	{ m_update_events.push_back(std::forward<update_event_t>(proc)); }
+
+	const update_event_list_t& get_update_events() const
+	{ return m_update_events; }
+
+	void clear_update_events() const
+	{ m_update_events.clear(); }
 
 private:
+	template<typename U> friend class property;
+
 	T m_value = T{};
 
-	using update_event_list_t = std::vector<update_event_t>;
 	mutable update_event_list_t m_update_events;
 
 	void fire_update_event() const
-	{
-		for(auto& event : m_update_events)
-			event(*this);
-	}
+	{ for(auto& event : m_update_events) event(*this); }
 };
 
-
-
+// POINTER SPECIALIZATION
 template<typename T>
 class property<T*>
 {
 public:
-	template<typename U>
-	friend class property;
-
 	property() = default;
 
 	property(const T*& v) : m_value(v) {}
@@ -288,47 +292,42 @@ public:
 	T& operator [] (std::size_t i) { return m_value[i]; }
 	const T& operator [] (std::size_t i) const { return m_value[i]; }
 
-	template<typename F, typename... Args>
-	auto invoke(F&& f, Args&&... args) -> std::invoke_result_t<F, T*, Args...>
-	{
-		return std::invoke(std::forward<F>(f), m_value, std::forward<Args>(args)...);
-	}
+	template<typename F, typename... A>
+	auto invoke(F&& f, A&&... a) -> std::invoke_result_t<F, T*, A...>
+	{ return std::invoke(std::forward<F>(f), m_value, std::forward<A>(a)...); }
 
-	template<typename F, typename... Args>
-	auto invoke(std::size_t i, F&& f, Args&&... args) -> std::invoke_result_t<F, T, Args...>
-	{
-		return std::invoke(std::forward<F>(f), m_value[i], std::forward<Args>(args)...);
-	}
+	template<typename F, typename... A>
+	auto invoke(std::size_t i, F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
+	{ return std::invoke(std::forward<F>(f), m_value[i], std::forward<A>(a)...); }
 
 	using update_event_t = std::function<void(const property&)>;
+	using update_event_list_t = std::vector<update_event_t>;
 
 	void add_update_event(update_event_t&& proc) const
-	{
-		m_update_events.push_back(std::forward<update_event_t>(proc));
-	}
+	{ m_update_events.push_back(std::forward<update_event_t>(proc)); }
+
+	const update_event_list_t& get_update_events() const
+	{ return m_update_events; }
+
+	void clear_update_events() const
+	{ m_update_events.clear(); }
 
 private:
+	template<typename U> friend class property;
+
 	T* m_value = nullptr;
 
-	using update_event_list_t = std::vector<update_event_t>;
 	mutable update_event_list_t m_update_events;
 
 	void fire_update_event() const
-	{
-		for(auto& event : m_update_events)
-			event(*this);
-	}
+	{ for(auto& event : m_update_events) event(*this); }
 };
 
-
-
+// ARRAY SPECIALIZATION
 template<typename T>
 class property<T[]>
 {
 public:
-	template<typename U>
-	friend class property;
-
 	property() = default;
 
 	property(const T*& v) : m_value(v) {}
@@ -442,42 +441,44 @@ public:
 	T& operator [] (std::size_t i) { return m_value[i]; }
 	const T& operator [] (std::size_t i) const { return m_value[i]; }
 
-	template<typename F, typename... Args>
-	auto invoke(std::size_t i, F&& f, Args&&... args) -> std::invoke_result_t<F, T, Args...>
-	{
-		return std::invoke(std::forward<F>(f), m_value[i], std::forward<Args>(args)...);
-	}
+	template<typename F, typename... A>
+	auto invoke(std::size_t i, F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
+	{ return std::invoke(std::forward<F>(f), m_value[i], std::forward<A>(a)...); }
 
 	using update_event_t = std::function<void(const property&)>;
+	using update_event_list_t = std::vector<update_event_t>;
 
 	void add_update_event(update_event_t&& proc) const
-	{
-		m_update_events.push_back(std::forward<update_event_t>(proc));
-	}
+	{ m_update_events.push_back(std::forward<update_event_t>(proc)); }
+
+	const update_event_list_t& get_update_events() const
+	{ return m_update_events; }
+
+	void clear_update_events() const
+	{ m_update_events.clear(); }
 
 private:
+	template<typename U> friend class property;
+
 	T* m_value = nullptr;
 
-	using update_event_list_t = std::vector<update_event_t>;
 	mutable update_event_list_t m_update_events;
 
 	void fire_update_event() const
-	{
-		for(auto& event : m_update_events)
-			event(*this);
-	}
+	{ for(auto& event : m_update_events) event(*this); }
 };
 
-
-
+// PROPERTY HELPERS
 template<typename T, typename U>
 auto make_property(std::initializer_list<U> l)
 {
-	return property<T>(std::decay_t<T>{l});
+	using V = std::decay_t<T>;
+	return property<T>(V(l));
 }
 
-template<typename T, typename... Args>
-auto make_property(Args&&... args)
+template<typename T, typename... A>
+auto make_property(A&&... a)
 {
-	return property<T>(std::decay_t<T>(std::forward<Args>(args)...));
+	using V = std::decay_t<T>;
+	return property<T>(V(std::forward<A>(a)...));
 }

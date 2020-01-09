@@ -55,12 +55,12 @@ int main()
 
 
 	// W/ COMPLEX TYPES
-	property<Q> c1;
+	property<Q> c1(1, 2, 3);
 	property<T> c2(c1);
 	property<T> c3(std::move(c2));
 
-	auto c4 = make_property<T>(1, 2, 3);
-	auto c5 = make_property<Q>(4, 5, 6);
+	auto c4 = make_property<T>(4, 5, 6);
+	auto c5 = make_property<Q>(7, 8, 9);
 
 	c5.add_update_event([](auto p) { cout << "~~~ c5 updated with value: " << p << endl; });
 
@@ -102,22 +102,24 @@ int main()
 
 	// W/ CONTAINERS
 	property<vector<int>> pv1{1, 0, 3};
+	pv1[1] = 2;
 	auto& pv1r = (vector<int>&)pv1;
-	pv1r[1] = 2;
 	for_each(begin(pv1r), end(pv1r), [](auto& v) { cout << v << ", "; });
 	cout << "(" << pv1.invoke(&vector<int>::size) << ")" << endl;
 
 	property<vector<int>> pv2 = make_property<vector<int>>({4, 0, 6});
+	pv2[1] = 5;
 	auto& pv2r = (vector<int>&)pv2;
-	pv2r[1] = 5;
 	for_each(begin(pv2r), end(pv2r), [](auto& v) { cout << v << ", "; });
 	cout << "(" << pv2.invoke(&vector<int>::size) << ")" << endl;
 
-	property<map<int, int>> pm;//= make_property<map<int, int>>({make_pair(1, 2)});
+	property<map<int, int>> pm({{1, 2}, {3, 4}, {5, 6}});
+	property<map<int, int>> pm2 = make_property<map<int, int>, pair<const int, int>>({{1, 2}, {3, 4}, {5, 6}});
+	pm = std::move(pm2);
+	pm[7] = 8;
+	pm[9] = 10;
+	pm[11] = 12;
 	auto& pmr = (map<int, int>&)pm;
-	pmr[7] = -1;
-	pmr[8] = -2;
-	pmr[9] = -3;
 	for_each(begin(pmr), end(pmr), [](auto& v) { cout << v.first << " => " << v.second << ", "; });
 	cout << "(" << pm.invoke(&map<int, int>::size) << ")" << endl;
 }
