@@ -48,8 +48,11 @@ struct T
 	virtual ~T()
 	{ std::cout << "T" << get_instance_number() << "::~T()" << std::endl; }
 
-	virtual void foo() const
+	virtual void foo()
 	{ std::cout << "T" << get_instance_number() << "::foo()" << std::endl; }
+
+	virtual void bar() const
+	{ std::cout << "T" << get_instance_number() << "::bar()" << std::endl; }
 
 	auto x() const { return m_x; }
 	auto y() const { return m_y; }
@@ -109,10 +112,10 @@ struct Q final : public T
 	virtual ~Q()
 	{ std::cout << "Q" << get_instance_number() << "::~Q()" << std::endl; }
 
-	virtual void foo() const final override
+	virtual void foo() final override
 	{ std::cout << "Q" << get_instance_number() << "::foo()" << std::endl; }
 
-	void bar() const
+	virtual void bar() const final override
 	{ std::cout << "Q" << get_instance_number() << "::bar()" << std::endl; }
 };
 
