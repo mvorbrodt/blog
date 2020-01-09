@@ -115,11 +115,19 @@ public:
 		fire_update_event(); \
 		return *this; \
 	} \
+	template<typename U = T> \
+	std::enable_if_t<std::is_arithmetic_v<U>, property&> \
+	operator op (const property& p) \
+	{ \
+		m_value op p.m_value; \
+		fire_update_event(); \
+		return *this; \
+	} \
 	template<typename U = T, typename V> \
 	std::enable_if_t<std::is_arithmetic_v<U> && std::is_arithmetic_v<V>, property&> \
-	operator op (const property<V>& v) \
+	operator op (const property<V>& p) \
 	{ \
-		m_value op v; \
+		m_value op p.m_value; \
 		fire_update_event(); \
 		return *this; \
 	}
