@@ -4,29 +4,28 @@
 #include <utility>
 #include <functional>
 #include <type_traits>
+#include <initializer_list>
 #include <cstddef>
 
 template<typename T>
 class property
 {
 public:
-
 	template<typename U>
 	friend class property;
 
 	property() = default;
 
-	explicit property(const T& v) : m_value(v) { std::cout << "property(const T& v)\n"; }
-	explicit property(T&& v) : m_value(std::move(v)) { std::cout << "property(T&& v)\n"; }
+	property(const T& v) : m_value(v) { std::cout << "property(const T& v)\n"; }
+	property(T&& v) : m_value(std::move(v)) { std::cout << "property(T&& v)\n"; }
 
 	property(const property& p) : m_value(p.m_value) { std::cout << "property(const property& p)\n"; }
 	property(property&& p) : m_value(std::move(p.m_value)) { std::cout << "property(property&& p)\n"; }
 
-	template<typename U>
-	property(const property<U>& p) : m_value(p.m_value) { std::cout << "property(const property<U>& p)\n"; }
+	template<typename U> property(const property<U>& p) : m_value(p.m_value) { std::cout << "property(const property<U>& p)\n"; }
+	template<typename U> property(property<U>&& p) : m_value(std::move(p.m_value)) { std::cout << "property(property<U>&& p)\n"; }
 
-	template<typename U>
-	property(property<U>&& p) : m_value(std::move(p.m_value)) { std::cout << "property(property<U>&& p)\n"; }
+	template<typename U> property(std::initializer_list<U> l) : m_value(l) { std::cout << "property(std::initializer_list<U> l)\n"; }
 
 	property& operator = (const T& v)
 	{
@@ -70,8 +69,11 @@ public:
 	property& operator = (const property<U>& p)
 	{
 		std::cout << "operator = (const property<U>& p)\n";
-		m_value = p.m_value;
-		fire_update_event();
+		if(this != (decltype(this))&p)
+		{
+			m_value = p.m_value;
+			fire_update_event();
+		}
 		return *this;
 	}
 
@@ -79,8 +81,11 @@ public:
 	property& operator = (property<U>&& p)
 	{
 		std::cout << "operator = (property<U>&& p)\n";
-		m_value = std::move(p.m_value);
-		fire_update_event();
+		if(this != (decltype(this))&p)
+		{
+			m_value = std::move(p.m_value);
+			fire_update_event();
+		}
 		return *this;
 	}
 
@@ -121,10 +126,10 @@ public:
 	PROPERTY_ARITHMETIC_OPERATOR(-=);
 	PROPERTY_ARITHMETIC_OPERATOR(*=);
 	PROPERTY_ARITHMETIC_OPERATOR(/=);
-	PROPERTY_ARITHMETIC_OPERATOR(%=);
-	PROPERTY_ARITHMETIC_OPERATOR(^=);
 	PROPERTY_ARITHMETIC_OPERATOR(&=);
 	PROPERTY_ARITHMETIC_OPERATOR(|=);
+	PROPERTY_ARITHMETIC_OPERATOR(^=);
+	PROPERTY_ARITHMETIC_OPERATOR(%=);
 	PROPERTY_ARITHMETIC_OPERATOR(>>=);
 	PROPERTY_ARITHMETIC_OPERATOR(<<=);
 	#undef PROPERTY_ARITHMETIC_OPERATOR
@@ -133,20 +138,20 @@ public:
 	explicit operator T& () { std::cout << "explicit operator T&\n"; return m_value; }
 	operator const T& () const { std::cout << "operator const T&\n"; return m_value; }
 
-	template<typename Q = T>
-	std::enable_if_t<std::is_class_v<Q>, T&>
+	template<typename U = T>
+	std::enable_if_t<std::is_class_v<U>, T&>
 	operator -> () { return m_value; }
 
-	template<typename Q = T>
-	std::enable_if_t<std::is_class_v<Q>, const T&>
+	template<typename U = T>
+	std::enable_if_t<std::is_class_v<U>, const T&>
 	operator -> () const { return m_value; }
 
-	template<typename Q = T>
-	std::enable_if_t<std::is_class_v<Q>, typename Q::value_type&>
+	template<typename U = T>
+	std::enable_if_t<std::is_class_v<U>, typename U::value_type&>
 	operator [] (std::size_t i) { return m_value[i]; }
 
-	template<typename Q = T>
-	std::enable_if_t<std::is_class_v<Q>, const typename Q::value_type&>
+	template<typename U = T>
+	std::enable_if_t<std::is_class_v<U>, const typename U::value_type&>
 	operator [] (std::size_t i) const { return m_value[i]; }
 
 	template<typename F, typename... Args>
@@ -155,23 +160,23 @@ public:
 		return std::invoke(std::forward<F>(f), m_value, std::forward<Args>(args)...);
 	}
 
-	using update_event_proc_t = std::function<void(const property&)>;
+	using update_event_t = std::function<void(const property&)>;
 
-	void add_update_event(update_event_proc_t&& proc) const
+	void add_update_event(update_event_t&& proc) const
 	{
-		m_update_event_proc_list.push_back(std::forward<update_event_proc_t>(proc));
+		m_update_events.push_back(std::forward<update_event_t>(proc));
 	}
 
 private:
 	T m_value = T{};
 
-	using update_event_proc_list_t = std::vector<update_event_proc_t>;
-	mutable update_event_proc_list_t m_update_event_proc_list;
+	using update_event_list_t = std::vector<update_event_t>;
+	mutable update_event_list_t m_update_events;
 
 	void fire_update_event() const
 	{
-		for(auto& proc : m_update_event_proc_list)
-			proc(*this);
+		for(auto& event : m_update_events)
+			event(*this);
 	}
 };
 
@@ -186,17 +191,14 @@ public:
 
 	property() = default;
 
-	explicit property(const T*& v) : m_value(v) {}
-	explicit property(T*&& v) : m_value(v) { v = nullptr; }
+	property(const T*& v) : m_value(v) {}
+	property(T*&& v) : m_value(v) {}
 
 	property(const property& p) : m_value(p.m_value) {}
-	property(property&& p) : m_value(p.m_value) { p.m_value = nullptr; }
+	property(property&& p) : m_value(p.m_value) {}
 
-	template<typename U>
-	property(const property<U*>& p) : m_value(p.m_value) {}
-
-	template<typename U>
-	property(property<U*>&& p) : m_value(p.m_value) { p.m_value = nullptr; }
+	template<typename U> property(const property<U*>& p) : m_value(p.m_value) {}
+	template<typename U> property(property<U*>&& p) : m_value(p.m_value) {}
 
 	property& operator = (const T*& v)
 	{
@@ -208,7 +210,6 @@ public:
 	property& operator = (T*&& v)
 	{
 		m_value = v;
-		v = nullptr;
 		fire_update_event();
 		return *this;
 	}
@@ -228,7 +229,28 @@ public:
 		if(this != &p)
 		{
 			m_value = p.m_value;
-			p.m_value = nullptr;
+			fire_update_event();
+		}
+		return *this;
+	}
+
+	template<typename U>
+	property& operator = (const property<U*>& p)
+	{
+		if(this != (decltype(this))&p)
+		{
+			m_value = p.m_value;
+			fire_update_event();
+		}
+		return *this;
+	}
+
+	template<typename U>
+	property& operator = (property<U*>&& p)
+	{
+		if(this != (decltype(this))&p)
+		{
+			m_value = p.m_value;
 			fire_update_event();
 		}
 		return *this;
@@ -266,14 +288,14 @@ public:
 	#undef POINTER_ARITHMETIC_OPERATOR
 	#endif
 
-	explicit operator T* () { return m_value; }
-	operator const T* () const { return m_value; }
-
-	T* operator -> () { return m_value; }
-	const T* operator -> () const { return m_value; }
+	explicit operator T* () { return m_value; } // SHOULD THE RETURN VALUE BE A REFERENCE ???!!!
+	operator const T* () const { return m_value; } // SHOULD THE RETURN VALUE BE A REFERENCE ???!!!
 
 	T& operator * () { return *m_value; }
 	const T& operator * () const { return *m_value; }
+
+	T* operator -> () { return m_value; }
+	const T* operator -> () const { return m_value; }
 
 	T& operator [] (std::size_t i) { return m_value[i]; }
 	const T& operator [] (std::size_t i) const { return m_value[i]; }
@@ -284,30 +306,36 @@ public:
 		return std::invoke(std::forward<F>(f), m_value, std::forward<Args>(args)...);
 	}
 
-	using update_event_proc_t = std::function<void(const property&)>;
+	using update_event_t = std::function<void(const property&)>;
 
-	void add_update_event(update_event_proc_t&& proc) const
+	void add_update_event(update_event_t&& proc) const
 	{
-		m_update_event_proc_list.push_back(std::forward<update_event_proc_t>(proc));
+		m_update_events.push_back(std::forward<update_event_t>(proc));
 	}
 
 private:
 	T* m_value = nullptr;
 
-	using update_event_proc_list_t = std::vector<update_event_proc_t>;
-	mutable update_event_proc_list_t m_update_event_proc_list;
+	using update_event_list_t = std::vector<update_event_t>;
+	mutable update_event_list_t m_update_events;
 
 	void fire_update_event() const
 	{
-		for(auto& proc : m_update_event_proc_list)
-			proc(*this);
+		for(auto& event : m_update_events)
+			event(*this);
 	}
 };
 
 
 
+template<typename T, typename U>
+auto make_property(std::initializer_list<U> l)
+{
+	return property<T>(T(l));
+}
+
 template<typename T, typename... Args>
 auto make_property(Args&&... args)
 {
-	return property<T>{ T { std::forward<Args>(args)... } };
+	return property<T>(T(std::forward<Args>(args)...));
 }

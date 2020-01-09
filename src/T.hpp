@@ -10,32 +10,40 @@ struct T
 	T() : instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T()" << std::endl; }
 
-	T(int x) : instance_number(instance_counter++)
+	T(int x) : m_x(x), instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(int x = " << x << ")" << std::endl; }
 
-	T(int x, int y, int z) : instance_number(instance_counter++)
+	T(int x, int y, int z) : m_x(x), m_y(y), m_z(z), instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(int x = " << x << ", int y = " << y << ", int z = " << z << ")" << std::endl; }
 
-	T(const char* s) : instance_number(instance_counter++)
+	T(const char* s) : m_s(s), instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(const char* s = " << s << ")" << std::endl; }
 
-	T(const std::string& s) : instance_number(instance_counter++)
+	T(const std::string& s) : m_s(s), instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(const std::string& s = " << s << ")" << std::endl; }
 
-	T(std::string&& s) : instance_number(instance_counter++)
+	T(std::string&& s) : m_s(std::move(s)), instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(std::string&& s = " << s << ")" << std::endl; }
 
-	T(const T& t) : instance_number(instance_counter++)
+	T(const T& t) : m_x(t.m_x), m_y(t.m_y), m_z(t.m_z), m_s(t.m_s), instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(const T" << t.get_instance_number() << " &)" << std::endl; }
 
-	T(T&& t) : instance_number(instance_counter++)
+	T(T&& t) : m_x(t.m_x), m_y(t.m_y), m_z(t.m_z), m_s(std::move(t.m_s)), instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::(T" << t.get_instance_number() << " &&)" << std::endl; }
 
 	T& operator = (const T& rhs)
-	{ std::cout << "T" << get_instance_number() << "::operator = (const T" << rhs.get_instance_number() << " &)" << std::endl; return *this; }
+	{
+		std::cout << "T" << get_instance_number() << "::operator = (const T" << rhs.get_instance_number() << " &)" << std::endl;
+		m_x = rhs.m_x, m_y = rhs.m_y, m_z = rhs.m_z, m_s = rhs.m_s;
+		return *this;
+	}
 
 	T& operator = (T&& rhs)
-	{ std::cout << "T" << get_instance_number() << "::operator = (T" << rhs.get_instance_number() << " &&)" << std::endl; return *this; }
+	{
+		std::cout << "T" << get_instance_number() << "::operator = (T" << rhs.get_instance_number() << " &&)" << std::endl;
+		m_x = rhs.m_x, m_y = rhs.m_y, m_z = rhs.m_z, m_s = std::move(rhs.m_s);
+		return *this;
+	}
 
 	virtual ~T()
 	{ std::cout << "T" << get_instance_number() << "::~T()" << std::endl; }
@@ -43,14 +51,22 @@ struct T
 	virtual void foo() const
 	{ std::cout << "T" << get_instance_number() << "::foo()" << std::endl; }
 
+	auto x() const { return m_x; }
+	auto y() const { return m_y; }
+	auto z() const { return m_z; }
+	auto s() const { return m_s; }
+
 	int get_instance_number() const { return instance_number; }
 
 private:
+	int m_x = -1, m_y = -2, m_z = -3;
+	std::string m_s = "empty";
+
 	inline static int instance_counter = 1;
-	const int instance_number = 0;
+	const int instance_number = -1;
 };
 
-struct Q : public T
+struct Q final : public T
 {
 	Q() : T()
 	{ std::cout << "Q" << get_instance_number() << "::Q()" << std::endl; }
@@ -77,10 +93,18 @@ struct Q : public T
 	{ std::cout << "Q" << get_instance_number() << "::Q(Q" << q.get_instance_number() << " &&)" << std::endl; }
 
 	Q& operator = (const Q& rhs)
-	{ std::cout << "Q" << get_instance_number() << "::operator = (const Q" << rhs.get_instance_number() << " &)" << std::endl; return *this; }
+	{
+		std::cout << "Q" << get_instance_number() << "::operator = (const Q" << rhs.get_instance_number() << " &)" << std::endl;
+		T::operator=(rhs);
+		return *this;
+	}
 
 	Q& operator = (Q&& rhs)
-	{ std::cout << "Q" << get_instance_number() << "::operator = (Q" << rhs.get_instance_number() << " &&)" << std::endl; return *this; }
+	{
+		std::cout << "Q" << get_instance_number() << "::operator = (Q" << rhs.get_instance_number() << " &&)" << std::endl;
+		T::operator=(std::forward<Q>(rhs));
+		return *this;
+	}
 
 	virtual ~Q()
 	{ std::cout << "Q" << get_instance_number() << "::~Q()" << std::endl; }
@@ -94,12 +118,12 @@ struct Q : public T
 
 std::ostream& operator << (std::ostream& os, const T& t)
 {
-	os << "T" << t.get_instance_number();
+	os << "T" << t.get_instance_number() << "(" << t.x() << ", " << t.y() << ", " << t.z() << ", \"" << t.s() << "\")";
 	return os;
 }
 
 std::ostream& operator << (std::ostream& os, const Q& q)
 {
-	os << "Q" << q.get_instance_number();
+	os << "Q" << q.get_instance_number() << "(" << q.x() << ", " << q.y() << ", " << q.z() << ", \"" << q.s() << "\")";
 	return os;
 }
