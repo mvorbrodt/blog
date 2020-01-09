@@ -113,13 +113,20 @@ int main()
 	for_each(begin(pv2r), end(pv2r), [](auto& v) { cout << v << ", "; });
 	cout << "(" << pv2.invoke(&vector<int>::size) << ")" << endl;
 
-	property<map<int, int>> pm({{1, 2}, {3, 4}, {5, 6}});
+	property<map<int, int>> pm1({{1, 2}, {3, 4}, {5, 6}});
 	property<map<int, int>> pm2 = make_property<map<int, int>, pair<const int, int>>({{1, 2}, {3, 4}, {5, 6}});
-	pm = std::move(pm2);
-	pm[7] = 8;
-	pm[9] = 10;
-	pm[11] = 12;
-	auto& pmr = (map<int, int>&)pm;
-	for_each(begin(pmr), end(pmr), [](auto& v) { cout << v.first << " => " << v.second << ", "; });
-	cout << "(" << pm.invoke(&map<int, int>::size) << ")" << endl;
+	pm1 = std::move(pm2);
+	pm1[7] = 8;
+	pm1[9] = 10;
+	pm1[11] = 12;
+	auto& pm1r = (map<int, int>&)pm1;
+	for_each(begin(pm1r), end(pm1r), [](auto& v) { cout << v.first << " => " << v.second << ", "; });
+	cout << "(" << pm1.invoke(&map<int, int>::size) << ")" << endl;
+
+	property<map<string, int>> pm3({{"_1_", 1}, {"_2_", 2}, {"_3_", 3}});
+	pm3["_4_"] = 4;
+	pm3["_5_"] = 5;
+	auto& pm3r = (map<string, int>&)pm3;
+	for_each(begin(pm3r), end(pm3r), [](auto& v) { cout << v.first << " => " << v.second << ", "; });
+	cout << "(" << pm3.invoke(&map<string, int>::size) << ")" << endl;
 }

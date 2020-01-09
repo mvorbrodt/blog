@@ -114,6 +114,14 @@ public:
 		m_value op v; \
 		fire_update_event(); \
 		return *this; \
+	} \
+	template<typename U = T, typename V> \
+	std::enable_if_t<std::is_arithmetic_v<U> && std::is_arithmetic_v<V>, property&> \
+	operator op (const property<V>& v) \
+	{ \
+		m_value op v; \
+		fire_update_event(); \
+		return *this; \
 	}
 	PROPERTY_ARITHMETIC_OPERATOR(+=);
 	PROPERTY_ARITHMETIC_OPERATOR(-=);
@@ -139,13 +147,13 @@ public:
 	std::enable_if_t<std::is_class_v<U>, const U&>
 	operator -> () const { return m_value; }
 
-	template<typename U = T>
-	std::enable_if_t<std::is_class_v<U>, decltype(std::declval<U>()[std::size_t{}])&>
-	operator [] (std::size_t i) { return m_value[i]; }
+	template<typename U = T, typename V>
+	std::enable_if_t<std::is_class_v<U>, decltype(std::declval<U>()[V{}])&>
+	operator [] (const V& i) { return m_value[i]; }
 
-	template<typename U = T>
-	std::enable_if_t<std::is_class_v<U>, const decltype(std::declval<U>()[std::size_t{}])&>
-	operator [] (std::size_t i) const { return m_value[i]; }
+	template<typename U = T, typename V>
+	std::enable_if_t<std::is_class_v<U>, const decltype(std::declval<U>()[V{}])&>
+	operator [] (const V& i) const { return m_value[i]; }
 
 	template<typename F, typename... A>
 	auto invoke(F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
