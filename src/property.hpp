@@ -185,12 +185,9 @@ public:
 	PROPERTY_FRIEND_OPERATOR(^);
 	PROPERTY_FRIEND_OPERATOR(%);
 	PROPERTY_FRIEND_OPERATOR(>>);
-	//PROPERTY_FRIEND_OPERATOR(<<);
+	PROPERTY_FRIEND_OPERATOR(<<);
 	#undef PROPERTY_FRIEND_OPERATOR
 	#endif
-
-	friend auto& operator << (std::ostream& os, const property& p)
-	{ os << p.m_value; return os; }
 
 	explicit operator T& () { return m_value; }
 	operator const T& () const { return m_value; }
@@ -238,6 +235,13 @@ private:
 	{ for(auto& event : m_update_events) event(*this); }
 };
 
+template<typename T>
+inline auto& operator << (std::ostream& os, const property<T>& p)
+{
+	os << (T&)p;
+	return os;
+}
+
 #ifndef PROPERTY_FRIEND_OPERATOR
 #define PROPERTY_FRIEND_OPERATOR(op) \
 template<typename U, typename V> \
@@ -267,7 +271,7 @@ PROPERTY_FRIEND_OPERATOR(|);
 PROPERTY_FRIEND_OPERATOR(^);
 PROPERTY_FRIEND_OPERATOR(%);
 PROPERTY_FRIEND_OPERATOR(>>);
-//PROPERTY_FRIEND_OPERATOR(<<);
+PROPERTY_FRIEND_OPERATOR(<<);
 #undef PROPERTY_FRIEND_OPERATOR
 #endif
 

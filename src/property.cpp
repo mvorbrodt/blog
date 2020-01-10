@@ -5,7 +5,6 @@
 #include <map>
 #include <string>
 #include <algorithm>
-#include <typeinfo>
 #include "T.hpp"
 #include "property.hpp"
 
@@ -23,7 +22,7 @@ int main()
 
 	p1.add_update_event([](auto p) { cout << "~~~ p1 updated with value: " << p << endl; });
 
-	p1 = p2;
+	p1 = p2 + 0.f;
 	p1 = p3;
 	++p1;
 	p1 *= p4;
@@ -105,7 +104,7 @@ int main()
 
 	pstr1 = "C++17";
 	pstr1 += " " + pstr4 + " Rocks!";
-	cout << endl << pstr1 << endl << endl; return 1;
+	cout << "property<string> value is '" << pstr1 << "'" << endl;
 
 
 
