@@ -112,8 +112,8 @@ int main()
 	ps1 = ps2;
 	ps2 = std::move(pu2);
 
-	((sp&)ps2).use_count();
-	ps2.invoke(&sp::use_count);
+	auto use_count = ((sp&)ps2).use_count();
+	use_count = ps2.invoke(&sp::use_count);
 
 	ps2->foo();
 	ps2->get_instance_number();
