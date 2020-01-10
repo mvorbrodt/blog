@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <algorithm>
+#include <typeinfo>
 #include "T.hpp"
 #include "property.hpp"
 
@@ -99,10 +100,12 @@ int main()
 
 
 	// W/ STRINGS
-	property<string> pstr1 = "C++11", pstr2 = " ", pstr3 = "Rocks!";
-	//property<string> pstr4 = pstr1 + pstr2;
+	property<string> pstr1 = "C++11", pstr2 = " ", pstr3 = "Rocks";
+	property<string> pstr4 = pstr1 + pstr2 + pstr3 + " my DUPA!!!";
+
 	pstr1 = "C++17";
-	pstr1 += " Rocks!";
+	pstr1 += " " + pstr4 + " Rocks!";
+	cout << endl << pstr1 << endl << endl; return 1;
 
 
 

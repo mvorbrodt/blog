@@ -5,6 +5,7 @@
 #include <functional>
 #include <type_traits>
 #include <initializer_list>
+#include <ostream>
 #include <cstddef>
 
 // PROPERTY TEMPLATE
@@ -164,6 +165,33 @@ public:
 	#undef PROPERTY_OPERATOR
 	#endif
 
+	#ifndef PROPERTY_FRIEND_OPERATOR
+	#define PROPERTY_FRIEND_OPERATOR(op) \
+	template<typename U, typename V> \
+	friend auto operator op (const property<U>& lhs, const V& rhs) \
+		-> property<decltype(std::declval<U>() op std::declval<V>())>; \
+	template<typename U, typename V> \
+	friend auto operator op (const U& lhs, const property<V>& rhs) \
+		-> property<decltype(std::declval<U>() op std::declval<V>())>; \
+	template<typename U, typename V> \
+	friend auto operator op (const property<U>& lhs, const property<V>& rhs) \
+		-> property<decltype(std::declval<U>() op std::declval<V>())>;
+	PROPERTY_FRIEND_OPERATOR(+);
+	PROPERTY_FRIEND_OPERATOR(-);
+	PROPERTY_FRIEND_OPERATOR(*);
+	PROPERTY_FRIEND_OPERATOR(/);
+	PROPERTY_FRIEND_OPERATOR(&);
+	PROPERTY_FRIEND_OPERATOR(|);
+	PROPERTY_FRIEND_OPERATOR(^);
+	PROPERTY_FRIEND_OPERATOR(%);
+	PROPERTY_FRIEND_OPERATOR(>>);
+	//PROPERTY_FRIEND_OPERATOR(<<);
+	#undef PROPERTY_FRIEND_OPERATOR
+	#endif
+
+	friend auto& operator << (std::ostream& os, const property& p)
+	{ os << p.m_value; return os; }
+
 	explicit operator T& () { return m_value; }
 	operator const T& () const { return m_value; }
 
@@ -209,6 +237,41 @@ private:
 	void fire_update_event() const
 	{ for(auto& event : m_update_events) event(*this); }
 };
+
+#ifndef PROPERTY_FRIEND_OPERATOR
+#define PROPERTY_FRIEND_OPERATOR(op) \
+template<typename U, typename V> \
+inline auto operator op (const property<U>& lhs, const V& rhs) \
+	-> property<decltype(std::declval<U>() op std::declval<V>())> \
+{ \
+	return property(lhs.m_value op rhs); \
+} \
+template<typename U, typename V> \
+inline auto operator op (const U& lhs, const property<V>& rhs) \
+	-> property<decltype(std::declval<U>() op std::declval<V>())> \
+{ \
+	return property(lhs op rhs.m_value); \
+} \
+template<typename U, typename V> \
+inline auto operator op (const property<U>& lhs, const property<V>& rhs) \
+	-> property<decltype(std::declval<U>() op std::declval<V>())> \
+{ \
+	return property(lhs.m_value op rhs.m_value); \
+}
+PROPERTY_FRIEND_OPERATOR(+);
+PROPERTY_FRIEND_OPERATOR(-);
+PROPERTY_FRIEND_OPERATOR(*);
+PROPERTY_FRIEND_OPERATOR(/);
+PROPERTY_FRIEND_OPERATOR(&);
+PROPERTY_FRIEND_OPERATOR(|);
+PROPERTY_FRIEND_OPERATOR(^);
+PROPERTY_FRIEND_OPERATOR(%);
+PROPERTY_FRIEND_OPERATOR(>>);
+//PROPERTY_FRIEND_OPERATOR(<<);
+#undef PROPERTY_FRIEND_OPERATOR
+#endif
+
+
 
 // POINTER SPECIALIZATION
 template<typename T>
@@ -359,6 +422,8 @@ private:
 	{ for(auto& event : m_update_events) event(*this); }
 };
 
+
+
 // ARRAY SPECIALIZATION
 template<typename T>
 class property<T[]>
@@ -504,16 +569,18 @@ private:
 	{ for(auto& event : m_update_events) event(*this); }
 };
 
+
+
 // PROPERTY HELPERS
 template<typename T, typename U>
-auto make_property(std::initializer_list<U> l)
+inline auto make_property(std::initializer_list<U> l)
 {
 	using V = std::decay_t<T>;
 	return property<T>(V(l));
 }
 
 template<typename T, typename... A>
-auto make_property(A&&... a)
+inline auto make_property(A&&... a)
 {
 	using V = std::decay_t<T>;
 	return property<T>(V(std::forward<A>(a)...));
