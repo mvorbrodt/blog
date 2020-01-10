@@ -33,6 +33,10 @@ int main()
 	auto pp2 = make_property<Q[]>(new Q[3]);
 	property<int[]> pp3 = new int[3] {1, 2, 3};
 
+	int* ip1 = new int;
+	property<int*> pp4;
+	pp4 = ip1;
+
 	*pp1++ = T{"C++11"};
 	*pp2++ = Q{"C++14"};
 
@@ -54,6 +58,7 @@ int main()
 
 	delete pp1;
 	delete [] pp2;
+	delete pp4;
 
 
 

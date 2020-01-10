@@ -203,8 +203,8 @@ class property<T*>
 public:
 	property() = default;
 
-	property(const T*& v) : m_value(v) {}
-	property(T*&& v) : m_value(v) {}
+	property(T* const & v) : m_value(v) {}
+	property(T* && v) : m_value(v) {}
 
 	property(const property& p) : m_value(p.m_value) {}
 	property(property&& p) : m_value(p.m_value) {}
@@ -212,7 +212,7 @@ public:
 	template<typename U> property(const property<U*>& p) : m_value(p.m_value) {}
 	template<typename U> property(property<U*>&& p) : m_value(p.m_value) {}
 
-	property& operator = (const T*& v)
+	property& operator = (T* const & v)
 	{
 		m_value = v;
 		fire_update_event();
@@ -352,8 +352,8 @@ class property<T[]>
 public:
 	property() = default;
 
-	property(const T*& v) : m_value(v) {}
-	property(T*&& v) : m_value(v) {}
+	property(T* const & v) : m_value(v) {}
+	property(T* && v) : m_value(v) {}
 
 	property(const property& p) : m_value(p.m_value) {}
 	property(property&& p) : m_value(p.m_value) {}
@@ -361,7 +361,7 @@ public:
 	template<typename U> property(const property<U[]>& p) : m_value(p.m_value) {}
 	template<typename U> property(property<U[]>&& p) : m_value(p.m_value) {}
 
-	property& operator = (const T*& v)
+	property& operator = (T* const & v)
 	{
 		m_value = v;
 		fire_update_event();
