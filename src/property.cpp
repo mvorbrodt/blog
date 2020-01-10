@@ -3,6 +3,7 @@
 #include <vector>
 #include <array>
 #include <map>
+#include <string>
 #include <algorithm>
 #include "T.hpp"
 #include "property.hpp"
@@ -94,6 +95,14 @@ int main()
 	}
 	int ec = (int)((E)pe1);
 	cout << "property<E> numeric value is " << ec << endl;
+
+
+
+	// W/ STRINGS
+	property<string> pstr1 = "C++11", pstr2 = " ", pstr3 = "Rocks!";
+	//property<string> pstr4 = pstr1 + pstr2;
+	pstr1 = "C++17";
+	pstr1 += " Rocks!";
 
 
 

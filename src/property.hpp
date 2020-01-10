@@ -46,6 +46,22 @@ public:
 		return *this;
 	}
 
+	template<typename U>
+	property& operator = (const U& v)
+	{
+		m_value = v;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename U>
+	property& operator = (U&& v)
+	{
+		m_value = std::move(v);
+		fire_update_event();
+		return *this;
+	}
+
 	property& operator = (const property& p)
 	{
 		if(this != &p)
@@ -90,17 +106,13 @@ public:
 
 	#ifndef PROPERTY_INC_DEC_OPERATOR
 	#define PROPERTY_INC_DEC_OPERATOR(op) \
-	template<typename U = T> \
-	std::enable_if_t<std::is_arithmetic_v<U>, property&> \
-	operator op () \
+	property& operator op () \
 	{ \
 		op m_value; \
 		fire_update_event(); \
 		return *this; \
 	} \
-	template<typename U = T> \
-	std::enable_if_t<std::is_arithmetic_v<U>, property> \
-	operator op (int) \
+	property operator op (int) \
 	{ \
 		auto temp(*this); \
 		operator op (); \
@@ -111,43 +123,45 @@ public:
 	#undef PROPERTY_INC_DEC_OPERATOR
 	#endif
 
-	#ifndef PROPERTY_ARITHMETIC_OPERATOR
-	#define PROPERTY_ARITHMETIC_OPERATOR(op) \
-	template<typename U = T> \
-	std::enable_if_t<std::is_arithmetic_v<U>, property&> \
-	operator op (const T& v) \
+	#ifndef PROPERTY_OPERATOR
+	#define PROPERTY_OPERATOR(op) \
+	property& operator op (const T& v) \
 	{ \
 		m_value op v; \
 		fire_update_event(); \
 		return *this; \
 	} \
-	template<typename U = T> \
-	std::enable_if_t<std::is_arithmetic_v<U>, property&> \
-	operator op (const property& p) \
+	template<typename U> \
+	property& operator op (const U& v) \
+	{ \
+		m_value op v; \
+		fire_update_event(); \
+		return *this; \
+	} \
+	property& operator op (const property& p) \
 	{ \
 		m_value op p.m_value; \
 		fire_update_event(); \
 		return *this; \
 	} \
-	template<typename U = T, typename V> \
-	std::enable_if_t<std::is_arithmetic_v<U> && std::is_arithmetic_v<V>, property&> \
-	operator op (const property<V>& p) \
+	template<typename U > \
+	property& operator op (const property<U>& p) \
 	{ \
 		m_value op p.m_value; \
 		fire_update_event(); \
 		return *this; \
 	}
-	PROPERTY_ARITHMETIC_OPERATOR(+=);
-	PROPERTY_ARITHMETIC_OPERATOR(-=);
-	PROPERTY_ARITHMETIC_OPERATOR(*=);
-	PROPERTY_ARITHMETIC_OPERATOR(/=);
-	PROPERTY_ARITHMETIC_OPERATOR(&=);
-	PROPERTY_ARITHMETIC_OPERATOR(|=);
-	PROPERTY_ARITHMETIC_OPERATOR(^=);
-	PROPERTY_ARITHMETIC_OPERATOR(%=);
-	PROPERTY_ARITHMETIC_OPERATOR(>>=);
-	PROPERTY_ARITHMETIC_OPERATOR(<<=);
-	#undef PROPERTY_ARITHMETIC_OPERATOR
+	PROPERTY_OPERATOR(+=);
+	PROPERTY_OPERATOR(-=);
+	PROPERTY_OPERATOR(*=);
+	PROPERTY_OPERATOR(/=);
+	PROPERTY_OPERATOR(&=);
+	PROPERTY_OPERATOR(|=);
+	PROPERTY_OPERATOR(^=);
+	PROPERTY_OPERATOR(%=);
+	PROPERTY_OPERATOR(>>=);
+	PROPERTY_OPERATOR(<<=);
+	#undef PROPERTY_OPERATOR
 	#endif
 
 	explicit operator T& () { return m_value; }
@@ -303,7 +317,7 @@ public:
 	explicit operator bool () const { return m_value != nullptr; }
 
 	explicit operator T* () { return m_value; }
-	operator const T* () const { return m_value; }
+	operator T* () const { return m_value; }
 
 	T& operator * () { return *m_value; }
 	const T& operator * () const { return *m_value; }
@@ -452,7 +466,7 @@ public:
 	explicit operator bool () const { return m_value != nullptr; }
 
 	explicit operator T* () { return m_value; }
-	operator const T* () const { return m_value; }
+	operator T* () const { return m_value; }
 
 	T& operator * () { return *m_value; }
 	const T& operator * () const { return *m_value; }
