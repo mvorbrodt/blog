@@ -31,7 +31,7 @@ int main()
 	// W/ POINTERS
 	auto pp1 = make_property<T*>(new T);
 	auto pp2 = make_property<Q[]>(new Q[3]);
-	property<int[]> pp3 = new int[] {1, 2, 3};
+	property<int[]> pp3 = new int[3] {1, 2, 3};
 
 	*pp1++ = T{"C++11"};
 	*pp2++ = Q{"C++14"};
@@ -121,20 +121,27 @@ int main()
 
 
 	// W/ CONTAINERS
-	array<int, 3> arr1 = {1, 2, 3};
+	array<int, 3> arr1 = {1, 0, 3};
 	property<array<int, 3>> pa1 = arr1;
-	property<array<int, 3>> pa2 = array<int, 3>{1, 2, 3};
+	property<array<int, 3>> pa2 = array<int, 3>{1, 0, 3};
 	//property<array<int, 3>> pa3 = {1, 2, 3}; // FIX ME~!!!!!111oneone
+	pa1[1] = 2;
+	auto& pa1r = (array<int, 3>&)pa1;
+	cout << "array: ";
+	for_each(begin(pa1r), end(pa1r), [](auto& v) { cout << v << ", "; });
+	cout << "(" << pa1.invoke(&array<int, 3>::size) << ")" << endl;
 
 	property<vector<int>> pv1{1, 0, 3};
 	pv1[1] = 2;
 	auto& pv1r = (vector<int>&)pv1;
+	cout << "vector: ";
 	for_each(begin(pv1r), end(pv1r), [](auto& v) { cout << v << ", "; });
 	cout << "(" << pv1.invoke(&vector<int>::size) << ")" << endl;
 
 	property<vector<int>> pv2 = make_property<vector<int>>({4, 0, 6});
 	pv2[1] = 5;
 	auto& pv2r = (vector<int>&)pv2;
+	cout << "vector: ";
 	for_each(begin(pv2r), end(pv2r), [](auto& v) { cout << v << ", "; });
 	cout << "(" << pv2.invoke(&vector<int>::size) << ")" << endl;
 
@@ -145,6 +152,7 @@ int main()
 	pm1[9] = 10;
 	pm1[11] = 12;
 	auto& pm1r = (map<int, int>&)pm1;
+	cout << "map: ";
 	for_each(begin(pm1r), end(pm1r), [](auto& v) { cout << v.first << " => " << v.second << ", "; });
 	cout << "(" << pm1.invoke(&map<int, int>::size) << ")" << endl;
 
@@ -152,6 +160,7 @@ int main()
 	pm3["_4_"] = 4;
 	pm3["_5_"] = 5;
 	auto& pm3r = (map<string, int>&)pm3;
+	cout << "map: ";
 	for_each(begin(pm3r), end(pm3r), [](auto& v) { cout << v.first << " => " << v.second << ", "; });
 	cout << "(" << pm3.invoke(&map<string, int>::size) << ")" << endl;
 }
