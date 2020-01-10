@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <array>
 #include <map>
 #include <algorithm>
 #include "T.hpp"
@@ -16,6 +17,7 @@ int main()
 
 	property<const float> p3(p2);
 	const property<double> p4(p3);
+	property<int> p5{}, p6{123};
 
 	p1.add_update_event([](auto p) { cout << "~~~ p1 updated with value: " << p << endl; });
 
@@ -29,6 +31,7 @@ int main()
 	// W/ POINTERS
 	auto pp1 = make_property<T*>(new T);
 	auto pp2 = make_property<Q[]>(new Q[3]);
+	property<int[]> pp3 = new int[] {1, 2, 3};
 
 	*pp1++ = T{"C++11"};
 	*pp2++ = Q{"C++14"};
@@ -62,6 +65,9 @@ int main()
 	auto c4 = make_property<T>(4, 5, 6);
 	auto c5 = make_property<Q>(7, 8, 9);
 
+	property<T> c6{}, c7{"C++Rocks!"}, c8{1, 2, 3};
+	property<T> c9{c6}, c10{std::move(c7)};
+
 	c5.add_update_event([](auto p) { cout << "~~~ c5 updated with value: " << p << endl; });
 
 	c5 = c1;
@@ -69,6 +75,20 @@ int main()
 
 	((T&)c5).foo();
 	c5.invoke(&T::foo);
+
+
+
+	// W/ ENUMS
+	enum class E : int { E1, E2 = 123, E3 };
+	property<E> pe1{E::E2};
+	switch(pe1)
+	{
+		case E::E1: cout << "property<enum E> value is E1" << endl; break;
+		case E::E2: cout << "property<enum E> value is E2" << endl; break;
+		case E::E3: cout << "property<enum E> value is E3" << endl; break;
+	}
+	int ec = (int)((E)pe1);
+	cout << "property<E> numeric value is " << ec << endl;
 
 
 
@@ -101,6 +121,11 @@ int main()
 
 
 	// W/ CONTAINERS
+	array<int, 3> arr1 = {1, 2, 3};
+	property<array<int, 3>> pa1 = arr1;
+	property<array<int, 3>> pa2 = array<int, 3>{1, 2, 3};
+	//property<array<int, 3>> pa3 = {1, 2, 3}; // FIX ME~!!!!!111oneone
+
 	property<vector<int>> pv1{1, 0, 3};
 	pv1[1] = 2;
 	auto& pv1r = (vector<int>&)pv1;

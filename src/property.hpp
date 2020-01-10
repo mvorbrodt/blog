@@ -23,7 +23,13 @@ public:
 	template<typename U> property(const property<U>& p) : m_value(p.m_value) {}
 	template<typename U> property(property<U>&& p) : m_value(std::move(p.m_value)) {}
 
-	template<typename U> property(std::initializer_list<U> l) : m_value(l) {}
+	template<typename U = T, typename V>
+	property(std::initializer_list<V> l,
+		std::enable_if_t<
+			!std::is_scalar_v<U> &&
+			std::is_constructible_v<U, std::initializer_list<V>>
+		>* = nullptr) : m_value(l) {}
+
 	template<typename... A> property(A&&... a) : m_value(std::forward<A>(a)...) {}
 
 	property& operator = (const T& v)
