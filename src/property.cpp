@@ -33,10 +33,11 @@ int main()
 	auto pp1 = make_property<T*>(new T);
 	auto pp2 = make_property<Q[]>(new Q[3]);
 	property<int[]> pp3 = new int[3] {1, 2, 3};
+	property<const T*> pp4 = new T{"property<const T*>"};
 
 	int* ip1 = new int;
-	property<int*> pp4;
-	pp4 = ip1;
+	property<int*> pp5;
+	pp5 = ip1;
 
 	*pp1++ = T{"C++11"};
 	*pp2++ = Q{"C++14"};
@@ -47,12 +48,25 @@ int main()
 	--pp1, pp2 -= 1;
 
 	((T*)pp1)->foo();
+	((T*)pp1)->bar();
+	pp1.get()->foo();
+	pp1.get()->bar();
 	pp1.invoke(&T::foo);
 	pp1.invoke(0, &T::bar);
 
-	pp2[0].foo();
+	((Q*)pp2 + 1)->foo();
+	((Q*)pp2 + 1)->bar();
+	pp2[1].foo();
+	pp2[1].bar();
 	pp2.invoke(1, &Q::foo);
-	pp2.invoke(2, &Q::bar);
+	pp2.invoke(1, &Q::bar);
+
+	//((const T*)pp4)->foo(); // Compile error becasue foo() is non-const :o)
+	((const T*)pp4)->bar();
+	//pp4.get()->foo(); // Compile error becasue foo() is non-const :o)
+	pp4.get()->bar();
+	//pp4.invoke(&T::foo); // Compile error becasue foo() is non-const :o)
+	pp4.invoke(&T::bar);
 
 	pp2[0] = Q{"C++17"};
 	pp2[1] = Q{"C++20"};
@@ -71,8 +85,8 @@ int main()
 	auto c4 = make_property<T>(4, 5, 6);
 	auto c5 = make_property<Q>(7, 8, 9);
 
-	property<T> c6{}, c7{"C++Rocks!"}, c8{1, 2, 3};
-	property<T> c9{c6}, c10{std::move(c7)};
+	property<const T> c6{}, c7{"C++Rocks!"}, c8{1, 2, 3}; // const stripped away here
+	const property<T> c9{c6}, c10{std::move(c7)};
 
 	c5.add_update_event([](auto p) { cout << "~~~ c5 updated with value: " << p << endl; });
 
@@ -80,6 +94,8 @@ int main()
 	c5 = std::move(c1);
 
 	((T&)c5).foo();
+	//((T&)c10).foo(); // U.B. becasue of hard casting away constness
+	//c10.get().foo(); // Compile error becasue foo() is non-const :o)
 	c5.invoke(&T::foo);
 
 
@@ -105,6 +121,9 @@ int main()
 	pstr1 = "C++17";
 	pstr1 += " " + pstr4 + " Rocks!";
 	cout << "property<string> value is '" << pstr1 << "'" << endl;
+	//cout << "Type something then press [ENTER]: " << flush;
+	//std::getline(cin, pstr1.get());
+	//cout << "property<string> value is '" << pstr1 << "'" << endl;
 
 
 
@@ -128,7 +147,7 @@ int main()
 	ps1 = ps2;
 	ps2 = std::move(pu2);
 
-	auto use_count = ((sp&)ps2).use_count();
+	[[maybe_unused]] auto use_count = ((sp&)ps2).use_count();
 	use_count = ps2.invoke(&sp::use_count);
 
 	ps2->foo();
@@ -142,21 +161,21 @@ int main()
 	property<array<int, 3>> pa2 = array<int, 3>{1, 0, 3};
 	//property<array<int, 3>> pa3 = {1, 2, 3}; // FIX ME~!!!!!111oneone
 	pa1[1] = 2;
-	auto& pa1r = (array<int, 3>&)pa1;
+	auto& pa1r = pa1.get();
 	cout << "array: ";
 	for_each(begin(pa1r), end(pa1r), [](auto& v) { cout << v << ", "; });
 	cout << "(" << pa1.invoke(&array<int, 3>::size) << ")" << endl;
 
 	property<vector<int>> pv1{1, 0, 3};
 	pv1[1] = 2;
-	auto& pv1r = (vector<int>&)pv1;
+	auto& pv1r = pv1.get();
 	cout << "vector: ";
 	for_each(begin(pv1r), end(pv1r), [](auto& v) { cout << v << ", "; });
 	cout << "(" << pv1.invoke(&vector<int>::size) << ")" << endl;
 
 	property<vector<int>> pv2 = make_property<vector<int>>({4, 0, 6});
 	pv2[1] = 5;
-	auto& pv2r = (vector<int>&)pv2;
+	auto& pv2r = pv2.get();
 	cout << "vector: ";
 	for_each(begin(pv2r), end(pv2r), [](auto& v) { cout << v << ", "; });
 	cout << "(" << pv2.invoke(&vector<int>::size) << ")" << endl;
@@ -167,7 +186,7 @@ int main()
 	pm1[7] = 8;
 	pm1[9] = 10;
 	pm1[11] = 12;
-	auto& pm1r = (map<int, int>&)pm1;
+	auto& pm1r = pm1.get();
 	cout << "map: ";
 	for_each(begin(pm1r), end(pm1r), [](auto& v) { cout << v.first << " => " << v.second << ", "; });
 	cout << "(" << pm1.invoke(&map<int, int>::size) << ")" << endl;
@@ -175,7 +194,7 @@ int main()
 	property<map<string, int>> pm3({{"_1_", 1}, {"_2_", 2}, {"_3_", 3}});
 	pm3["_4_"] = 4;
 	pm3["_5_"] = 5;
-	auto& pm3r = (map<string, int>&)pm3;
+	auto& pm3r = pm3.get();
 	cout << "map: ";
 	for_each(begin(pm3r), end(pm3r), [](auto& v) { cout << v.first << " => " << v.second << ", "; });
 	cout << "(" << pm3.invoke(&map<string, int>::size) << ")" << endl;

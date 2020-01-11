@@ -5,6 +5,7 @@
 #include <functional>
 #include <type_traits>
 #include <initializer_list>
+#include <istream>
 #include <ostream>
 #include <cstddef>
 
@@ -24,14 +25,13 @@ public:
 	template<typename U> property(const property<U>& p) : m_value(p.m_value) {}
 	template<typename U> property(property<U>&& p) : m_value(std::move(p.m_value)) {}
 
-	template<typename U = T, typename V>
-	property(std::initializer_list<V> l,
-		std::enable_if_t<
-			!std::is_scalar_v<U> &&
-			std::is_constructible_v<U, std::initializer_list<V>>
-		>* = nullptr) : m_value(l) {}
+	template<typename V, std::enable_if_t<
+		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
+	property(std::initializer_list<V> l) : m_value(l) {}
 
-	template<typename... A> property(A&&... a) : m_value(std::forward<A>(a)...) {}
+	template<typename... A, std::enable_if_t<
+		std::is_constructible_v<T, A...>>* = nullptr>
+	property(A&&... a) : m_value(std::forward<A>(a)...) {}
 
 	property& operator = (const T& v)
 	{
@@ -189,24 +189,20 @@ public:
 	#undef PROPERTY_FRIEND_OPERATOR
 	#endif
 
+	T& get() { return m_value; }
+	const T& get() const { return m_value; }
+
 	explicit operator T& () { return m_value; }
 	operator const T& () const { return m_value; }
 
-	template<typename U = T>
-	std::enable_if_t<std::is_class_v<U>, U&>
-	operator -> () { return m_value; }
+	//T* operator & () { return &m_value; }
+	//const T* operator & () const { return &m_value; }
 
-	template<typename U = T>
-	std::enable_if_t<std::is_class_v<U>, const U&>
-	operator -> () const { return m_value; }
+	T& operator -> () { return m_value; }
+	const T& operator -> () const { return m_value; }
 
-	template<typename U = T, typename V>
-	std::enable_if_t<std::is_class_v<U>, decltype(std::declval<U>()[V{}])&>
-	operator [] (const V& i) { return m_value[i]; }
-
-	template<typename U = T, typename V>
-	std::enable_if_t<std::is_class_v<U>, const decltype(std::declval<U>()[V{}])&>
-	operator [] (const V& i) const { return m_value[i]; }
+	template<typename U> auto& operator [] (const U& i) { return m_value[i]; }
+	template<typename U> const auto& operator [] (const U& i) const { return m_value[i]; }
 
 	template<typename F, typename... A>
 	auto invoke(F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
@@ -235,13 +231,9 @@ private:
 	{ for(auto& event : m_update_events) event(*this); }
 };
 
-template<typename T>
-inline auto& operator << (std::ostream& os, const property<T>& p)
-{
-	os << (T&)p;
-	return os;
-}
 
+
+// PROPERTY FRIEND OPERATORS
 #ifndef PROPERTY_FRIEND_OPERATOR
 #define PROPERTY_FRIEND_OPERATOR(op) \
 template<typename U, typename V> \
@@ -275,6 +267,21 @@ PROPERTY_FRIEND_OPERATOR(<<);
 #undef PROPERTY_FRIEND_OPERATOR
 #endif
 
+// PROPERTY I/O OPERATORS
+template<typename T>
+inline std::istream& operator >> (std::istream& os, property<T>& p)
+{
+	os >> p.get();
+	return os;
+}
+
+template<typename T>
+inline std::ostream& operator << (std::ostream& os, const property<T>& p)
+{
+	os << p.get();
+	return os;
+}
+
 
 
 // POINTER SPECIALIZATION
@@ -301,6 +308,22 @@ public:
 	}
 
 	property& operator = (T*&& v)
+	{
+		m_value = v;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename U>
+	property& operator = (U* const & v)
+	{
+		m_value = v;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename U>
+	property& operator = (U*&& v)
 	{
 		m_value = v;
 		fire_update_event();
@@ -381,10 +404,16 @@ public:
 	#undef POINTER_ARITHMETIC_OPERATOR
 	#endif
 
+	T* get() { return m_value; }
+	const T* get() const { return m_value; }
+
 	explicit operator bool () const { return m_value != nullptr; }
 
-	explicit operator T* () { return m_value; }
-	operator T* () const { return m_value; }
+	operator T* () { return m_value; }
+	operator T* const () const { return m_value; }
+
+	//T* operator & () { return m_value; }
+	//const T* operator & () const { return m_value; }
 
 	T& operator * () { return *m_value; }
 	const T& operator * () const { return *m_value; }
@@ -452,6 +481,22 @@ public:
 	}
 
 	property& operator = (T*&& v)
+	{
+		m_value = v;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename U>
+	property& operator = (U* const & v)
+	{
+		m_value = v;
+		fire_update_event();
+		return *this;
+	}
+
+	template<typename U>
+	property& operator = (U*&& v)
 	{
 		m_value = v;
 		fire_update_event();
@@ -532,10 +577,16 @@ public:
 	#undef POINTER_ARITHMETIC_OPERATOR
 	#endif
 
+	T* get() { return m_value; }
+	const T* get() const { return m_value; }
+
 	explicit operator bool () const { return m_value != nullptr; }
 
-	explicit operator T* () { return m_value; }
-	operator T* () const { return m_value; }
+	operator T* () { return m_value; }
+	operator T* const () const { return m_value; }
+
+	//T* operator & () { return m_value; }
+	//const T* operator & () const { return m_value; }
 
 	T& operator * () { return *m_value; }
 	const T& operator * () const { return *m_value; }
@@ -575,7 +626,7 @@ private:
 
 
 
-// PROPERTY HELPERS
+// PROPERTY MAKER HELPERS
 template<typename T, typename U>
 inline auto make_property(std::initializer_list<U> l)
 {
