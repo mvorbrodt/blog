@@ -16,11 +16,11 @@ int main()
 	auto p1 = make_property<int>(1);
 	auto p2 = make_property<int>(2);
 
-	property<const float> p3(p2);
-	const property<double> p4(p3);
-	property<int> p5{}, p6{123};
+	property<const float> p3(p1), p4{p2};
+	const property<double> p5(p1), p6{p2};
+	property<int> p7{}, p8{123}, p9(p1), p10{p2};
 
-	p1.add_update_event([](auto p) { cout << "~~~ p1 updated with value: " << p << endl; });
+	p1.add_update_event([](auto& p) { cout << "~~~ p1 updated with value: " << p << endl; });
 
 	p1 = p2 + 0.f;
 	p1 = p3;
@@ -36,14 +36,14 @@ int main()
 	property<const T*> pp4 = new T{"property<const T*>"};
 
 	int* ip1 = new int;
-	property<int*> pp5;
+	property<int*> pp5, pp6(ip1), pp7{ip1};
 	pp5 = ip1;
 
 	*pp1++ = T{"C++11"};
 	*pp2++ = Q{"C++14"};
 
-	pp1.add_update_event([](auto p) { cout << "~~~ pp1 updated with value: " << p << " containing: " << *p << endl; });
-	pp2.add_update_event([](auto p) { cout << "~~~ pp2 updated with value: " << p << " containing: " << *p << endl; });
+	pp1.add_update_event([](auto& p) { cout << "~~~ pp1 updated with value: " << p << " containing: " << *p << endl; });
+	pp2.add_update_event([](auto& p) { cout << "~~~ pp2 updated with value: " << p << " containing: " << *p << endl; });
 
 	--pp1, pp2 -= 1;
 
@@ -88,7 +88,7 @@ int main()
 	property<const T> c6{}, c7{"C++Rocks!"}, c8{1, 2, 3}; // const stripped away here
 	const property<T> c9{c6}, c10{std::move(c7)};
 
-	c5.add_update_event([](auto p) { cout << "~~~ c5 updated with value: " << p << endl; });
+	c5.add_update_event([](auto& p) { cout << "~~~ c5 updated with value: " << p << endl; });
 
 	c5 = c1;
 	c5 = std::move(c1);
