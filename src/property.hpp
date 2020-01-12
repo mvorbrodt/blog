@@ -198,8 +198,8 @@ public:
 	T& operator -> () { return m_value; }
 	const T& operator -> () const { return m_value; }
 
-	template<typename U> auto& operator [] (const U& i) { return m_value[i]; }
-	template<typename U> const auto& operator [] (const U& i) const { return m_value[i]; }
+	template<typename U> decltype(auto) operator [] (const U& i) { return(m_value[i]); }
+	template<typename U> decltype(auto) operator [] (const U& i) const { return(m_value[i]); }
 
 	template<typename F, typename... A>
 	auto invoke(F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
