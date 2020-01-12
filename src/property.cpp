@@ -20,7 +20,9 @@ int main()
 	const property<double> p5(p1), p6{p2};
 	property<int> p7{}, p8{123}, p9(p1), p10{p2};
 
-	p1.add_update_event([](auto& p) { cout << "~~~ p1 updated with value: " << p << endl; });
+	auto update_event_proc = [t = T{"hi!"}](const auto& p) { cout << "~~~ p1 updated with value: " << p << ", T = " << t << endl; };
+	p1.add_update_event(update_event_proc);
+	p1.add_update_event([t = T{"bye!"}](const auto& p) { cout << "~~~ p1 updated with value: " << p << ", T = " << t << endl; });
 
 	p1 = p2 + 0.f;
 	p1 = p3;

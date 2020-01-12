@@ -31,6 +31,9 @@ struct T
 	T(T&& t) : m_x(t.m_x), m_y(t.m_y), m_z(t.m_z), m_s(std::move(t.m_s)), instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::(T" << t.get_instance_number() << " &&)" << std::endl; }
 
+	virtual ~T()
+	{ std::cout << "T" << get_instance_number() << "::~T()" << std::endl; }
+
 	T& operator = (const T& rhs)
 	{
 		std::cout << "T" << get_instance_number() << "::operator = (const T" << rhs.get_instance_number() << " &)" << std::endl;
@@ -45,19 +48,16 @@ struct T
 		return *this;
 	}
 
-	virtual ~T()
-	{ std::cout << "T" << get_instance_number() << "::~T()" << std::endl; }
-
 	virtual void foo()
 	{ std::cout << "T" << get_instance_number() << "::foo()" << std::endl; }
 
 	virtual void bar() const
 	{ std::cout << "T" << get_instance_number() << "::bar()" << std::endl; }
 
-	auto x() const { return m_x; }
-	auto y() const { return m_y; }
-	auto z() const { return m_z; }
-	auto s() const { return m_s; }
+	decltype(auto) x() const { return(m_x); }
+	decltype(auto) y() const { return(m_y); }
+	decltype(auto) z() const { return(m_z); }
+	decltype(auto) s() const { return(m_s); }
 
 	int get_instance_number() const { return instance_number; }
 
@@ -95,6 +95,9 @@ struct Q final : public T
 	Q(Q&& q) : T(std::forward<Q>(q))
 	{ std::cout << "Q" << get_instance_number() << "::Q(Q" << q.get_instance_number() << " &&)" << std::endl; }
 
+	virtual ~Q()
+	{ std::cout << "Q" << get_instance_number() << "::~Q()" << std::endl; }
+
 	Q& operator = (const Q& rhs)
 	{
 		std::cout << "Q" << get_instance_number() << "::operator = (const Q" << rhs.get_instance_number() << " &)" << std::endl;
@@ -109,15 +112,17 @@ struct Q final : public T
 		return *this;
 	}
 
-	virtual ~Q()
-	{ std::cout << "Q" << get_instance_number() << "::~Q()" << std::endl; }
-
 	virtual void foo() final override
 	{ std::cout << "Q" << get_instance_number() << "::foo()" << std::endl; }
 
 	virtual void bar() const final override
 	{ std::cout << "Q" << get_instance_number() << "::bar()" << std::endl; }
 };
+
+bool operator < (const T& lhs, const T& rhs)
+{
+	return lhs.x() < rhs.x();
+}
 
 std::ostream& operator << (std::ostream& os, const T& t)
 {

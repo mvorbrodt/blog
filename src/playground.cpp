@@ -6,12 +6,42 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <functional>
 #include <iterator>
+#include "T.hpp"
 
 using namespace std;
 
+void foo(const T& t) { cout << "foo(const T&) t = " << t << endl; }
+void foo(T&& t) { cout << "foo(T&&) t = " << t << endl; }
+template<typename T> void bar(T&& t) { foo(forward<T>(t)); }
+//void bar(T&& t) { foo(forward<T>(t)); } // Compile error!
+
+template<typename X>
+struct S
+{
+	using proc_t = function<void(const S&)>;
+
+	void foo(const proc_t&) { cout << "S::foo(const proc_t&)" << endl; }
+	void foo(proc_t&&) { cout << "S::foo(proc_t&&)" << endl; }
+
+	void bar(proc_t&& p) { S::foo(forward<proc_t>(p)); }
+};
+
 int main()
 {
+	S<int> s;
+	s.bar([](auto&) {});
+	auto p = [](auto&) {};
+	s.bar(p);
+	cout << endl;
+
+	bar(T{"hi!"});
+	cout << endl;
+	T ttt{"bye!"};
+	bar(ttt);
+	cout << endl;
+
 	using XnXs = pair<int, int>;
 	using Xs = vector<XnXs>;
 	using XsPush = back_insert_iterator<Xs>;

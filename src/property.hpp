@@ -58,7 +58,7 @@ public:
 	template<typename U>
 	property& operator = (U&& v)
 	{
-		m_value = std::move(v);
+		m_value = std::forward<U>(v);
 		fire_update_event();
 		return *this;
 	}
@@ -198,8 +198,8 @@ public:
 	T& operator -> () { return m_value; }
 	const T& operator -> () const { return m_value; }
 
-	template<typename U> decltype(auto) operator [] (const U& i) { return(m_value[i]); }
-	template<typename U> decltype(auto) operator [] (const U& i) const { return(m_value[i]); }
+	template<typename U> decltype(auto) operator [] (U&& i) { return(m_value[std::forward<U>(i)]); }
+	template<typename U> decltype(auto) operator [] (U&& i) const { return(m_value[std::forward<U>(i)]); }
 
 	template<typename F, typename... A>
 	auto invoke(F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
@@ -289,38 +289,12 @@ public:
 	property() = default;
 
 	property(T* const & v) : m_value(v) {}
-	property(T* && v) : m_value(v) {}
 
 	property(const property& p) : m_value(p.m_value) {}
-	property(property&& p) : m_value(p.m_value) {}
 
 	template<typename U> property(const property<U*>& p) : m_value(p.m_value) {}
-	template<typename U> property(property<U*>&& p) : m_value(p.m_value) {}
 
 	property& operator = (T* const & v)
-	{
-		m_value = v;
-		fire_update_event();
-		return *this;
-	}
-
-	property& operator = (T*&& v)
-	{
-		m_value = v;
-		fire_update_event();
-		return *this;
-	}
-
-	template<typename U>
-	property& operator = (U* const & v)
-	{
-		m_value = v;
-		fire_update_event();
-		return *this;
-	}
-
-	template<typename U>
-	property& operator = (U*&& v)
 	{
 		m_value = v;
 		fire_update_event();
@@ -337,29 +311,8 @@ public:
 		return *this;
 	}
 
-	property& operator = (property&& p)
-	{
-		if(this != &p)
-		{
-			m_value = p.m_value;
-			fire_update_event();
-		}
-		return *this;
-	}
-
 	template<typename U>
 	property& operator = (const property<U*>& p)
-	{
-		if(this != (decltype(this))&p)
-		{
-			m_value = p.m_value;
-			fire_update_event();
-		}
-		return *this;
-	}
-
-	template<typename U>
-	property& operator = (property<U*>&& p)
 	{
 		if(this != (decltype(this))&p)
 		{
@@ -459,38 +412,12 @@ public:
 	property() = default;
 
 	property(T* const & v) : m_value(v) {}
-	property(T* && v) : m_value(v) {}
 
 	property(const property& p) : m_value(p.m_value) {}
-	property(property&& p) : m_value(p.m_value) {}
 
 	template<typename U> property(const property<U[]>& p) : m_value(p.m_value) {}
-	template<typename U> property(property<U[]>&& p) : m_value(p.m_value) {}
 
 	property& operator = (T* const & v)
-	{
-		m_value = v;
-		fire_update_event();
-		return *this;
-	}
-
-	property& operator = (T*&& v)
-	{
-		m_value = v;
-		fire_update_event();
-		return *this;
-	}
-
-	template<typename U>
-	property& operator = (U* const & v)
-	{
-		m_value = v;
-		fire_update_event();
-		return *this;
-	}
-
-	template<typename U>
-	property& operator = (U*&& v)
 	{
 		m_value = v;
 		fire_update_event();
@@ -507,29 +434,8 @@ public:
 		return *this;
 	}
 
-	property& operator = (property&& p)
-	{
-		if(this != &p)
-		{
-			m_value = p.m_value;
-			fire_update_event();
-		}
-		return *this;
-	}
-
 	template<typename U>
 	property& operator = (const property<U[]>& p)
-	{
-		if(this != (decltype(this))&p)
-		{
-			m_value = p.m_value;
-			fire_update_event();
-		}
-		return *this;
-	}
-
-	template<typename U>
-	property& operator = (property<U[]>&& p)
 	{
 		if(this != (decltype(this))&p)
 		{
