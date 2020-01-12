@@ -195,9 +195,6 @@ public:
 	explicit operator T& () { return m_value; }
 	operator const T& () const { return m_value; }
 
-	//T* operator & () { return &m_value; }
-	//const T* operator & () const { return &m_value; }
-
 	T& operator -> () { return m_value; }
 	const T& operator -> () const { return m_value; }
 
@@ -412,9 +409,6 @@ public:
 	operator T* () { return m_value; }
 	operator T* const () const { return m_value; }
 
-	//T* operator & () { return m_value; }
-	//const T* operator & () const { return m_value; }
-
 	T& operator * () { return *m_value; }
 	const T& operator * () const { return *m_value; }
 
@@ -584,9 +578,6 @@ public:
 
 	operator T* () { return m_value; }
 	operator T* const () const { return m_value; }
-
-	//T* operator & () { return m_value; }
-	//const T* operator & () const { return m_value; }
 
 	T& operator * () { return *m_value; }
 	const T& operator * () const { return *m_value; }
