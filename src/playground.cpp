@@ -30,16 +30,16 @@ struct S
 
 int main()
 {
-	S<int> s;
-	s.bar([](auto&) {});
-	auto p = [](auto&) {};
-	s.bar(p);
-	cout << endl;
-
 	bar(T{"hi!"});
 	cout << endl;
 	T ttt{"bye!"};
 	bar(ttt);
+	cout << endl;
+
+	S<int> s;
+	s.bar([](auto&) {});
+	auto p = [](auto&) {};
+	s.bar(p);
 	cout << endl;
 
 	using XnXs = pair<int, int>;
