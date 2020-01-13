@@ -2,12 +2,13 @@
 #include <iomanip>
 #include <ostream>
 #include <sstream>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
+#include <map>
+#include <iterator>
 #include <algorithm>
 #include <functional>
-#include <iterator>
 #include "T.hpp"
 
 using namespace std;
