@@ -34,13 +34,23 @@ int main()
 	cout << endl;
 	T ttt{"bye!"};
 	bar(ttt);
-	cout << endl;
+	cout << ">>> done" << endl << endl;
 
 	S<int> s;
 	s.bar([](auto&) {});
 	auto p = [](auto&) {};
 	s.bar(p);
-	cout << endl;
+	cout << ">>> done" << endl << endl;
+
+	vector<T> vt;
+	vt.push_back(T{"hi!"});
+	vt.resize(2);
+	cout << ">>> done" << endl << endl;
+
+	vector<Q> vq;
+	vq.push_back(Q{"bye!"});
+	vq.resize(2);
+	cout << ">>> done" << endl << endl;
 
 	using XnXs = pair<int, int>;
 	using Xs = vector<XnXs>;

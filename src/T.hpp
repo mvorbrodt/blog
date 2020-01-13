@@ -28,7 +28,7 @@ struct T
 	T(const T& t) : m_x(t.m_x), m_y(t.m_y), m_z(t.m_z), m_s(t.m_s), instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::T(const T" << t.get_instance_number() << " &)" << std::endl; }
 
-	T(T&& t) : m_x(t.m_x), m_y(t.m_y), m_z(t.m_z), m_s(std::move(t.m_s)), instance_number(instance_counter++)
+	T(T&& t) noexcept : m_x(t.m_x), m_y(t.m_y), m_z(t.m_z), m_s(std::move(t.m_s)), instance_number(instance_counter++)
 	{ std::cout << "T" << get_instance_number() << "::(T" << t.get_instance_number() << " &&)" << std::endl; }
 
 	virtual ~T()
@@ -41,7 +41,7 @@ struct T
 		return *this;
 	}
 
-	T& operator = (T&& rhs)
+	T& operator = (T&& rhs) noexcept
 	{
 		std::cout << "T" << get_instance_number() << "::operator = (T" << rhs.get_instance_number() << " &&)" << std::endl;
 		m_x = rhs.m_x, m_y = rhs.m_y, m_z = rhs.m_z, m_s = std::move(rhs.m_s);
@@ -92,7 +92,7 @@ struct Q final : public T
 	Q(const Q& q) : T(q)
 	{ std::cout << "Q" << get_instance_number() << "::Q(const Q" << q.get_instance_number() << " &)" << std::endl; }
 
-	Q(Q&& q) : T(std::forward<Q>(q))
+	Q(Q&& q) noexcept : T(std::forward<Q>(q))
 	{ std::cout << "Q" << get_instance_number() << "::Q(Q" << q.get_instance_number() << " &&)" << std::endl; }
 
 	virtual ~Q()
@@ -105,7 +105,7 @@ struct Q final : public T
 		return *this;
 	}
 
-	Q& operator = (Q&& rhs)
+	Q& operator = (Q&& rhs) noexcept
 	{
 		std::cout << "Q" << get_instance_number() << "::operator = (Q" << rhs.get_instance_number() << " &&)" << std::endl;
 		T::operator=(std::forward<Q>(rhs));
