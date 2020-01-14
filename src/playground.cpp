@@ -16,7 +16,7 @@ using namespace std;
 void foo(const T& t) { cout << "foo(const T&) t = " << t << endl; }
 void foo(T&& t) { cout << "foo(T&&) t = " << t << endl; }
 template<typename T> void bar(T&& t) { foo(forward<T>(t)); }
-//void bar(T&& t) { foo(forward<T>(t)); } // Compile error!
+//void bar(T&& t) { foo(forward<T>(t)); } // Compile error, T&& is a universal reference here!
 
 template<typename X>
 struct S
