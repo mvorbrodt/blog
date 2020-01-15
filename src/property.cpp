@@ -26,8 +26,12 @@ int main()
 	p1.add_update_event(update_event_proc);
 	p1.add_update_event([t = T{"bye!"}](const auto& p) { cout << "~~~ p1 updated with value: " << p << ", T = " << t << endl; });
 
+	p1 = 1;
+	p1 = 0.f;
+	p1 = p2;
+	p1 = p1 + p2;
 	p1 = p2 + 0.f;
-	p1 = p3;
+	p1 = p2 + p3;
 	++p1;
 	p1 *= p4;
 
@@ -94,6 +98,7 @@ int main()
 
 	c5.add_update_event([](auto& p) { cout << "~~~ c5 updated with value: " << p << endl; });
 
+	c4 = Q{};
 	c5 = c1;
 	c5 = std::move(c1);
 
@@ -150,6 +155,7 @@ int main()
 
 	ps1 = ps2;
 	ps2 = std::move(pu2);
+	ps2 = std::make_unique<T>();
 
 	[[maybe_unused]] auto use_count = ((sp&)ps2).use_count();
 	use_count = ps2.invoke(&sp::use_count);
