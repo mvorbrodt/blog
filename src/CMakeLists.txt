@@ -1,4 +1,4 @@
-add_executable(property property.hpp property.cpp)
+add_executable(property T.hpp property.hpp property.cpp)
 add_executable(constructors constructors.cpp)
 add_executable(unique unique.cpp)
 add_executable(deadlock deadlock.cpp)
