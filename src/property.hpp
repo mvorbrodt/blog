@@ -13,14 +13,13 @@ template<typename T>
 struct default_property_access_policy
 {
 protected:
-	template<typename T2> void validate_get(const T2& v) const {}
-	template<typename T2> void validate_set(const T2& v) const {}
+	template<typename T2> void validate(const T2& v) const {}
 
-	decltype(auto) get_value(const T& v) const { validate_get(v); return(v); }
-	decltype(auto) get_value(T& v) { validate_get(v); return(v); }
+	decltype(auto) get_value(const T& v) const { return(v); }
+	decltype(auto) get_value(T& v) { return(v); }
 
-	template<typename T2> void set_value(T& v, const T2& nv) { validate_set(nv); v = nv; }
-	template<typename T2> void set_value(T& v, T2&& nv) { validate_set(nv); v = std::forward<T2>(nv); }
+	template<typename T2> void set_value(T& v, const T2& nv) { validate(nv); v = nv; }
+	template<typename T2> void set_value(T& v, T2&& nv) { validate(nv); v = std::forward<T2>(nv); }
 };
 
 template<typename T>
@@ -38,24 +37,24 @@ template<typename T, typename P = default_property_access_policy<T>>
 class property : public P
 {
 public:
-	property() { P::validate_set(m_value); }
+	property() { P::validate(m_value); }
 
-	property(const T& v) : m_value(v) { P::validate_set(m_value); }
-	property(T&& v) : m_value(std::move(v)) { P::validate_set(m_value); }
+	property(const T& v) : m_value(v) { P::validate(m_value); }
+	property(T&& v) : m_value(std::move(v)) { P::validate(m_value); }
 
-	property(const property& p) : m_value(p.P::get_value(p.m_value)) { P::validate_set(m_value); }
-	property(property&& p) : m_value(std::move(p.P::get_value(p.m_value))) { P::validate_set(m_value); }
+	property(const property& p) : m_value(p.P::get_value(p.m_value)) { P::validate(m_value); }
+	property(property&& p) : m_value(std::move(p.P::get_value(p.m_value))) { P::validate(m_value); }
 
-	template<typename T2, typename P2> property(const property<T2, P2>& p) : m_value(p.P2::get_value(p.m_value)) { P::validate_set(m_value); }
-	template<typename T2, typename P2> property(property<T2, P2>&& p) : m_value(std::move(p.P2::get_value(p.m_value))) { P::validate_set(m_value); }
+	template<typename T2, typename P2> property(const property<T2, P2>& p) : m_value(p.P2::get_value(p.m_value)) { P::validate(m_value); }
+	template<typename T2, typename P2> property(property<T2, P2>&& p) : m_value(std::move(p.P2::get_value(p.m_value))) { P::validate(m_value); }
 
 	template<typename V, std::enable_if_t<
 		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
-	property(std::initializer_list<V> l) : m_value(l) { P::validate_set(m_value); }
+	property(std::initializer_list<V> l) : m_value(l) { P::validate(m_value); }
 
 	template<typename... A, std::enable_if_t<
 		std::is_constructible_v<T, A...>>* = nullptr>
-	property(A&&... a) : m_value(std::forward<A>(a)...) { P::validate_set(m_value); }
+	property(A&&... a) : m_value(std::forward<A>(a)...) { P::validate(m_value); }
 
 	property& operator = (const T& v)
 	{
@@ -129,14 +128,21 @@ public:
 		return *this;
 	}
 
-	// ******************************************* //
-	// TODO: VALIDATE SELF-UPDATING OPERATORS HERE //
-	// ******************************************* //
 	#ifndef PROPERTY_INC_DEC_OPERATOR
 	#define PROPERTY_INC_DEC_OPERATOR(op) \
 	property& operator op () \
 	{ \
+		auto temp(m_value); \
 		op m_value; \
+		try \
+		{ \
+			P::validate(m_value); \
+		} \
+		catch(...) \
+		{ \
+			m_value = std::move(temp); \
+			throw; \
+		} \
 		fire_update_event(); \
 		return *this; \
 	} \
@@ -151,34 +157,71 @@ public:
 	#undef PROPERTY_INC_DEC_OPERATOR
 	#endif
 
-	// ************** //
-	// TODO: AND HERE //
-	// ************** //
 	#ifndef PROPERTY_OPERATOR
 	#define PROPERTY_OPERATOR(op) \
 	property& operator op (const T& v) \
 	{ \
+		auto temp(m_value); \
 		m_value op v; \
+		try \
+		{ \
+			P::validate(m_value); \
+		} \
+		catch(...) \
+		{ \
+			m_value = std::move(temp); \
+			throw; \
+		} \
 		fire_update_event(); \
 		return *this; \
 	} \
 	template<typename U> \
 	property& operator op (const U& v) \
 	{ \
+		auto temp(m_value); \
 		m_value op v; \
+		try \
+		{ \
+			P::validate(m_value); \
+		} \
+		catch(...) \
+		{ \
+			m_value = std::move(temp); \
+			throw; \
+		} \
 		fire_update_event(); \
 		return *this; \
 	} \
 	property& operator op (const property& p) \
 	{ \
+		auto temp(m_value); \
 		m_value op p.P::get_value(p.m_value); \
+		try \
+		{ \
+			P::validate(m_value); \
+		} \
+		catch(...) \
+		{ \
+			m_value = std::move(temp); \
+			throw; \
+		} \
 		fire_update_event(); \
 		return *this; \
 	} \
-	template<typename T2, typename P2> \
-	property& operator op (const property<T2, P2>& p) \
+	template<typename T2> \
+	property& operator op (const property<T2, P>& p) \
 	{ \
-		m_value op p.P2::get_value(p.m_value); \
+		auto temp(m_value); \
+		m_value op p.P::get_value(p.m_value); \
+		try \
+		{ \
+			P::validate(m_value); \
+		} \
+		catch(...) \
+		{ \
+			m_value = std::move(temp); \
+			throw; \
+		} \
 		fire_update_event(); \
 		return *this; \
 	}
@@ -199,13 +242,13 @@ public:
 	#define PROPERTY_FRIEND_OPERATOR(op) \
 	template<typename T2, typename P2, typename V> \
 	friend auto operator op (const property<T2, P2>& lhs, const V& rhs) \
-		-> property<decltype(std::declval<T2>() op std::declval<V>())>; \
+		-> property<decltype(std::declval<T2>() op std::declval<V>()), P2>; \
 	template<typename T2, typename P2, typename V> \
 	friend auto operator op (const V& lhs, const property<T2, P2>& rhs) \
-		-> property<decltype(std::declval<V>() op std::declval<T2>())>; \
-	template<typename T2, typename P2, typename T3, typename P3> \
-	friend auto operator op (const property<T2, P2>& lhs, const property<T3, P3>& rhs) \
-		-> property<decltype(std::declval<T2>() op std::declval<T3>())>;
+		-> property<decltype(std::declval<V>() op std::declval<T2>()), P2>; \
+	template<typename T2, typename T3, typename P2> \
+	friend auto operator op (const property<T2, P2>& lhs, const property<T3, P2>& rhs) \
+		-> property<decltype(std::declval<T2>() op std::declval<T3>()), P2>;
 	PROPERTY_FRIEND_OPERATOR(+);
 	PROPERTY_FRIEND_OPERATOR(-);
 	PROPERTY_FRIEND_OPERATOR(*);
@@ -265,21 +308,21 @@ private:
 #define PROPERTY_FRIEND_OPERATOR(op) \
 template<typename T2, typename P2, typename V> \
 auto operator op (const property<T2, P2>& lhs, const V& rhs) \
-	-> property<decltype(std::declval<T2>() op std::declval<V>())> \
+	-> property<decltype(std::declval<T2>() op std::declval<V>()), P2> \
 { \
 	return property(lhs.P2::get_value(lhs.m_value) op rhs); \
 } \
 template<typename T2, typename P2, typename V> \
 auto operator op (const V& lhs, const property<T2, P2>& rhs) \
-	-> property<decltype(std::declval<V>() op std::declval<T2>())> \
+	-> property<decltype(std::declval<V>() op std::declval<T2>()), P2> \
 { \
 	return property(lhs op rhs.P2::get_value(rhs.m_value)); \
 } \
-template<typename T2, typename P2, typename T3, typename P3> \
-auto operator op (const property<T2, P2>& lhs, const property<T3, P3>& rhs) \
-	-> property<decltype(std::declval<T2>() op std::declval<T3>())> \
+template<typename T2, typename T3, typename P2> \
+auto operator op (const property<T2, P2>& lhs, const property<T3, P2>& rhs) \
+	-> property<decltype(std::declval<T2>() op std::declval<T3>()), P2> \
 { \
-	return property(lhs.P2::get_value(lhs.m_value) op rhs.P3::get_value(rhs.m_value)); \
+	return property(lhs.P2::get_value(lhs.m_value) op rhs.P2::get_value(rhs.m_value)); \
 }
 PROPERTY_FRIEND_OPERATOR(+);
 PROPERTY_FRIEND_OPERATOR(-);
@@ -322,7 +365,7 @@ public:
 
 	property(const property& p) : m_value(p.m_value) {}
 
-	template<typename T2, typename P2> property(const property<T2*, P2>& p) : m_value(p.m_value) {}
+	template<typename T2> property(const property<T2*, P>& p) : m_value(p.m_value) {}
 
 	property& operator = (T* const & v)
 	{
@@ -341,8 +384,8 @@ public:
 		return *this;
 	}
 
-	template<typename T2, typename P2>
-	property& operator = (const property<T2*, P2>& p)
+	template<typename T2>
+	property& operator = (const property<T2*, P>& p)
 	{
 		if(this != (decltype(this))&p)
 		{
@@ -445,7 +488,7 @@ public:
 
 	property(const property& p) : m_value(p.m_value) {}
 
-	template<typename T2, typename P2> property(const property<T2[], P2>& p) : m_value(p.m_value) {}
+	template<typename T2> property(const property<T2[], P>& p) : m_value(p.m_value) {}
 
 	property& operator = (T* const & v)
 	{
@@ -464,8 +507,8 @@ public:
 		return *this;
 	}
 
-	template<typename T2, typename P2>
-	property& operator = (const property<T2[], P2>& p)
+	template<typename T2>
+	property& operator = (const property<T2[], P>& p)
 	{
 		if(this != (decltype(this))&p)
 		{
@@ -581,3 +624,15 @@ inline auto make_property(A&&... a)
 	using V = std::decay_t<T>;
 	return property<T, P>(V(std::forward<A>(a)...));
 }
+
+
+
+// PROPERTY TYPE TRAITS
+template<typename>
+struct is_property : std::false_type {};
+
+template<typename T2, typename P2>
+struct is_property<property<T2, P2>> : std::true_type {};
+
+template<typename U>
+inline constexpr bool is_property_v = is_property<U>::value;
