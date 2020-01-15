@@ -13,32 +13,32 @@
 
 // PROPERTY POLICY
 template<typename T>
-struct default_property_access_policy
+struct default_property_policy
 {
 protected:
-	template<typename T2> void validate(const T2& v) const {}
+	template<typename U> void validate(const U& v) const {}
 
 	decltype(auto) get_value(const T& v) const { return(v); }
 	decltype(auto) get_value(T& v) { return(v); }
 
-	template<typename T2> void set_value(T& v, const T2& nv) { validate(nv); v = nv; }
-	template<typename T2> void set_value(T& v, T2&& nv) { validate(nv); v = std::forward<T2>(nv); }
+	template<typename U> void set_value(T& v, const U& nv) { validate(nv); v = nv; }
+	template<typename U> void set_value(T& v, U&& nv) { validate(nv); v = std::forward<U>(nv); }
 };
 
 template<typename T>
-struct default_property_access_policy<T*>
+struct default_property_policy<T*>
 {
 };
 
 template<typename T>
-struct default_property_access_policy<T[]>
+struct default_property_policy<T[]>
 {
 };
 
 
 
 // PROPERTY TYPE TRAITS
-template<typename T, template<typename> class P = default_property_access_policy>
+template<typename T, template<typename> class P = default_property_policy>
 class property;
 
 template<typename>
@@ -47,8 +47,8 @@ struct is_property : std::false_type {};
 template<typename T, template<typename> class P>
 struct is_property<property<T, P>> : std::true_type {};
 
-template<typename U>
-inline constexpr bool is_property_v = is_property<std::decay_t<U>>::value;
+template<typename T>
+inline constexpr bool is_property_v = is_property<std::decay_t<T>>::value;
 
 
 
@@ -65,8 +65,8 @@ public:
 	property(const property& p) : m_value(p.P<T>::get_value(p.m_value)) { P<T>::validate(m_value); }
 	property(property&& p) : m_value(std::move(p.P<T>::get_value(p.m_value))) { P<T>::validate(m_value); }
 
-	template<typename T2> property(const property<T2, P>& p) : m_value(p.P<T2>::get_value(p.m_value)) { P<T>::validate(m_value); }
-	template<typename T2> property(property<T2, P>&& p) : m_value(std::move(p.P<T2>::get_value(p.m_value))) { P<T>::validate(m_value); }
+	template<typename U> property(const property<U, P>& p) : m_value(p.P<U>::get_value(p.m_value)) { P<T>::validate(m_value); }
+	template<typename U> property(property<U, P>&& p) : m_value(std::move(p.P<U>::get_value(p.m_value))) { P<T>::validate(m_value); }
 
 	template<typename V, std::enable_if_t<
 		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
@@ -128,23 +128,23 @@ public:
 		return *this;
 	}
 
-	template<typename T2>
-	property& operator = (const property<T2, P>& p)
+	template<typename U>
+	property& operator = (const property<U, P>& p)
 	{
 		if(this != (decltype(this))&p)
 		{
-			P<T>::set_value(m_value, p.P<T2>::get_value(p.m_value));
+			P<T>::set_value(m_value, p.P<U>::get_value(p.m_value));
 			fire_update_event();
 		}
 		return *this;
 	}
 
-	template<typename T2>
-	property& operator = (property<T2, P>&& p)
+	template<typename U>
+	property& operator = (property<U, P>&& p)
 	{
 		if(this != (decltype(this))&p)
 		{
-			P<T>::set_value(m_value, std::move(p.P<T2>::get_value(p.m_value)));
+			P<T>::set_value(m_value, std::move(p.P<U>::get_value(p.m_value)));
 			fire_update_event();
 		}
 		return *this;
@@ -230,11 +230,11 @@ public:
 		fire_update_event(); \
 		return *this; \
 	} \
-	template<typename T2> \
-	property& operator op (const property<T2, P>& p) \
+	template<typename U> \
+	property& operator op (const property<U, P>& p) \
 	{ \
 		auto temp(m_value); \
-		m_value op p.P<T2>::get_value(p.m_value); \
+		m_value op p.P<U>::get_value(p.m_value); \
 		try \
 		{ \
 			P<T>::validate(m_value); \
@@ -265,7 +265,7 @@ public:
 	template<typename T2, template<typename> class P2, typename V> \
 	friend auto operator op (const property<T2, P2>& lhs, const V& rhs) \
 		-> property<decltype(std::declval<T2>() op std::declval<V>()), P2>; \
-	template<typename T2, template<typename> class P2, typename V> \
+	template<typename V, typename T2, template<typename> class P2> \
 	friend auto operator op (const V& lhs, const property<T2, P2>& rhs) \
 		-> property<decltype(std::declval<V>() op std::declval<T2>()), P2>; \
 	template<typename T2, typename T3, template<typename> class P2> \
@@ -334,7 +334,7 @@ auto operator op (const property<T2, P2>& lhs, const V& rhs) \
 { \
 	return property(lhs.P2<T2>::get_value(lhs.m_value) op rhs); \
 } \
-template<typename T2, template<typename> class P2, typename V> \
+template<typename V, typename T2, template<typename> class P2> \
 auto operator op (const V& lhs, const property<T2, P2>& rhs) \
 	-> property<decltype(std::declval<V>() op std::declval<T2>()), P2> \
 { \
@@ -387,7 +387,7 @@ public:
 
 	property(const property& p) : m_value(p.m_value) {}
 
-	template<typename T2> property(const property<T2*, P>& p) : m_value(p.m_value) {}
+	template<typename U> property(const property<U*, P>& p) : m_value(p.m_value) {}
 
 	property& operator = (T* const & v)
 	{
@@ -406,8 +406,8 @@ public:
 		return *this;
 	}
 
-	template<typename T2>
-	property& operator = (const property<T2*, P>& p)
+	template<typename U>
+	property& operator = (const property<U*, P>& p)
 	{
 		if(this != (decltype(this))&p)
 		{
@@ -510,7 +510,7 @@ public:
 
 	property(const property& p) : m_value(p.m_value) {}
 
-	template<typename T2> property(const property<T2[], P>& p) : m_value(p.m_value) {}
+	template<typename U> property(const property<U[], P>& p) : m_value(p.m_value) {}
 
 	property& operator = (T* const & v)
 	{
@@ -529,8 +529,8 @@ public:
 		return *this;
 	}
 
-	template<typename T2>
-	property& operator = (const property<T2[], P>& p)
+	template<typename U>
+	property& operator = (const property<U[], P>& p)
 	{
 		if(this != (decltype(this))&p)
 		{
@@ -619,30 +619,30 @@ private:
 
 
 // PROPERTY MAKER HELPERS
-template<typename T, typename U>
-inline auto make_property(std::initializer_list<U> l)
+template<typename T, typename V>
+inline auto make_property(std::initializer_list<V> l)
 {
-	using V = std::decay_t<T>;
-	return property<T>(V(l));
+	using U = std::decay_t<T>;
+	return property<T>(U(l));
 }
 
-template<typename T, template<typename> class P, typename U>
-inline auto make_property(std::initializer_list<U> l)
+template<typename T, template<typename> class P, typename V>
+inline auto make_property(std::initializer_list<V> l)
 {
-	using V = std::decay_t<T>;
-	return property<T, P>(V(l));
+	using U = std::decay_t<T>;
+	return property<T, P>(U(l));
 }
 
 template<typename T, typename... A>
 inline auto make_property(A&&... a)
 {
-	using V = std::decay_t<T>;
-	return property<T>(V(std::forward<A>(a)...));
+	using U = std::decay_t<T>;
+	return property<T>(U(std::forward<A>(a)...));
 }
 
 template<typename T, template<typename> class P, typename... A>
 inline auto make_property(A&&... a)
 {
-	using V = std::decay_t<T>;
-	return property<T, P>(V(std::forward<A>(a)...));
+	using U = std::decay_t<T>;
+	return property<T, P>(U(std::forward<A>(a)...));
 }
