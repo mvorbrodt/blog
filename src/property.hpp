@@ -25,15 +25,23 @@ protected:
 	template<typename U> void set_value(T& v, U&& nv) { validate(nv); v = std::forward<U>(nv); }
 };
 
-template<typename T>
-struct default_property_policy<T*>
+template<typename TP>
+struct default_property_policy<TP*>
 {
+protected:
+	using T = TP*;
+
+	void validate(const T& v) const {}
+
+	decltype(auto) get_value(const T& v) const { return(v); }
+	decltype(auto) get_value(T& v) { return(v); }
+
+	void set_value(T& v, const T& nv) { validate(nv); v = nv; }
+	void set_value(T& v, T&& nv) { validate(nv); v = std::forward<T>(nv); }
 };
 
-template<typename T>
-struct default_property_policy<T[]>
-{
-};
+template<typename TA>
+struct default_property_policy<TA[]> : default_property_policy<TA*> {};
 
 
 
@@ -57,35 +65,37 @@ template<typename T, template<typename> class P>
 class property : public P<T>
 {
 public:
-	property() { P<T>::validate(m_value); }
+	using PT = P<T>;
 
-	property(const T& v) : m_value(v) { P<T>::validate(m_value); }
-	property(T&& v) : m_value(std::move(v)) { P<T>::validate(m_value); }
+	property() { PT::validate(m_value); }
 
-	property(const property& p) : m_value(p.P<T>::get_value(p.m_value)) { P<T>::validate(m_value); }
-	property(property&& p) : m_value(std::move(p.P<T>::get_value(p.m_value))) { P<T>::validate(m_value); }
+	property(const T& v) : m_value(v) { PT::validate(m_value); }
+	property(T&& v) : m_value(std::move(v)) { PT::validate(m_value); }
 
-	template<typename U> property(const property<U, P>& p) : m_value(p.P<U>::get_value(p.m_value)) { P<T>::validate(m_value); }
-	template<typename U> property(property<U, P>&& p) : m_value(std::move(p.P<U>::get_value(p.m_value))) { P<T>::validate(m_value); }
+	property(const property& p) : m_value(p.PT::get_value(p.m_value)) { PT::validate(m_value); }
+	property(property&& p) : m_value(std::move(p.PT::get_value(p.m_value))) { PT::validate(m_value); }
+
+	template<typename U> property(const property<U, P>& p) : m_value(p.P<U>::get_value(p.m_value)) { PT::validate(m_value); }
+	template<typename U> property(property<U, P>&& p) : m_value(std::move(p.P<U>::get_value(p.m_value))) { PT::validate(m_value); }
 
 	template<typename V, std::enable_if_t<
 		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
-	property(std::initializer_list<V> l) : m_value(l) { P<T>::validate(m_value); }
+	property(std::initializer_list<V> l) : m_value(l) { PT::validate(m_value); }
 
 	template<typename... A, std::enable_if_t<
 		std::is_constructible_v<T, A...>>* = nullptr>
-	property(A&&... a) : m_value(std::forward<A>(a)...) { P<T>::validate(m_value); }
+	property(A&&... a) : m_value(std::forward<A>(a)...) { PT::validate(m_value); }
 
 	property& operator = (const T& v)
 	{
-		P<T>::set_value(m_value, v);
+		PT::set_value(m_value, v);
 		fire_update_event();
 		return *this;
 	}
 
 	property& operator = (T&& v)
 	{
-		P<T>::set_value(m_value, std::move(v));
+		PT::set_value(m_value, std::move(v));
 		fire_update_event();
 		return *this;
 	}
@@ -94,7 +104,7 @@ public:
 	std::enable_if_t<!is_property_v<U>, property&>
 	operator = (const U& v)
 	{
-		P<T>::set_value(m_value, v);
+		PT::set_value(m_value, v);
 		fire_update_event();
 		return *this;
 	}
@@ -103,7 +113,7 @@ public:
 	std::enable_if_t<!is_property_v<U>, property&>
 	operator = (U&& v)
 	{
-		P<T>::set_value(m_value, std::forward<U>(v));
+		PT::set_value(m_value, std::forward<U>(v));
 		fire_update_event();
 		return *this;
 	}
@@ -112,7 +122,7 @@ public:
 	{
 		if(this != &p)
 		{
-			P<T>::set_value(m_value, p.P<T>::get_value(p.m_value));
+			PT::set_value(m_value, p.PT::get_value(p.m_value));
 			fire_update_event();
 		}
 		return *this;
@@ -122,7 +132,7 @@ public:
 	{
 		if(this != &p)
 		{
-			P<T>::set_value(m_value, std::move(p.P<T>::get_value(p.m_value)));
+			PT::set_value(m_value, std::move(p.PT::get_value(p.m_value)));
 			fire_update_event();
 		}
 		return *this;
@@ -133,7 +143,7 @@ public:
 	{
 		if(this != (decltype(this))&p)
 		{
-			P<T>::set_value(m_value, p.P<U>::get_value(p.m_value));
+			PT::set_value(m_value, p.P<U>::get_value(p.m_value));
 			fire_update_event();
 		}
 		return *this;
@@ -144,7 +154,7 @@ public:
 	{
 		if(this != (decltype(this))&p)
 		{
-			P<T>::set_value(m_value, std::move(p.P<U>::get_value(p.m_value)));
+			PT::set_value(m_value, std::move(p.P<U>::get_value(p.m_value)));
 			fire_update_event();
 		}
 		return *this;
@@ -158,7 +168,7 @@ public:
 		op m_value; \
 		try \
 		{ \
-			P<T>::validate(m_value); \
+			PT::validate(m_value); \
 		} \
 		catch(...) \
 		{ \
@@ -187,7 +197,7 @@ public:
 		m_value op v; \
 		try \
 		{ \
-			P<T>::validate(m_value); \
+			PT::validate(m_value); \
 		} \
 		catch(...) \
 		{ \
@@ -204,7 +214,7 @@ public:
 		m_value op v; \
 		try \
 		{ \
-			P<T>::validate(m_value); \
+			PT::validate(m_value); \
 		} \
 		catch(...) \
 		{ \
@@ -217,10 +227,10 @@ public:
 	property& operator op (const property& p) \
 	{ \
 		auto temp(m_value); \
-		m_value op p.P<T>::get_value(p.m_value); \
+		m_value op p.PT::get_value(p.m_value); \
 		try \
 		{ \
-			P<T>::validate(m_value); \
+			PT::validate(m_value); \
 		} \
 		catch(...) \
 		{ \
@@ -237,7 +247,7 @@ public:
 		m_value op p.P<U>::get_value(p.m_value); \
 		try \
 		{ \
-			P<T>::validate(m_value); \
+			PT::validate(m_value); \
 		} \
 		catch(...) \
 		{ \
@@ -284,11 +294,11 @@ public:
 	#undef PROPERTY_FRIEND_OPERATOR
 	#endif
 
-	T& get() { return P<T>::get_value(m_value); }
-	const T& get() const { return P<T>::get_value(m_value); }
+	T& get() { return PT::get_value(m_value); }
+	const T& get() const { return PT::get_value(m_value); }
 
-	explicit operator T& () { return P<T>::get_value(m_value); }
-	operator const T& () const { return P<T>::get_value(m_value); }
+	explicit operator T& () { return PT::get_value(m_value); }
+	operator const T& () const { return PT::get_value(m_value); }
 
 	T& operator -> () { return m_value; }
 	const T& operator -> () const { return m_value; }
@@ -381,17 +391,19 @@ template<typename T, template<typename> class P>
 class property<T*, P> : public P<T*>
 {
 public:
-	property() = default;
+	using PT = P<T*>;
 
-	property(T* const & v) : m_value(v) {}
+	property() { PT::validate(m_value); }
 
-	property(const property& p) : m_value(p.m_value) {}
+	property(T* const & v) : m_value(v) { PT::validate(m_value); }
 
-	template<typename U> property(const property<U*, P>& p) : m_value(p.m_value) {}
+	property(const property& p) : m_value(p.PT::get_value(p.m_value)) { PT::validate(m_value); }
+
+	template<typename U> property(const property<U*, P>& p) : m_value(p.P<U*>::get_value(p.m_value)) { PT::validate(m_value); }
 
 	property& operator = (T* const & v)
 	{
-		m_value = v;
+		PT::set_value(m_value, v);
 		fire_update_event();
 		return *this;
 	}
@@ -400,7 +412,7 @@ public:
 	{
 		if(this != &p)
 		{
-			m_value = p.m_value;
+			PT::set_value(m_value, p.PT::get_value(p.m_value));
 			fire_update_event();
 		}
 		return *this;
@@ -411,7 +423,7 @@ public:
 	{
 		if(this != (decltype(this))&p)
 		{
-			m_value = p.m_value;
+			PT::set_value(m_value, p.P<U*>::get_value(p.m_value));
 			fire_update_event();
 		}
 		return *this;
@@ -421,7 +433,17 @@ public:
 	#define POINTER_INC_DEC_OPERATOR(op) \
 	property& operator op () \
 	{ \
+		auto temp(m_value); \
 		op m_value; \
+		try \
+		{ \
+			PT::validate(m_value); \
+		} \
+		catch(...) \
+		{ \
+			m_value = temp; \
+			throw; \
+		} \
 		fire_update_event(); \
 		return *this; \
 	} \
@@ -440,7 +462,17 @@ public:
 	#define POINTER_ARITHMETIC_OPERATOR(op) \
 	property& operator op (std::ptrdiff_t v) \
 	{ \
+		auto temp(m_value); \
 		m_value op v; \
+		try \
+		{ \
+			PT::validate(m_value); \
+		} \
+		catch(...) \
+		{ \
+			m_value = temp; \
+			throw; \
+		} \
 		fire_update_event(); \
 		return *this; \
 	}
@@ -449,13 +481,13 @@ public:
 	#undef POINTER_ARITHMETIC_OPERATOR
 	#endif
 
-	T* get() { return m_value; }
-	const T* get() const { return m_value; }
+	T* get() { return PT::get_value(m_value); }
+	const T* get() const { return PT::get_value(m_value); }
 
-	explicit operator bool () const { return m_value != nullptr; }
+	explicit operator bool () const { return PT::get_value(m_value) != nullptr; }
 
-	operator T* () { return m_value; }
-	operator T* const () const { return m_value; }
+	operator T* () { return PT::get_value(m_value); }
+	operator T* const () const { return PT::get_value(m_value); }
 
 	T& operator * () { return *m_value; }
 	const T& operator * () const { return *m_value; }
@@ -504,7 +536,9 @@ template<typename T, template<typename> class P>
 class property<T[], P> : public P<T[]>
 {
 public:
-	property() = default;
+	using PT = P<T[]>;
+
+	property() { PT::validate(m_value); }
 
 	property(T* const & v) : m_value(v) {}
 
