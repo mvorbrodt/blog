@@ -72,11 +72,11 @@ public:
 	property(const T& v) : m_value(v) { PT::validate(m_value); }
 	property(T&& v) : m_value(std::move(v)) { PT::validate(m_value); }
 
-	property(const property& p) : m_value(p.PT::get_value(p.m_value)) { PT::validate(m_value); }
-	property(property&& p) : m_value(std::move(p.PT::get_value(p.m_value))) { PT::validate(m_value); }
+	property(const property& p) : m_value(p.get()) { PT::validate(m_value); }
+	property(property&& p) : m_value(std::move(p.get())) { PT::validate(m_value); }
 
-	template<typename U> property(const property<U, P>& p) : m_value(p.P<U>::get_value(p.m_value)) { PT::validate(m_value); }
-	template<typename U> property(property<U, P>&& p) : m_value(std::move(p.P<U>::get_value(p.m_value))) { PT::validate(m_value); }
+	template<typename U> property(const property<U, P>& p) : m_value(p.get()) { PT::validate(m_value); }
+	template<typename U> property(property<U, P>&& p) : m_value(std::move(p.get())) { PT::validate(m_value); }
 
 	template<typename V, std::enable_if_t<
 		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
@@ -122,7 +122,7 @@ public:
 	{
 		if(this != &p)
 		{
-			PT::set_value(m_value, p.PT::get_value(p.m_value));
+			PT::set_value(m_value, p.get());
 			fire_update_event();
 		}
 		return *this;
@@ -132,7 +132,7 @@ public:
 	{
 		if(this != &p)
 		{
-			PT::set_value(m_value, std::move(p.PT::get_value(p.m_value)));
+			PT::set_value(m_value, std::move(p.get()));
 			fire_update_event();
 		}
 		return *this;
@@ -143,7 +143,7 @@ public:
 	{
 		if(this != (decltype(this))&p)
 		{
-			PT::set_value(m_value, p.P<U>::get_value(p.m_value));
+			PT::set_value(m_value, p.get());
 			fire_update_event();
 		}
 		return *this;
@@ -154,7 +154,7 @@ public:
 	{
 		if(this != (decltype(this))&p)
 		{
-			PT::set_value(m_value, std::move(p.P<U>::get_value(p.m_value)));
+			PT::set_value(m_value, std::move(p.get()));
 			fire_update_event();
 		}
 		return *this;
@@ -227,7 +227,7 @@ public:
 	property& operator op (const property& p) \
 	{ \
 		auto temp(m_value); \
-		m_value op p.PT::get_value(p.m_value); \
+		m_value op p.get(); \
 		try \
 		{ \
 			PT::validate(m_value); \
@@ -244,7 +244,7 @@ public:
 	property& operator op (const property<U, P>& p) \
 	{ \
 		auto temp(m_value); \
-		m_value op p.P<U>::get_value(p.m_value); \
+		m_value op p.get(); \
 		try \
 		{ \
 			PT::validate(m_value); \
@@ -297,18 +297,21 @@ public:
 	T& get() { return PT::get_value(m_value); }
 	const T& get() const { return PT::get_value(m_value); }
 
-	explicit operator T& () { return PT::get_value(m_value); }
-	operator const T& () const { return PT::get_value(m_value); }
+	void set(const T& v) { PT::set_value(m_value, v); }
+	void set(T&& v) { PT::set_value(m_value, std::move(v)); }
 
-	T& operator -> () { return m_value; }
-	const T& operator -> () const { return m_value; }
+	explicit operator T& () { return get(); }
+	operator const T& () const { return get(); }
 
-	template<typename U> decltype(auto) operator [] (U&& i) { return(m_value[std::forward<U>(i)]); }
-	template<typename U> decltype(auto) operator [] (U&& i) const { return(m_value[std::forward<U>(i)]); }
+	T& operator -> () { return get(); }
+	const T& operator -> () const { return get(); }
+
+	template<typename U> decltype(auto) operator [] (U&& i) { return(get()[std::forward<U>(i)]); }
+	template<typename U> decltype(auto) operator [] (U&& i) const { return(get()[std::forward<U>(i)]); }
 
 	template<typename F, typename... A>
 	auto invoke(F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
-	{ return std::invoke(std::forward<F>(f), m_value, std::forward<A>(a)...); }
+	{ return std::invoke(std::forward<F>(f), get(), std::forward<A>(a)...); }
 
 	using update_event_t = std::function<void(const property&)>;
 	using update_event_list_t = std::vector<update_event_t>;
@@ -342,19 +345,19 @@ template<typename T2, template<typename> class P2, typename V> \
 auto operator op (const property<T2, P2>& lhs, const V& rhs) \
 	-> property<decltype(std::declval<T2>() op std::declval<V>()), P2> \
 { \
-	return property(lhs.P2<T2>::get_value(lhs.m_value) op rhs); \
+	return property(lhs.get() op rhs); \
 } \
 template<typename V, typename T2, template<typename> class P2> \
 auto operator op (const V& lhs, const property<T2, P2>& rhs) \
 	-> property<decltype(std::declval<V>() op std::declval<T2>()), P2> \
 { \
-	return property(lhs op rhs.P2<T2>::get_value(rhs.m_value)); \
+	return property(lhs op rhs.get()); \
 } \
 template<typename T2, typename T3, template<typename> class P2> \
 auto operator op (const property<T2, P2>& lhs, const property<T3, P2>& rhs) \
 	-> property<decltype(std::declval<T2>() op std::declval<T3>()), P2> \
 { \
-	return property(lhs.P2<T2>::get_value(lhs.m_value) op rhs.P2<T3>::get_value(rhs.m_value)); \
+	return property(lhs.get() op rhs.get()); \
 }
 PROPERTY_FRIEND_OPERATOR(+);
 PROPERTY_FRIEND_OPERATOR(-);
@@ -396,14 +399,25 @@ public:
 	property() { PT::validate(m_value); }
 
 	property(T* const & v) : m_value(v) { PT::validate(m_value); }
+	property(T*&& v) : m_value(v) { PT::validate(m_value); v = nullptr; }
 
-	property(const property& p) : m_value(p.PT::get_value(p.m_value)) { PT::validate(m_value); }
+	property(const property& p) : m_value(p.get()) { PT::validate(m_value); }
+	property(property&& p) : m_value(p.get()) { PT::validate(m_value); p.get() = nullptr; }
 
-	template<typename U> property(const property<U*, P>& p) : m_value(p.P<U*>::get_value(p.m_value)) { PT::validate(m_value); }
+	template<typename U> property(const property<U*, P>& p) : m_value(p.get()) { PT::validate(m_value); }
+	template<typename U> property(property<U*, P>&& p) : m_value(p.get()) { PT::validate(m_value); p.get() = nullptr; }
 
 	property& operator = (T* const & v)
 	{
 		PT::set_value(m_value, v);
+		fire_update_event();
+		return *this;
+	}
+	
+	property& operator = (T*&& v)
+	{
+		PT::set_value(m_value, v);
+		v = nullptr;
 		fire_update_event();
 		return *this;
 	}
@@ -412,7 +426,18 @@ public:
 	{
 		if(this != &p)
 		{
-			PT::set_value(m_value, p.PT::get_value(p.m_value));
+			PT::set_value(m_value, p.get());
+			fire_update_event();
+		}
+		return *this;
+	}
+
+	property& operator = (property&& p)
+	{
+		if(this != &p)
+		{
+			PT::set_value(m_value, p.get());
+			p.get() = nullptr;
 			fire_update_event();
 		}
 		return *this;
@@ -423,7 +448,19 @@ public:
 	{
 		if(this != (decltype(this))&p)
 		{
-			PT::set_value(m_value, p.P<U*>::get_value(p.m_value));
+			PT::set_value(m_value, p.get());
+			fire_update_event();
+		}
+		return *this;
+	}
+
+	template<typename U>
+	property& operator = (property<U*, P>&& p)
+	{
+		if(this != (decltype(this))&p)
+		{
+			PT::set_value(m_value, p.get());
+			p.get() = nullptr;
 			fire_update_event();
 		}
 		return *this;
@@ -481,30 +518,33 @@ public:
 	#undef POINTER_ARITHMETIC_OPERATOR
 	#endif
 
-	T* get() { return PT::get_value(m_value); }
-	const T* get() const { return PT::get_value(m_value); }
+	T* & get() { return PT::get_value(m_value); }
+	T* const & get() const { return PT::get_value(m_value); }
 
-	explicit operator bool () const { return PT::get_value(m_value) != nullptr; }
+	void set(T* const & v) { PT::set_value(m_value, v); }
+	void set(T*&& v) { PT::set_value(m_value, v); v = nullptr; }
 
-	operator T* () { return PT::get_value(m_value); }
-	operator T* const () const { return PT::get_value(m_value); }
+	explicit operator bool () const { return get() != nullptr; }
 
-	T& operator * () { return *m_value; }
-	const T& operator * () const { return *m_value; }
+	operator T* () { return get(); }
+	operator T* const () const { return get(); }
 
-	T* operator -> () { return m_value; }
-	const T* operator -> () const { return m_value; }
+	T& operator * () { return *get(); }
+	const T& operator * () const { return *get(); }
 
-	T& operator [] (std::size_t i) { return m_value[i]; }
-	const T& operator [] (std::size_t i) const { return m_value[i]; }
+	T* operator -> () { return get(); }
+	const T* operator -> () const { return get(); }
+
+	T& operator [] (std::size_t i) { return get()[i]; }
+	const T& operator [] (std::size_t i) const { return get()[i]; }
 
 	template<typename F, typename... A>
 	auto invoke(F&& f, A&&... a) -> std::invoke_result_t<F, T*, A...>
-	{ return std::invoke(std::forward<F>(f), m_value, std::forward<A>(a)...); }
+	{ return std::invoke(std::forward<F>(f), get(), std::forward<A>(a)...); }
 
 	template<typename F, typename... A>
 	auto invoke(std::size_t i, F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
-	{ return std::invoke(std::forward<F>(f), m_value[i], std::forward<A>(a)...); }
+	{ return std::invoke(std::forward<F>(f), get()[i], std::forward<A>(a)...); }
 
 	using update_event_t = std::function<void(const property&)>;
 	using update_event_list_t = std::vector<update_event_t>;
@@ -540,15 +580,26 @@ public:
 
 	property() { PT::validate(m_value); }
 
-	property(T* const & v) : m_value(v) {}
+	property(T* const & v) : m_value(v) { PT::validate(m_value); }
+	property(T*&& v) : m_value(v) { PT::validate(m_value); v = nullptr; }
 
-	property(const property& p) : m_value(p.m_value) {}
+	property(const property& p) : m_value(p.get()) { PT::validate(m_value); }
+	property(property&& p) : m_value(p.get()) { PT::validate(m_value); p.get() = nullptr; }
 
-	template<typename U> property(const property<U[], P>& p) : m_value(p.m_value) {}
+	template<typename U> property(const property<U[], P>& p) : m_value(p.get()) { PT::validate(m_value); }
+	template<typename U> property(property<U[], P>&& p) : m_value(p.get()) { PT::validate(m_value); p.get() = nullptr; }
 
 	property& operator = (T* const & v)
 	{
-		m_value = v;
+		PT::set_value(m_value, v);
+		fire_update_event();
+		return *this;
+	}
+
+	property& operator = (T*&& v)
+	{
+		PT::set_value(m_value, v);
+		v = nullptr;
 		fire_update_event();
 		return *this;
 	}
@@ -557,7 +608,18 @@ public:
 	{
 		if(this != &p)
 		{
-			m_value = p.m_value;
+			PT::set_value(m_value, p.get());
+			fire_update_event();
+		}
+		return *this;
+	}
+
+	property& operator = (property&& p)
+	{
+		if(this != &p)
+		{
+			PT::set_value(m_value, p.get());
+			p.get() = nullptr;
 			fire_update_event();
 		}
 		return *this;
@@ -568,7 +630,19 @@ public:
 	{
 		if(this != (decltype(this))&p)
 		{
-			m_value = p.m_value;
+			PT::set_value(m_value, p.get());
+			fire_update_event();
+		}
+		return *this;
+	}
+
+	template<typename U>
+	property& operator = (property<U[], P>&& p)
+	{
+		if(this != (decltype(this))&p)
+		{
+			PT::set_value(m_value, p.get());
+			p.get() = nullptr;
 			fire_update_event();
 		}
 		return *this;
@@ -606,26 +680,29 @@ public:
 	#undef POINTER_ARITHMETIC_OPERATOR
 	#endif
 
-	T* get() { return m_value; }
-	const T* get() const { return m_value; }
+	T* & get() { return PT::get_value(m_value); }
+	T* const & get() const { return PT::get_value(m_value); }
 
-	explicit operator bool () const { return m_value != nullptr; }
+	void set(T* const & v) { PT::set_value(m_value, v); }
+	void set(T*&& v) { PT::set_value(m_value, v); v = nullptr; }
 
-	operator T* () { return m_value; }
-	operator T* const () const { return m_value; }
+	explicit operator bool () const { return get() != nullptr; }
 
-	T& operator * () { return *m_value; }
-	const T& operator * () const { return *m_value; }
+	operator T* () { return get(); }
+	operator T* const () const { return get(); }
 
-	T* operator -> () { return m_value; }
-	const T* operator -> () const { return m_value; }
+	T& operator * () { return *get(); }
+	const T& operator * () const { return *get(); }
 
-	T& operator [] (std::size_t i) { return m_value[i]; }
-	const T& operator [] (std::size_t i) const { return m_value[i]; }
+	T* operator -> () { return get(); }
+	const T* operator -> () const { return get(); }
+
+	T& operator [] (std::size_t i) { return get()[i]; }
+	const T& operator [] (std::size_t i) const { return get()[i]; }
 
 	template<typename F, typename... A>
 	auto invoke(std::size_t i, F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
-	{ return std::invoke(std::forward<F>(f), m_value[i], std::forward<A>(a)...); }
+	{ return std::invoke(std::forward<F>(f), get()[i], std::forward<A>(a)...); }
 
 	using update_event_t = std::function<void(const property&)>;
 	using update_event_list_t = std::vector<update_event_t>;

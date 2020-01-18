@@ -46,6 +46,7 @@ int main()
 	int* ip1 = new int;
 	property<int*> pp5, pp6(ip1), pp7{ip1};
 	pp5 = ip1;
+	pp6 = std::move(pp7);
 
 	*pp1++ = T{"C++11"};
 	*pp2++ = Q{"C++14"};
