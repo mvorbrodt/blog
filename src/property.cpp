@@ -22,9 +22,7 @@ int main()
 	const property<double> p5(p1), p6{p2};
 	property<int> p7{}, p8{123}, p9(p1), p10{p2};
 
-	auto update_event_proc = [t = T{"hi!"}](const auto& p) { cout << "~~~ p1 updated with value: " << p << ", T = " << t << endl; };
-	p1.add_update_event(update_event_proc);
-	p1.add_update_event([t = T{"bye!"}](const auto& p) { cout << "~~~ p1 updated with value: " << p << ", T = " << t << endl; });
+	p1.add_update_event([](const auto& p) { cout << "~~~ p1 updated with value: " << p << endl; });
 
 	p1 = 1;
 	p1 = 0.f;
@@ -126,7 +124,7 @@ int main()
 
 	// W/ STRINGS
 	property<string> pstr1 = "C++11", pstr2 = " ", pstr3 = "Rocks";
-	property<string> pstr4 = pstr1 + pstr2 + pstr3 + " my DUPA!!!";
+	property<string> pstr4 = pstr1 + pstr2 + pstr3 + " my world!!!";
 
 	pstr1 = "C++17";
 	pstr1 += " " + pstr4 + " Rocks!";
