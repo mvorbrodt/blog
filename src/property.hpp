@@ -297,8 +297,8 @@ public:
 	T& get() { return PT::get_value(m_value); }
 	const T& get() const { return PT::get_value(m_value); }
 
-	void set(const T& v) { PT::set_value(m_value, v); }
-	void set(T&& v) { PT::set_value(m_value, std::move(v)); }
+	void set(const T& v) { PT::set_value(m_value, v); fire_update_event(); }
+	void set(T&& v) { PT::set_value(m_value, std::move(v)); fire_update_event(); }
 
 	explicit operator T& () { return get(); }
 	operator const T& () const { return get(); }
