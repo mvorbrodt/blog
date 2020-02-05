@@ -37,7 +37,7 @@ protected:
 	decltype(auto) get_value(T& v) { return(v); }
 
 	void set_value(T& v, const T& nv) { validate(nv); v = nv; }
-	void set_value(T& v, T&& nv) { validate(nv); v = std::forward<T>(nv); }
+	void set_value(T& v, T&& nv) { validate(nv); v = nv; nv = nullptr; }
 };
 
 template<typename TA>
@@ -88,15 +88,13 @@ public:
 
 	property& operator = (const T& v)
 	{
-		PT::set_value(m_value, v);
-		fire_update_event();
+		set(v);
 		return *this;
 	}
 
 	property& operator = (T&& v)
 	{
-		PT::set_value(m_value, std::move(v));
-		fire_update_event();
+		set(std::move(v));
 		return *this;
 	}
 
@@ -104,8 +102,7 @@ public:
 	std::enable_if_t<!is_property_v<U>, property&>
 	operator = (const U& v)
 	{
-		PT::set_value(m_value, v);
-		fire_update_event();
+		set(v);
 		return *this;
 	}
 
@@ -113,28 +110,21 @@ public:
 	std::enable_if_t<!is_property_v<U>, property&>
 	operator = (U&& v)
 	{
-		PT::set_value(m_value, std::forward<U>(v));
-		fire_update_event();
+		set(std::forward<U>(v));
 		return *this;
 	}
 
 	property& operator = (const property& p)
 	{
 		if(this != &p)
-		{
-			PT::set_value(m_value, p.get());
-			fire_update_event();
-		}
+			set(p.get());
 		return *this;
 	}
 
 	property& operator = (property&& p)
 	{
 		if(this != &p)
-		{
-			PT::set_value(m_value, std::move(p.get()));
-			fire_update_event();
-		}
+			set(std::move(p.get()));
 		return *this;
 	}
 
@@ -142,10 +132,7 @@ public:
 	property& operator = (const property<U, P>& p)
 	{
 		if(this != (decltype(this))&p)
-		{
-			PT::set_value(m_value, p.get());
-			fire_update_event();
-		}
+			set(p.get());
 		return *this;
 	}
 
@@ -153,10 +140,7 @@ public:
 	property& operator = (property<U, P>&& p)
 	{
 		if(this != (decltype(this))&p)
-		{
-			PT::set_value(m_value, std::move(p.get()));
-			fire_update_event();
-		}
+			set(std::move(p.get()));
 		return *this;
 	}
 
@@ -165,17 +149,8 @@ public:
 	property& operator op () \
 	{ \
 		auto temp(m_value); \
-		op m_value; \
-		try \
-		{ \
-			PT::validate(m_value); \
-		} \
-		catch(...) \
-		{ \
-			m_value = std::move(temp); \
-			throw; \
-		} \
-		fire_update_event(); \
+		op temp; \
+		set(std::move(temp)); \
 		return *this; \
 	} \
 	property operator op (int) \
@@ -194,67 +169,31 @@ public:
 	property& operator op (const T& v) \
 	{ \
 		auto temp(m_value); \
-		m_value op v; \
-		try \
-		{ \
-			PT::validate(m_value); \
-		} \
-		catch(...) \
-		{ \
-			m_value = std::move(temp); \
-			throw; \
-		} \
-		fire_update_event(); \
+		temp op v; \
+		set(std::move(temp)); \
 		return *this; \
 	} \
 	template<typename U> \
 	property& operator op (const U& v) \
 	{ \
 		auto temp(m_value); \
-		m_value op v; \
-		try \
-		{ \
-			PT::validate(m_value); \
-		} \
-		catch(...) \
-		{ \
-			m_value = std::move(temp); \
-			throw; \
-		} \
-		fire_update_event(); \
+		temp op v; \
+		set(std::move(temp)); \
 		return *this; \
 	} \
 	property& operator op (const property& p) \
 	{ \
 		auto temp(m_value); \
-		m_value op p.get(); \
-		try \
-		{ \
-			PT::validate(m_value); \
-		} \
-		catch(...) \
-		{ \
-			m_value = std::move(temp); \
-			throw; \
-		} \
-		fire_update_event(); \
+		temp op p.get(); \
+		set(std::move(temp)); \
 		return *this; \
 	} \
 	template<typename U> \
 	property& operator op (const property<U, P>& p) \
 	{ \
 		auto temp(m_value); \
-		m_value op p.get(); \
-		try \
-		{ \
-			PT::validate(m_value); \
-		} \
-		catch(...) \
-		{ \
-			m_value = std::move(temp); \
-			throw; \
-		} \
-		fire_update_event(); \
+		temp op p.get(); \
+		set(std::move(temp)); \
 		return *this; \
 	}
 	PROPERTY_OPERATOR(+=);
@@ -409,37 +348,27 @@ public:
 
 	property& operator = (T* const & v)
 	{
-		PT::set_value(m_value, v);
-		fire_update_event();
+		set(v);
 		return *this;
 	}
 	
 	property& operator = (T*&& v)
 	{
-		PT::set_value(m_value, v);
-		v = nullptr;
-		fire_update_event();
+		set(std::move(v));
 		return *this;
 	}
 
 	property& operator = (const property& p)
 	{
 		if(this != &p)
-		{
-			PT::set_value(m_value, p.get());
-			fire_update_event();
-		}
+			set(p.get());
 		return *this;
 	}
 
 	property& operator = (property&& p)
 	{
 		if(this != &p)
-		{
-			PT::set_value(m_value, p.get());
-			p.get() = nullptr;
-			fire_update_event();
-		}
+			set(std::move(p.get()));
 		return *this;
 	}
 
@@ -447,10 +376,7 @@ public:
 	property& operator = (const property<U*, P>& p)
 	{
 		if(this != (decltype(this))&p)
-		{
-			PT::set_value(m_value, p.get());
-			fire_update_event();
-		}
+			set(p.get());
 		return *this;
 	}
 
@@ -458,11 +384,7 @@ public:
 	property& operator = (property<U*, P>&& p)
 	{
 		if(this != (decltype(this))&p)
-		{
-			PT::set_value(m_value, p.get());
-			p.get() = nullptr;
-			fire_update_event();
-		}
+			set(std::move(p.get()));
 		return *this;
 	}
 
@@ -471,17 +393,8 @@ public:
 	property& operator op () \
 	{ \
 		auto temp(m_value); \
-		op m_value; \
-		try \
-		{ \
-			PT::validate(m_value); \
-		} \
-		catch(...) \
-		{ \
-			m_value = temp; \
-			throw; \
-		} \
-		fire_update_event(); \
+		op temp; \
+		set(temp); \
 		return *this; \
 	} \
 	property operator op (int) \
@@ -500,17 +413,8 @@ public:
 	property& operator op (std::ptrdiff_t v) \
 	{ \
 		auto temp(m_value); \
-		m_value op v; \
-		try \
-		{ \
-			PT::validate(m_value); \
-		} \
-		catch(...) \
-		{ \
-			m_value = temp; \
-			throw; \
-		} \
-		fire_update_event(); \
+		temp op v; \
+		set(temp); \
 		return *this; \
 	}
 	POINTER_ARITHMETIC_OPERATOR(+=);
@@ -521,8 +425,8 @@ public:
 	T* & get() { return PT::get_value(m_value); }
 	T* const & get() const { return PT::get_value(m_value); }
 
-	void set(T* const & v) { PT::set_value(m_value, v); }
-	void set(T*&& v) { PT::set_value(m_value, v); v = nullptr; }
+	void set(T* const & v) { PT::set_value(m_value, v); fire_update_event(); }
+	void set(T*&& v) { PT::set_value(m_value, std::move(v)); fire_update_event(); }
 
 	explicit operator bool () const { return get() != nullptr; }
 
@@ -591,37 +495,27 @@ public:
 
 	property& operator = (T* const & v)
 	{
-		PT::set_value(m_value, v);
-		fire_update_event();
+		set(v);
 		return *this;
 	}
 
 	property& operator = (T*&& v)
 	{
-		PT::set_value(m_value, v);
-		v = nullptr;
-		fire_update_event();
+		set(std::move(v));
 		return *this;
 	}
 
 	property& operator = (const property& p)
 	{
 		if(this != &p)
-		{
-			PT::set_value(m_value, p.get());
-			fire_update_event();
-		}
+			set(p.get());
 		return *this;
 	}
 
 	property& operator = (property&& p)
 	{
 		if(this != &p)
-		{
-			PT::set_value(m_value, p.get());
-			p.get() = nullptr;
-			fire_update_event();
-		}
+			set(std::move(p.get()));
 		return *this;
 	}
 
@@ -629,10 +523,7 @@ public:
 	property& operator = (const property<U[], P>& p)
 	{
 		if(this != (decltype(this))&p)
-		{
-			PT::set_value(m_value, p.get());
-			fire_update_event();
-		}
+			set(p.get());
 		return *this;
 	}
 
@@ -640,11 +531,7 @@ public:
 	property& operator = (property<U[], P>&& p)
 	{
 		if(this != (decltype(this))&p)
-		{
-			PT::set_value(m_value, p.get());
-			p.get() = nullptr;
-			fire_update_event();
-		}
+			set(std::move(p.get()));
 		return *this;
 	}
 
@@ -652,8 +539,9 @@ public:
 	#define POINTER_INC_DEC_OPERATOR(op) \
 	property& operator op () \
 	{ \
-		op m_value; \
-		fire_update_event(); \
+		auto temp(m_value); \
+		op temp; \
+		set(temp); \
 		return *this; \
 	} \
 	property operator op (int) \
@@ -671,8 +559,9 @@ public:
 	#define POINTER_ARITHMETIC_OPERATOR(op) \
 	property& operator op (std::ptrdiff_t v) \
 	{ \
-		m_value op v; \
-		fire_update_event(); \
+		auto temp(m_value); \
+		temp op v; \
+		set(temp); \
 		return *this; \
 	}
 	POINTER_ARITHMETIC_OPERATOR(+=);
@@ -683,8 +572,8 @@ public:
 	T* & get() { return PT::get_value(m_value); }
 	T* const & get() const { return PT::get_value(m_value); }
 
-	void set(T* const & v) { PT::set_value(m_value, v); }
-	void set(T*&& v) { PT::set_value(m_value, v); v = nullptr; }
+	void set(T* const & v) { PT::set_value(m_value, v); fire_update_event(); }
+	void set(T*&& v) { PT::set_value(m_value, std::move(v)); fire_update_event(); }
 
 	explicit operator bool () const { return get() != nullptr; }
 
