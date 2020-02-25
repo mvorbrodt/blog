@@ -1,31 +1,64 @@
 #pragma once
 
-template
-<
-	typename T,
-	template<typename> typename AcquirePolicy,
-	template<typename> typename ReleasePolicy
->
-class handle
+#include <utility>
+#include <type_traits>
+
+template<typename T, typename AP, typename RP>
+class basic_handle : public AP, public RP
 {
 public:
-	explicit handle(T h) : m_handle(h) { AcquirePolicy<T>::Execute(m_handle); }
-	handle(const handle&) = delete;
-	handle(handle&&) = default;
-	handle& operator = (const handle&) = delete;
-	handle& operator = (handle&&) = default;
-	~handle() { ReleasePolicy<T>::Execute(m_handle); }
+	basic_handle(const T& v) : m_handle(v) { AP::Execute(m_handle); }
 
-	operator T () const { return m_handle; }
+	template<typename U = T, std::enable_if_t<std::is_default_constructible_v<U>>* = nullptr>
+	basic_handle(U&& v) : m_handle(std::move(v)) { AP::Execute(m_handle); v = U{}; }
+
+	basic_handle(const basic_handle&) = delete;
+
+	template<typename U = T, std::enable_if_t<std::is_default_constructible_v<U>>* = nullptr>
+	basic_handle(basic_handle&& other) : m_handle(std::move(other.m_handle)) { other.m_handle = U{}; }
+
+	~basic_handle() { RP::Execute(m_handle); }
+
+	basic_handle& operator = (const T& v) = delete;
+
+	template<typename U = T>
+	std::enable_if_t<std::is_default_constructible_v<U>, basic_handle&>
+	operator = (U&& v)
+	{
+		RP::Execute(m_handle);
+		m_handle = std::move(v);
+		AP::Execute(m_handle);
+		v = U{};
+		return *this;
+	}
+
+	basic_handle& operator = (const basic_handle&) = delete;
+
+	template<typename U = T>
+	std::enable_if_t<std::is_default_constructible_v<U>, basic_handle&>
+	operator = (basic_handle&& other)
+	{
+		RP::Execute(m_handle);
+		m_handle = std::move(other.m_handle);
+		other.m_handle = U{};
+		return *this;
+	}
+
+	operator T& () { return m_handle; }
+	operator const T& () const { return m_handle; }
+
+	template<typename U = T>
+	std::enable_if_t<!std::is_reference_v<U>, U*>
+	operator & () { return &m_handle; }
 
 private:
 	T m_handle;
 };
 
-template<typename T> struct NoOpPolicy { static void Execute(T) noexcept {} };
+struct NoOpPolicy { template<typename T> void Execute(const T&) {} };
 
-template<typename T> struct PointerReleasePolicy { static void Execute(T ptr) noexcept { delete ptr; } };
-template<typename T> struct ArrayReleasePolicy { static void Execute(T ptr) noexcept { delete[] ptr; } };
+struct PointerReleasePolicy { template<typename T> void Execute(T* ptr) { delete ptr; } };
+template<typename T> using ptr_handle_t = basic_handle<T*, NoOpPolicy, PointerReleasePolicy>;
 
-template<typename T> using arr_ptr_handle_t = handle<T*, NoOpPolicy, ArrayReleasePolicy>;
-template<typename T> using ptr_handle_t = handle<T*, NoOpPolicy, PointerReleasePolicy>;
+struct PointerArrayReleasePolicy { template<typename T> void Execute(T* ptr) { delete[] ptr; } };
+template<typename T> using arr_ptr_handle_t = basic_handle<T*, NoOpPolicy, PointerArrayReleasePolicy>;
