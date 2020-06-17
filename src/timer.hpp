@@ -1,69 +1,85 @@
 #pragma once
 
+#include <set>
 #include <thread>
 #include <chrono>
 #include <memory>
-#include <functional>
-#include <set>
 #include <iterator>
-#include <cassert>
+#include <stdexcept>
+#include <functional>
 #include "event.hpp"
 
 class timer
 {
 public:
-	template<typename T>
-	explicit timer(T&& tick)
-	: m_tick(std::chrono::duration_cast<std::chrono::nanoseconds>(tick)), m_thread([this]()
+	timer() : timer(std::chrono::seconds(1)) {}
+
+	template<typename R, typename P>
+	explicit timer(const std::chrono::duration<R, P>& tick)
+	: m_tick(std::chrono::duration_cast<std::chrono::nanoseconds>(tick))
 	{
-		assert(m_tick.count() > 0);
-		auto start = std::chrono::high_resolution_clock::now();
-		std::chrono::nanoseconds drift{0};
-		while(!m_event.wait_for(m_tick - drift))
+		if(m_tick.count() <= 0)
 		{
-			++m_ticks;
-			auto it = std::begin(m_events);
-			auto end = std::end(m_events);
-			while(it != end)
-			{
-				auto& event = *it;
-				++event.elapsed;
-				if(event.elapsed == event.ticks)
-				{
-					auto remove = event.proc();
-					if(remove)
-					{
-						m_events.erase(it++);
-						continue;
-					}
-					else
-					{
-						event.elapsed = 0;
-					}
-				}
-				++it;
-			}
-			auto now = std::chrono::high_resolution_clock::now();
-			auto realDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(now - start);
-			auto fakeDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(m_tick * m_ticks);
-			drift = realDuration - fakeDuration;
+			throw std::invalid_argument("Invalid tick value: must be greater than zero!");
 		}
-	})
-	{}
+
+		m_thread = std::make_unique<std::thread>([this]()
+		{
+			auto start = std::chrono::high_resolution_clock::now();
+			std::chrono::nanoseconds drift{0};
+			while(!m_event.wait_for(m_tick - drift))
+			{
+				++m_ticks;
+				auto it = std::begin(m_events);
+				auto end = std::end(m_events);
+				while(it != end)
+				{
+					auto& event = *it;
+					++event.elapsed;
+					if(event.elapsed == event.ticks)
+					{
+						auto remove = event.proc();
+						if(remove)
+						{
+							m_events.erase(it++);
+							continue;
+						}
+						else
+						{
+							event.elapsed = 0;
+						}
+					}
+					++it;
+				}
+				auto now = std::chrono::high_resolution_clock::now();
+				auto realDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(now - start);
+				auto fakeDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(m_tick * m_ticks);
+				drift = realDuration - fakeDuration;
+			}
+		});
+	}
 
 	~timer()
 	{
 		m_event.signal();
-		m_thread.join();
+		m_thread->join();
 	}
 
-	template<typename T, typename F, typename... Args>
-	auto set_timeout(T&& timeout, F f, Args&&... args)
+	template<typename R, typename P, typename F, typename... Args>
+	[[nodiscard]] auto set_timeout(const std::chrono::duration<R, P>& timeout, F f, Args&&... args)
 	{
-		assert(std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count() >= m_tick.count());
+		if(timeout.count() <= 0)
+		{
+			throw std::invalid_argument("Invalid timeout value: must be greater than zero!");
+		}
+
 		auto event = std::make_shared<manual_event>();
-		auto proc = [=]() {
-			if(event->wait_for(std::chrono::seconds(0))) return true;
+		auto proc = [=]()
+		{
+			if(event->wait_for(std::chrono::seconds(0)))
+			{
+				return true;
+			}
 			f(args...);
 			return true;
 		};
@@ -71,13 +87,21 @@ public:
 		return event;
 	}
 
-	template<typename T, typename F, typename... Args>
-	auto set_interval(T&& interval, F f, Args&&... args)
+	template<typename R, typename P, typename F, typename... Args>
+	[[nodiscard]] auto set_interval(const std::chrono::duration<R, P>& interval, F f, Args&&... args)
 	{
-		assert(std::chrono::duration_cast<std::chrono::nanoseconds>(interval).count() >= m_tick.count());
+		if(interval.count() <= 0)
+		{
+			throw std::invalid_argument("Invalid interval value: must be greater than zero!");
+		}
+
 		auto event = std::make_shared<manual_event>();
-		auto proc = [=]() {
-			if(event->wait_for(std::chrono::seconds(0))) return true;
+		auto proc = [=]()
+		{
+			if(event->wait_for(std::chrono::seconds(0)))
+			{
+				return true;
+			}
 			f(args...);
 			return false;
 		};
@@ -89,7 +113,8 @@ private:
 	std::chrono::nanoseconds m_tick;
 	unsigned long long m_ticks = 0;
 	manual_event m_event;
-	std::thread m_thread;
+	using thread_ptr = std::unique_ptr<std::thread>;
+	thread_ptr m_thread = nullptr;
 
 	struct event_ctx
 	{

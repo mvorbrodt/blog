@@ -8,14 +8,15 @@ using namespace chrono;
 int main()
 {
 	auto start = high_resolution_clock::now();
-	auto duration = [start]() {
+	auto duration = [start]()
+	{
 		auto now = high_resolution_clock::now();
 		auto msecs = duration_cast<milliseconds>(now - start).count();
 		stringstream ss;
 		ss << msecs / 1000.0;
 		cout << "elapsed " << ss.str() << "s\t: ";
 	};
-	
+
 	cout << "start" << endl;
 	timer t(1ms);
 	auto e1 = t.set_timeout(3s, [&]() { duration(); cout << "timeout 3s" << endl; });
