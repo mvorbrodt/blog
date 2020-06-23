@@ -3,7 +3,7 @@
 #include "timer.hpp"
 
 using namespace std;
-using namespace chrono;
+using namespace std::chrono;
 
 int main()
 {
@@ -24,9 +24,9 @@ int main()
 	auto e3 = t.set_timeout(4s, [&]() { duration(); cout << "timeout 4s" << endl; });
 	auto e4 = t.set_interval(2s, [&]() { duration(); cout << "interval 2s" << endl; });
 	auto e5 = t.set_timeout(5s, [&]() { duration(); cout << "timeout that never happens" << endl; });
-	e5->signal(); // cancel this timeout
+	e5.cancel(); // cancel this timeout
 	this_thread::sleep_for(5s);
-	e4->signal(); // cancel this interval
+	e4.cancel(); // cancel this interval
 	cout << "cancel interval 2" << endl;
 	this_thread::sleep_for(5s);
 	cout << "end" << endl;

@@ -1,15 +1,16 @@
 #pragma once
 
 #include <mutex>
+#include <chrono>
 #include <condition_variable>
 
 class manual_event
 {
 public:
-	explicit manual_event(bool signaled = false) noexcept
+	explicit manual_event(bool signaled = false)
 	: m_signaled(signaled) {}
 
-	void signal() noexcept
+	void signal()
 	{
 		{
 			std::unique_lock lock(m_mutex);
@@ -18,27 +19,27 @@ public:
 		m_cv.notify_all();
 	}
 
-	void wait() noexcept
+	void wait()
 	{
 		std::unique_lock lock(m_mutex);
-		m_cv.wait(lock, [&](){ return m_signaled != false; });
+		m_cv.wait(lock, [&]() { return m_signaled != false; });
 	}
 
-	template<typename T>
-	bool wait_for(T t) noexcept
+	template<typename R, typename P>
+	bool wait_for(const std::chrono::duration<R, P>& t)
 	{
 		std::unique_lock lock(m_mutex);
-		return m_cv.wait_for(lock, t, [&](){ return m_signaled != false; });
+		return m_cv.wait_for(lock, t, [&]() { return m_signaled != false; });
 	}
 
-	template<typename T>
-	bool wait_until(T t) noexcept
+	template<typename R, typename P>
+	bool wait_until(const std::chrono::duration<R, P>& t)
 	{
 		std::unique_lock lock(m_mutex);
-		return m_cv.wait_until(lock, t, [&](){ return m_signaled != false; });
+		return m_cv.wait_until(lock, t, [&]() { return m_signaled != false; });
 	}
 
-	void reset() noexcept
+	void reset()
 	{
 		std::unique_lock lock(m_mutex);
 		m_signaled = false;
@@ -53,10 +54,10 @@ private:
 class auto_event
 {
 public:
-	explicit auto_event(bool signaled = false) noexcept
+	explicit auto_event(bool signaled = false)
 	: m_signaled(signaled) {}
 
-	void signal() noexcept
+	void signal()
 	{
 		{
 			std::unique_lock lock(m_mutex);
@@ -65,27 +66,27 @@ public:
 		m_cv.notify_one();
 	}
 
-	void wait() noexcept
+	void wait()
 	{
 		std::unique_lock lock(m_mutex);
-		m_cv.wait(lock, [&](){ return m_signaled != false; });
+		m_cv.wait(lock, [&]() { return m_signaled != false; });
 		m_signaled = false;
 	}
 
-	template<typename T>
-	bool wait_for(T t) noexcept
+	template<typename R, typename P>
+	bool wait_for(const std::chrono::duration<R, P>& t)
 	{
 		std::unique_lock lock(m_mutex);
-		bool result = m_cv.wait_for(lock, t, [&](){ return m_signaled != false; });
+		bool result = m_cv.wait_for(lock, t, [&]() { return m_signaled != false; });
 		if(result) m_signaled = false;
 		return result;
 	}
 
-	template<typename T>
-	bool wait_until(T t) noexcept
+	template<typename R, typename P>
+	bool wait_until(const std::chrono::duration<R, P>& t)
 	{
 		std::unique_lock lock(m_mutex);
-		bool result = m_cv.wait_until(lock, t, [&](){ return m_signaled != false; });
+		bool result = m_cv.wait_until(lock, t, [&]() { return m_signaled != false; });
 		if(result) m_signaled = false;
 		return result;
 	}
