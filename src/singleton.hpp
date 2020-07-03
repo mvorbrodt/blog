@@ -7,21 +7,15 @@ template<typename T>
 class singleton
 {
 public:
-	template<typename... A>
-	static void Create(A&&... a)
+	template<typename... Args>
+	static void Create(Args&&... args)
 	{
 		static std::mutex s_lock;
 		std::scoped_lock lock(s_lock);
 
-		struct Q : public T
+		if(!s_instance)
 		{
-			using T::T;
-			virtual void __abstract__() override {}
-		};
-
-		if(!s_ptr)
-		{
-			s_ptr = S{ new Q(std::forward<A>(a)...) };
+			s_instance.reset(new T(std::forward<Args>(args)...));
 		}
 		else
 		{
@@ -31,7 +25,7 @@ public:
 
 	static T* Instance()
 	{
-		return s_ptr.get();
+		return s_instance.get();
 	}
 
 protected:
@@ -40,15 +34,14 @@ protected:
 	singleton(singleton&&) = delete;
 	singleton& operator = (const singleton&) = delete;
 	singleton& operator = (singleton&&) = delete;
-	virtual ~singleton() = default;
+	~singleton() = default;
 
 private:
-	using S = std::unique_ptr<T>;
-	inline static S s_ptr = nullptr;
-
-	virtual void __abstract__() = 0;
+	using storage_t = std::unique_ptr<T>;
+	inline static storage_t s_instance = nullptr;
 };
 
-#define IS_A_SINGLETON(T) : public singleton<T>
-#define SINGLETON_CLASS(C) class C IS_A_SINGLETON(C)
-#define SINGLETON_STRUCT(S) struct S IS_A_SINGLETON(S)
+#define SINGLETON(T) final : public singleton<T>
+#define SINGLETON_CLASS(C) class C SINGLETON(C)
+#define SINGLETON_STRUCT(S) struct S SINGLETON(S)
+#define SINGLETON_FRIEND(T) friend class singleton<T>;
