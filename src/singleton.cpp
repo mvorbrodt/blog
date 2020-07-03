@@ -3,9 +3,14 @@
 
 using namespace std;
 
-class S : public singleton<S>
+SINGLETON_CLASS(X) {};
+SINGLETON_STRUCT(Y) {};
+
+class S IS_A_SINGLETON(S) //, public X // Compile-time error because singletons cannot be inherited from...
 {
 public:
+	~S() { cout << "~S()" << endl; }
+
 	void foo() const
 	{
 		cout << "foo() x = " << _x << ", y = " << _y << ", z = " << _z << endl;
@@ -25,6 +30,9 @@ private:
 int main()
 {
 	S::Create(1, 2, 3);
+	//S xxx(1,2,3); // Compile-time error, can't create instances...
 	try { S::Create(4, 5, 6); } catch(exception& e) { cout << e.what() << endl; }
+	//*S::Instance() = *S::Instance(); // Compile-time error, can't copy singletons...
 	S::Instance()->foo();
+	cout << "Done!" << endl;
 }

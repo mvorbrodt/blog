@@ -40,3 +40,7 @@ private:
 	using S = std::unique_ptr<T>;
 	inline static S s_ptr = nullptr;
 };
+
+#define IS_A_SINGLETON(T) final : public singleton<T>
+#define SINGLETON_CLASS(C) class C IS_A_SINGLETON(C)
+#define SINGLETON_STRUCT(S) struct S IS_A_SINGLETON(S)
