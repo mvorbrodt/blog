@@ -22,7 +22,7 @@ int main()
 	const property<double> p5(p1), p6{p2};
 	property<int> p7{}, p8{123}, p9(p1), p10{p2};
 
-	p1.add_update_event([](const auto& p) { cout << "~~~ p1 updated with value: " << p << endl; });
+	p1.add_update_event([](void* p) { cout << "~~~ p1 updated with value: " << property_cast_to_ref<int>(p) << endl; });
 
 	p1 = 1;
 	p1 = 0.f;
@@ -49,8 +49,8 @@ int main()
 	*pp1++ = T{"C++11"};
 	*pp2++ = Q{"C++14"};
 
-	pp1.add_update_event([](auto& p) { cout << "~~~ pp1 updated with value: " << p << " containing: " << *p << endl; });
-	pp2.add_update_event([](auto& p) { cout << "~~~ pp2 updated with value: " << p << " containing: " << *p << endl; });
+	pp1.add_update_event([](void* p) { cout << "~~~ pp1 updated with value: " << property_cast<T*>(p) << " containing: " << property_cast_to_val<T*>(p) << endl; });
+	pp2.add_update_event([](void* p) { cout << "~~~ pp2 updated with value: " << property_cast<Q[]>(p) << " containing: " << property_cast_to_val<Q[]>(p) << endl; });
 
 	--pp1, pp2 -= 1;
 
@@ -95,13 +95,13 @@ int main()
 	property<const T> c6{}, c7{"C++Rocks!"}, c8{1, 2, 3}; // const stripped away here
 	const property<T> c9{c6}, c10{std::move(c7)};
 
-	c5.add_update_event([](auto& p) { cout << "~~~ c5 updated with value: " << p << endl; });
+	c5.add_update_event([](void* p) { cout << "~~~ c5 updated with value: " << p << endl; });
 
 	c4 = Q{};
 	c5 = c1;
 	c5 = std::move(c1);
 
-	((T&)c5).foo();
+	((Q&)c5).foo();
 	//((T&)c10).foo(); // U.B. becasue of hard casting away constness
 	//c10.get().foo(); // Compile error becasue foo() is non-const :o)
 	c5.invoke(&T::foo);

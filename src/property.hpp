@@ -11,23 +11,36 @@
 
 
 
-// PROPERTY POLICY
+// AGGREGATE PROPERTY POLICY: CONTROLS ACCESS + EVENTS
+// OVERLOADED FOR T, T*, T[], NO ACCESS RESTRICTIONS, FIRES EVENTS
 template<typename T>
 struct default_property_policy
 {
+	using update_event_t = std::function<void(void*)>;
+	void add_update_event(const update_event_t& proc) { m_update_events.push_back(proc); }
+
 protected:
 	template<typename U> void validate(const U& v) const {}
 
 	decltype(auto) get_value(const T& v) const { return(v); }
 	decltype(auto) get_value(T& v) { return(v); }
 
-	template<typename U> void set_value(T& v, const U& nv) { validate(nv); v = nv; }
-	template<typename U> void set_value(T& v, U&& nv) { validate(nv); v = std::forward<U>(nv); }
+	template<typename U> void set_value(T& v, const U& nv) { validate(nv); v = nv; fire_update_event(); }
+	template<typename U> void set_value(T& v, U&& nv) { validate(nv); v = std::forward<U>(nv); fire_update_event(); }
+
+	void fire_update_event() { for(auto& event : m_update_events) event(this); }
+
+private:
+	using update_event_list_t = std::vector<update_event_t>;
+	update_event_list_t m_update_events;
 };
 
 template<typename TP>
 struct default_property_policy<TP*>
 {
+	using update_event_t = std::function<void(void*)>;
+	void add_update_event(const update_event_t& proc) { m_update_events.push_back(proc); }
+
 protected:
 	using T = TP*;
 
@@ -36,8 +49,14 @@ protected:
 	decltype(auto) get_value(const T& v) const { return(v); }
 	decltype(auto) get_value(T& v) { return(v); }
 
-	void set_value(T& v, const T& nv) { validate(nv); v = nv; }
-	void set_value(T& v, T&& nv) { validate(nv); v = nv; nv = nullptr; }
+	void set_value(T& v, const T& nv) { validate(nv); v = nv; fire_update_event(); }
+	void set_value(T& v, T&& nv) { validate(nv); v = nv; nv = nullptr; fire_update_event(); }
+
+	void fire_update_event() { for(auto& event : m_update_events) event(this); }
+
+private:
+	using update_event_list_t = std::vector<update_event_t>;
+	update_event_list_t m_update_events;
 };
 
 template<typename TA>
@@ -233,11 +252,11 @@ public:
 	#undef PROPERTY_FRIEND_OPERATOR
 	#endif
 
-	T& get() { return PT::get_value(m_value); }
-	const T& get() const { return PT::get_value(m_value); }
+	decltype(auto) get() { return(PT::get_value(m_value)); }
+	decltype(auto) get() const { return(PT::get_value(m_value)); }
 
-	void set(const T& v) { PT::set_value(m_value, v); fire_update_event(); }
-	void set(T&& v) { PT::set_value(m_value, std::move(v)); fire_update_event(); }
+	void set(const T& v) { PT::set_value(m_value, v); }
+	void set(T&& v) { PT::set_value(m_value, std::move(v)); }
 
 	explicit operator T& () { return get(); }
 	operator const T& () const { return get(); }
@@ -252,27 +271,10 @@ public:
 	auto invoke(F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
 	{ return std::invoke(std::forward<F>(f), get(), std::forward<A>(a)...); }
 
-	using update_event_t = std::function<void(const property&)>;
-	using update_event_list_t = std::vector<update_event_t>;
-
-	void add_update_event(update_event_t&& proc) const
-	{ m_update_events.push_back(std::forward<update_event_t>(proc)); }
-
-	const update_event_list_t& get_update_events() const
-	{ return m_update_events; }
-
-	void clear_update_events() const
-	{ m_update_events.clear(); }
-
 private:
 	template<typename, template<typename> class> friend class property;
 
 	T m_value = T{};
-
-	mutable update_event_list_t m_update_events;
-
-	void fire_update_event() const
-	{ for(auto& event : m_update_events) event(*this); }
 };
 
 
@@ -425,8 +427,8 @@ public:
 	T* & get() { return PT::get_value(m_value); }
 	T* const & get() const { return PT::get_value(m_value); }
 
-	void set(T* const & v) { PT::set_value(m_value, v); fire_update_event(); }
-	void set(T*&& v) { PT::set_value(m_value, std::move(v)); fire_update_event(); }
+	void set(T* const & v) { PT::set_value(m_value, v); }
+	void set(T*&& v) { PT::set_value(m_value, std::move(v)); }
 
 	explicit operator bool () const { return get() != nullptr; }
 
@@ -450,27 +452,10 @@ public:
 	auto invoke(std::size_t i, F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
 	{ return std::invoke(std::forward<F>(f), get()[i], std::forward<A>(a)...); }
 
-	using update_event_t = std::function<void(const property&)>;
-	using update_event_list_t = std::vector<update_event_t>;
-
-	void add_update_event(update_event_t&& proc) const
-	{ m_update_events.push_back(std::forward<update_event_t>(proc)); }
-
-	const update_event_list_t& get_update_events() const
-	{ return m_update_events; }
-
-	void clear_update_events() const
-	{ m_update_events.clear(); }
-
 private:
 	template<typename, template<typename> class> friend class property;
 
 	T* m_value = nullptr;
-
-	mutable update_event_list_t m_update_events;
-
-	void fire_update_event() const
-	{ for(auto& event : m_update_events) event(*this); }
 };
 
 
@@ -572,8 +557,8 @@ public:
 	T* & get() { return PT::get_value(m_value); }
 	T* const & get() const { return PT::get_value(m_value); }
 
-	void set(T* const & v) { PT::set_value(m_value, v); fire_update_event(); }
-	void set(T*&& v) { PT::set_value(m_value, std::move(v)); fire_update_event(); }
+	void set(T* const & v) { PT::set_value(m_value, v); }
+	void set(T*&& v) { PT::set_value(m_value, std::move(v)); }
 
 	explicit operator bool () const { return get() != nullptr; }
 
@@ -593,27 +578,10 @@ public:
 	auto invoke(std::size_t i, F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
 	{ return std::invoke(std::forward<F>(f), get()[i], std::forward<A>(a)...); }
 
-	using update_event_t = std::function<void(const property&)>;
-	using update_event_list_t = std::vector<update_event_t>;
-
-	void add_update_event(update_event_t&& proc) const
-	{ m_update_events.push_back(std::forward<update_event_t>(proc)); }
-
-	const update_event_list_t& get_update_events() const
-	{ return m_update_events; }
-
-	void clear_update_events() const
-	{ m_update_events.clear(); }
-
 private:
 	template<typename, template<typename> class> friend class property;
 
 	T* m_value = nullptr;
-
-	mutable update_event_list_t m_update_events;
-
-	void fire_update_event() const
-	{ for(auto& event : m_update_events) event(*this); }
 };
 
 
@@ -645,4 +613,25 @@ inline auto make_property(A&&... a)
 {
 	using U = std::decay_t<T>;
 	return property<T, P>(U(std::forward<A>(a)...));
+}
+
+
+
+// PROPERTY CAST HELPERS
+template<typename T>
+inline property<T>* property_cast(void* p)
+{
+	return reinterpret_cast<property<T>*>(p);
+}
+
+template<typename T>
+inline decltype(auto) property_cast_to_ref(void* p)
+{
+	return(*property_cast<T>(p));
+}
+
+template<typename T>
+inline decltype(auto) property_cast_to_val(void* p)
+{
+	return(*property_cast_to_ref<T>(p));
 }
