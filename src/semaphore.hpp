@@ -8,14 +8,15 @@
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
+#include <chrono>
 
 class semaphore
 {
 public:
-	explicit semaphore(unsigned int count = 0) noexcept
+	explicit semaphore(unsigned int count = 0)
 	: m_count(count) {}
 
-	void post() noexcept
+	void post()
 	{
 		{
 			std::unique_lock lock(m_mutex);
@@ -24,7 +25,7 @@ public:
 		m_cv.notify_one();
 	}
 
-	void post(unsigned int count) noexcept
+	void post(unsigned int count)
 	{
 		{
 			std::unique_lock lock(m_mutex);
@@ -33,15 +34,15 @@ public:
 		m_cv.notify_all();
 	}
 
-	void wait() noexcept
+	void wait()
 	{
 		std::unique_lock lock(m_mutex);
 		m_cv.wait(lock, [this]() { return m_count != 0; });
 		--m_count;
 	}
 
-	template<typename T>
-	bool wait_for(T&& t) noexcept
+	template<typename Rep, typename Period>
+	bool wait_for(const std::chrono::duration<Rep, Period>& t)
 	{
 		std::unique_lock lock(m_mutex);
 		if(!m_cv.wait_for(lock, t, [this]() { return m_count != 0; }))
@@ -50,8 +51,8 @@ public:
 		return true;
 	}
 
-	template<typename T>
-	bool wait_until(T&& t) noexcept
+	template<typename Clock, typename Duration>
+	bool wait_until(const std::chrono::time_point<Clock, Duration>& t)
 	{
 		std::unique_lock lock(m_mutex);
 		if(!m_cv.wait_until(lock, t, [this]() { return m_count != 0; }))
@@ -69,17 +70,17 @@ private:
 class fast_semaphore
 {
 public:
-	explicit fast_semaphore(unsigned int count = 0) noexcept
+	explicit fast_semaphore(unsigned int count = 0)
 	: m_count(count), m_semaphore(0) {}
 
-	void post() noexcept
+	void post()
 	{
 		int count = m_count.fetch_add(1, std::memory_order_release);
 		if (count < 0)
 			m_semaphore.post();
 	}
 
-	void wait() noexcept
+	void wait()
 	{
 		int count = m_count.fetch_sub(1, std::memory_order_acquire);
 		if (count < 1)
