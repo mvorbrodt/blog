@@ -134,7 +134,7 @@ add_executable(pstl pstl_test.cpp)
 target_link_libraries(pstl ${TBB_LIBRARIES})
 
 add_executable(timer timer_test.cpp timer.hpp event.hpp)
-add_executable(pool pool_test.cpp)
+add_executable(pool pool.hpp pool_test.cpp)
 add_executable(random random_test.cpp)
 add_executable(dekker_n dekker_n.cpp)
 add_executable(dekker dekker.cpp)
