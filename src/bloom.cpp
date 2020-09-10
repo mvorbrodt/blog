@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ios>
 #include <string>
 #include "bloom.hpp"
 
@@ -6,17 +7,22 @@ using namespace std;
 
 int main()
 {
-	string set1[] = {"Martin", "Vorbrodt", "C++", "Blog"};
-	string set2[] = {"Not", "In", "The", "Set"};
+	auto set1 = {"Martin", "Vorbrodt", "C++", "Blog"};
+	auto set2 = {"Not", "In", "The", "Set"};
 
-	bloom_filter<string> bloom(128, 5);
+	bloom_filter<string, 5> bloom(128);
+	for(auto s : set1) bloom.add(s);
 
-	for(auto& s : set1)
-		bloom.add(s);
+	std::boolalpha(cout);
+	cout << "bloom_filter<string, 5> bloom(128);" << endl;
+	for(auto s : set1) cout << "\tContains \"" << s << "\"\t: " << bloom.contains(s) << endl;
+	for(auto s : set2) cout << "\tContains \"" << s << "\"\t: " << bloom.contains(s) << endl;
+	cout << endl;
 
-	for(auto& s : set1)
-		cout << "Contains \"" << s << "\" : " << bloom.contains(s) << endl;
+	fixed_bloom_filter<string, 128, 1> fixed_bloom;
+	for(auto s : set1) fixed_bloom.add(s);
 
-	for(auto& s : set2)
-		cout << "Contains \"" << s << "\" : " << bloom.contains(s) << endl;
+	cout << "fixed_bloom_filter<string, 128, 1> fixed_bloom;" << endl;
+	for(auto s : set1) cout << "\tContains \"" << s << "\"\t: " << fixed_bloom.contains(s) << endl;
+	for(auto s : set2) cout << "\tContains \"" << s << "\"\t: " << fixed_bloom.contains(s) << endl;
 }

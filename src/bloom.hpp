@@ -1,83 +1,68 @@
 #pragma once
 
 #include <vector>
+#include <bitset>
 #include <random>
+#include <stdexcept>
 #include <functional>
 #include <cstddef>
-#include <cassert>
+#include "hash.hpp"
 
-template<typename Key, typename Hash = std::hash<Key>>
-class basic_bloom_filter
+template <typename Key, std::size_t HashN, typename Hash = std::hash<Key>>
+class bloom_filter
 {
 public:
-	basic_bloom_filter(std::size_t size)
+	static_assert(HashN > 0, "HashN must be greater than zero!");
+
+	bloom_filter(std::size_t size)
 	: m_bits(size)
 	{
-		assert(size > 0);
+		if(!size)
+			throw std::invalid_argument("Size must be greater than zero!");
 	}
 
 	void add(const Key& key)
 	{
-		m_bits[Hash{}(key) % m_bits.size()] = true;
+		auto hv = hashNT<HashN, std::size_t>(key);
+		for(std::size_t i = 0; i < HashN; ++i)
+			m_bits[hv[i] % m_bits.size()] = true;
 	}
 
-	bool contains(const Key& key)
+	bool contains(const Key& key) const
 	{
-		return m_bits[Hash{}(key) % m_bits.size()];
+		auto hv = hashNT<HashN, std::size_t>(key);
+		for(std::size_t i = 0; i < HashN; ++i)
+			if(!m_bits[hv[i] % m_bits.size()])
+				return false;
+		return true;
 	}
 
 private:
 	std::vector<bool> m_bits;
 };
 
-namespace
-{
-	template<typename Key, typename Hash = std::hash<Key>>
-	class mixer
-	{
-	public:
-		mixer(std::size_t size, const Key& key)
-		: m_size(size), m_random(Hash{}(key))
-		{
-			assert(size > 0);
-		}
-
-		std::size_t operator()() { return m_random() % m_size; }
-
-	private:
-		std::size_t m_size;
-		std::mt19937 m_random;
-	};
-}
-
-template <typename Key, typename Hash = std::hash<Key>>
-class bloom_filter
+template <typename Key, std::size_t Size, std::size_t HashN, typename Hash = std::hash<Key>>
+class fixed_bloom_filter
 {
 public:
-	bloom_filter(std::size_t size, std::size_t hashes)
-	: m_size(size), m_hashes(hashes), m_bits(size)
-	{
-		assert(size > 0);
-		assert(hashes > 0);
-	}
+	static_assert(Size > 0, "Size must be greater than zero!");
 
 	void add(const Key& key)
 	{
-		mixer<Key, Hash> m(m_size, key);
-		for(std::size_t i = 0; i < m_hashes; ++i)
-			m_bits[m()] = true;
+		auto hv = hashNT<HashN, std::size_t>(key);
+		for(std::size_t i = 0; i < HashN; ++i)
+			m_bits[hv[i] % Size] = true;
 	}
 
 	bool contains(const Key& key) const
 	{
-		mixer<Key, Hash> m(m_size, key);
-		for(std::size_t i = 0; i < m_hashes; ++i)
-			if(!m_bits[m()]) return false;
+		auto hv = hashNT<HashN, std::size_t>(key);
+		for(std::size_t i = 0; i < HashN; ++i)
+			if(!m_bits[hv[i] % Size])
+				return false;
 		return true;
 	}
 
 private:
-	std::size_t m_size;
-	std::size_t m_hashes;
-	std::vector<bool> m_bits;
+	std::bitset<Size> m_bits;
 };
