@@ -92,7 +92,7 @@ target_link_libraries(options ${Boost_PROGRAM_OPTIONS_LIBRARY})
 add_executable(otp otp.cpp)
 target_link_libraries(otp -loath)
 
-add_executable(playground T.hpp playground.cpp)
+add_executable(playground I.hpp T.hpp playground.cpp)
 
 add_executable(plugin_load plugin_load.cpp)
 target_link_libraries(plugin_load ${CMAKE_DL_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
@@ -145,6 +145,7 @@ add_executable(timer timer_test.cpp timer.hpp event.hpp)
 add_executable(try_block try_block.cpp)
 add_executable(unique unique.cpp)
 add_executable(unordered unordered.cpp)
+add_executable(utils I.hpp T.hpp utils.hpp utils.cpp)
 add_executable(uuid uuid.cpp)
 
 add_executable(xml xml.cpp)
