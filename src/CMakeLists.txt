@@ -41,6 +41,7 @@ target_include_directories(database PUBLIC ${SOCI_INCLUDE_DIRS})
 target_link_libraries(database ${SOCI_LIBRARY} ${SOCI_mysql_PLUGIN} ${MYSQL_CLIENT_LIBS})
 
 add_executable(deadlock deadlock.cpp)
+add_executable(deep_ptr I.hpp T.hpp deep_ptr.hpp deep_ptr.cpp)
 add_executable(dekker dekker.cpp)
 add_executable(dekker_n dekker_n.cpp)
 add_executable(enum enum.cpp)
