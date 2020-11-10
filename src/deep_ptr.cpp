@@ -38,6 +38,8 @@ int main()
 	q q1;
 	q1 = nullptr;
 	q1 = q{new Q};
+	r X{ std::move(q1) };
+	//q Y{ std::move(X) };
 
 	x1 = q1;
 
