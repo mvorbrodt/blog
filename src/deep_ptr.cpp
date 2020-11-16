@@ -35,6 +35,9 @@ int main()
 	r x4{ std::move(x1) };
 	//return;
 
+	if(x1) {}
+	if(!x1) {}
+
 	q q1;
 	q1 = nullptr;
 	q1 = q{new Q};

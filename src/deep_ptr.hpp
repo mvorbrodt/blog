@@ -41,7 +41,7 @@ public:
 		return *this;
 	}
 
-	explicit operator bool() const noexcept { return m_ptr != nullptr; }
+	explicit operator bool () const noexcept { return m_ptr != nullptr; }
 
 	T& operator * () const noexcept { return *m_ptr; }
 
