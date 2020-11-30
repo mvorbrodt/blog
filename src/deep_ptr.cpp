@@ -6,22 +6,30 @@ using namespace std;
 
 void f(deep_ptr<T> r) { if(r) r->foo(); }
 
+void foo(T t) { t.foo(); }
+void bar(const T& t) { t.bar(); }
+
 int main()
 {
-	struct S
-	{
-		S() = default;
-		S(const S&) = default;
-		S(S&&) = default;
-	};
-
-	S s1;/*
-	deep_ptr<S> xxx{ s1 };
-	deep_ptr<S> yyy{ S{} };*/
+	foo("first"); cout << "\n";
+	bar("second"); cout << "\n";
+	T t{ "tyhird" }; cout << "\n";
+	foo(t); cout << "\n";
+	bar(t); cout << "\n";
+	foo(std::move(t)); cout << "\n";
+	bar(std::move(t)); cout << "\n";
+	
+	return rand();
 
 	using r = deep_ptr<T>;
 	using q = deep_ptr<Q>;
 
+	auto del = [](T* p) { delete p; };
+	using c = deep_ptr<T, decltype(del)>;
+
+	c c1{ new T{ "custom deleter" }, del };
+
+	return rand();
 	/*r x0{ T{ "by r-value" } };
 	T t1{ "by l-value" };
 	r x00{ std::move(t1) };*/
@@ -38,11 +46,15 @@ int main()
 	if(x1) {}
 	if(!x1) {}
 
-	q q1;
+	q q1{ new Q{ "C++98 sucks" } };
 	q1 = nullptr;
-	q1 = q{new Q};
+	q1 = q{ new Q{ "C++03 sucks too" } };
 	r X{ std::move(q1) };
 	//q Y{ std::move(X) };
+
+	cout << (x1 == x1) << "," << (x1 != x1) << "," << (x1 < x1) << "," << (x1 <= x1) << "," << (x1 > x1) << "," << (x1 >= x1) << endl;
+	cout << (x1 == q1) << "," << (x1 != q1) << "," << (x1 < q1) << "," << (x1 <= q1) << "," << (x1 > q1) << "," << (x1 >= q1) << endl;
+	return rand();
 
 	x1 = q1;
 

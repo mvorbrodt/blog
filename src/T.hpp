@@ -17,6 +17,9 @@ struct T
 	T(int x, int y, int z) : m_x(x), m_y(y), m_z(z), instance_number(instance_counter++), alive_number(++alive_counter)
 	{ std::cout << "T" << get_instance_number() << "/" << get_alive_number_at_construction() << "::T(int x = " << T::x() << ", int y = " << T::y() << ", int z = " << T::z() << ")" << std::endl; }
 
+	T(const char* s) : m_s(s), instance_number(instance_counter++), alive_number(++alive_counter)
+	{ std::cout << "T" << get_instance_number() << "/" << get_alive_number_at_construction() << "::T(const char* s = \"" << T::s() << "\")" << std::endl; }
+
 	T(const std::string& s) : m_s(s), instance_number(instance_counter++), alive_number(++alive_counter)
 	{ std::cout << "T" << get_instance_number() << "/" << get_alive_number_at_construction() << "::T(const std::string& s = \"" << T::s() << "\")" << std::endl; }
 
