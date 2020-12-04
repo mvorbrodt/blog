@@ -11,6 +11,7 @@ CMakeScripts/
 Makefile
 bin/
 blog.build/
+build/
 cmake_install.cmake
 src/*.dir
 src/*.filters
