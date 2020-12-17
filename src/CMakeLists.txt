@@ -112,12 +112,12 @@ add_custom_command(
 add_executable(protobuf protobuf.cpp protobuf.pb.cc)
 target_link_libraries(protobuf ${Protobuf_LIBRARIES})
 
-add_executable(pstl pstl_test.cpp)
-target_link_libraries(pstl ${TBB_LIBRARIES})
+# add_executable(pstl pstl_test.cpp)
+# target_link_libraries(pstl ${TBB_LIBRARIES})
 
 add_executable(queue queue.cpp)
 add_executable(random random_test.cpp)
-add_executable(ranges ranges.cpp)
+# add_executable(ranges ranges.cpp)
 add_executable(round round.hpp round.cpp)
 add_executable(singleton singleton.hpp singleton.cpp)
 add_executable(sorting sorting.cpp)
