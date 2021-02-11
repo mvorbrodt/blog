@@ -1,3 +1,5 @@
+#pragma once
+
 #include <memory>
 #include <utility>
 #include <compare>
@@ -19,7 +21,7 @@ public:
 
 	explicit deep_ptr(pointer p) noexcept : m_p{ p } {}
 
-	deep_ptr(pointer p, const deleter_type& d) : m_p{ p }, m_d{ d } {}
+	deep_ptr(pointer p, deleter_type d) : m_p{ p }, m_d{ d } {}
 
 	deep_ptr(const deep_ptr& d) : m_p{ !d ? nullptr : new T{ *d } }, m_d{ d.m_d } {}
 	deep_ptr(deep_ptr&& d) noexcept : m_p{ std::exchange(d.m_p, nullptr) }, m_d{ std::move(d.m_d) } {}
@@ -30,7 +32,7 @@ public:
 	template<typename U, typename V>
 	deep_ptr(deep_ptr<U, V>&& d) noexcept : m_p{ std::exchange(d.m_p, nullptr) }, m_d{ std::move(d.m_d) } {}
 
-	~deep_ptr() noexcept { delete m_p; }
+	~deep_ptr() noexcept { get_deleter()(get()); }
 
 	deep_ptr& operator = (deep_ptr r) noexcept
 	{
@@ -52,9 +54,13 @@ public:
 
 	pointer get() const noexcept { return m_p; }
 
+	deleter_type& get_deleter() noexcept { return m_d; }
+
+	const deleter_type& get_deleter() const noexcept { return m_d; }
+
 	pointer release() noexcept { return std::exchange(m_p, nullptr); }
 
-	void reset(pointer p = pointer()) noexcept { delete std::exchange(m_p, p); }
+	void reset(pointer p = pointer()) noexcept { get_deleter()(std::exchange(m_p, p)); }
 
 	void swap(deep_ptr& o) noexcept
 	{

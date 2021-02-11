@@ -13,7 +13,7 @@ int main()
 {
 	foo("first"); cout << "\n";
 	bar("second"); cout << "\n";
-	T t{ "tyhird" }; cout << "\n";
+	T t{ "third" }; cout << "\n";
 	foo(t); cout << "\n";
 	bar(t); cout << "\n";
 	foo(std::move(t)); cout << "\n";

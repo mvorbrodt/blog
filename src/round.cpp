@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-	constexpr auto v = 0.0123456789; // 0.49999997f;
+	constexpr auto v = 0.0123456789;
 	array<decltype(v), 10> a =
 	{
 		my_round<1>(v),
@@ -27,4 +27,3 @@ int main()
 	for(int p = 1; auto it : a)
 		cout << p++ << ":\t" << it << endl;
 }
-

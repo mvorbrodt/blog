@@ -1,6 +1,9 @@
+#pragma once
+
 #include <limits>
 #include <type_traits>
 #include <cmath>
+#include <cstdint>
 
 // solution 1
 // can specify number of digits at run-time as the second parameter
@@ -19,7 +22,7 @@ auto my_round1(T v, unsigned char d)
 
 // recursive template to compute B^E at compile time
 // result is stored as a static variable 'value' of type T
-template<unsigned long long B, unsigned char E, typename T>
+template<std::uint64_t B, unsigned char E, typename T>
 requires std::is_arithmetic_v<T>
 struct power_of
 {
@@ -27,7 +30,7 @@ struct power_of
 };
 
 // terminating template for the recursion one above once E == 0
-template<unsigned long long B, typename T>
+template<std::uint64_t B, typename T>
 requires std::is_arithmetic_v<T>
 struct power_of<B, 0, T>
 {
@@ -40,7 +43,7 @@ struct power_of<B, 0, T>
 // returns the result as type T
 template<typename T>
 requires std::is_arithmetic_v<T>
-constexpr T power_of_f(unsigned long long b, unsigned char e)
+constexpr T power_of_f(std::uint64_t b, unsigned char e)
 {
 	return e == 0 ? T(1) : T(b) * power_of_f<T>(b, e - 1);
 }
@@ -68,7 +71,7 @@ requires std::is_floating_point_v<T>
 constexpr auto my_rnd(T v)
 {
 	constexpr auto h = T(0.5) - std::numeric_limits<T>::epsilon();
-	return (signed long long)(v + h * my_sign(v));
+	return (std::int64_t)(v + h * my_sign(v));
 }
 
 // self explanatory :)
@@ -81,7 +84,7 @@ constexpr auto my_round2(T v)
 	/* option 1 */ //constexpr auto p = power_of_f<T>(10, D);
 	/* option 2 */ constexpr auto p = power_of<10, D, T>::value;
 	if(my_abs(v) > std::numeric_limits<T>::max() / p) return v; // v * p would overflow
-	if(my_abs(v) * p > std::numeric_limits<signed long long>::max() - 1) return v; // v * p would not fit in int64_t
+	if(my_abs(v) * p > std::numeric_limits<std::int64_t>::max() - 1) return v; // v * p would not fit in int64_t
 	return my_rnd(v * p) / p;
 }
 

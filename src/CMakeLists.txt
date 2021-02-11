@@ -86,6 +86,7 @@ add_executable(inverting inverting.cpp)
 add_executable(membars membars.cpp)
 add_executable(multi_hash hash.hpp multi_hash.cpp)
 add_executable(new new.cpp)
+add_executable(newtrace newtrace.hpp newtrace.cpp)
 
 add_executable(options options.cpp)
 target_link_libraries(options ${Boost_PROGRAM_OPTIONS_LIBRARY})
