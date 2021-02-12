@@ -123,7 +123,7 @@ void __operator_delete__(void* ptr, bool array_delete) noexcept
 		{
 			auto entry = *it;
 			get_new_entry_set()->erase(it);
-			try { get_mismatch_list()->emplace_back(entry.ptr, entry.is_array, entry.bytes, entry.file, entry.proc, entry.line); }
+			try { get_mismatch_list()->push_back(std::move(entry)); }
 			catch(...) {}
 		}
 	}
