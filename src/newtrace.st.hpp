@@ -3,8 +3,11 @@
 #include <new>
 #include <map>
 #include <vector>
+#include <string>
 #include <utility>
 #include <cstdlib>
+#define BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED
+#include <boost/stacktrace.hpp>
 
 namespace
 {
@@ -26,7 +29,8 @@ namespace
 
 	using char_t = char;
 	using string_t = const char_t*;
-	using new_entry_t = struct { std::size_t bytes; string_t file; string_t proc; int line; };
+	using stack_trace_t = std::string;
+	using new_entry_t = struct { std::size_t bytes; string_t file; string_t proc; int line; stack_trace_t stack; };
 	using ptr_t = void*;
 	using new_ptr_map_t = std::map<ptr_t, new_entry_t, std::less<ptr_t>, malloc_allocator_t<std::pair<ptr_t const, new_entry_t>>>;
 	using leak_list_t = std::vector<new_entry_t>;
@@ -57,8 +61,11 @@ void* operator new(std::size_t n)
 void* operator new (std::size_t n, const char* file, const char* func, int line)
 {
 	void* ptr = ::operator new(n);
-	try { get_ptr_map().emplace(ptr, new_entry_t{ n, file, func, line }); }
-	catch(...) { }
+	try {
+		namespace st = boost::stacktrace;
+		auto stack = st::to_string(st::stacktrace());
+		get_ptr_map().emplace(ptr, new_entry_t{ n, file, func, line, std::move(stack) });
+	} catch(...) { }
 	return ptr;
 }
 
