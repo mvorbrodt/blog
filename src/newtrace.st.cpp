@@ -2,7 +2,7 @@
 #include <vector>
 #include <map>
 #include <set>
-#include "newtrace.hpp"
+#include "newtrace.st.hpp"
 
 const int N = 100;
 
