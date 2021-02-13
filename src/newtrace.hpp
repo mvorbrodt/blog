@@ -10,6 +10,10 @@
 
 static_assert(__cplusplus >= 201703L, "C++17 compiler is required!");
 
+#ifdef new
+#undef new
+#endif
+
 #include <new>
 #include <memory>
 #include <vector>
@@ -209,4 +213,6 @@ void operator delete [] (ndt::ptr_t ptr, ndt::string_t, int, ndt::string_t) noex
 Otherwise comment these warnings out and hope we get 'std::source_location' soon! \
 https://en.cppreference.com/w/cpp/utility/source_location/
 
+#ifndef new
 #define new new(__FILE__, __LINE__, __PRETTY_FUNCTION__)
+#endif
