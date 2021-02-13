@@ -1,53 +1,60 @@
 #include <iostream>
 #include <vector>
-#include <map>
-#include <set>
+
+#define NEW_DELETE_TRACE_DUMP
 #include "newtrace.hpp"
 
-const int N = 100;
+struct I { virtual ~I() {} };
 
-enum TEST { GOOD, LEAK, MISMATCH, LEAK_MISMATCH };
-TEST test = LEAK_MISMATCH;
+template<typename T> struct S : I
+{
+	S(T* p, void(*d)(T*)) : ptr{ p }, del{ d } {}
+	virtual ~S() { del(ptr); }
 
-struct S { S() { throw 1; } };
+	T* ptr;
+	void(*del)(T*);
+};
+
+using allocation_list_t = std::vector<I*>;
+allocation_list_t my_allocations;
+
+const int N = 5;
+
+auto delete_one = [](auto* p) { delete p; };
+auto delete_many = [](auto* p) { delete [] p; };
+
+template<typename T> void good()
+{
+	my_allocations.push_back(new S<T>(new T, delete_one));
+	my_allocations.push_back(new S<T>(new T[N], delete_many));
+	for(auto s : my_allocations) delete s;
+	my_allocations.clear();
+}
+
+template<typename T> void mismatch()
+{
+	my_allocations.push_back(new S<T>(new T, delete_many));
+	my_allocations.push_back(new S<T>(new T[N], delete_one));
+	for(auto s : my_allocations) delete s;
+	my_allocations.clear();
+}
+
+template<typename T> void leak()
+{
+	my_allocations.push_back(new S<T>(new T, delete_many));
+	my_allocations.push_back(new S<T>(new T[N], delete_one));
+	//for(auto s : my_allocations) delete s;
+	//my_allocations.clear();
+}
 
 int main()
 {
-	try { new S; } catch(...) { } // not a leak!
-	try { new S [N]; } catch(...) { } // same!
+	struct Boom { Boom() { throw 1; } };
 
-	char* cp = new char;
-	char* ca = new char [N];
-	short* sp = new short;
-	short* sa = new short [N];
-	int* ip = new int;
-	int* ia = new int [N];
+	try { new Boom; } catch(...) { } // not a leak!
+	try { new Boom [N]; } catch(...) { } // same!
 
-	switch(test)
-	{
-		case GOOD:
-			delete cp;
-			delete [] ca;
-			delete sp;
-			delete [] sa;
-			delete ip;
-			delete [] ia;
-			break;
-		case LEAK:
-			break;
-		case MISMATCH:
-			delete [] cp;
-			delete ca;
-			delete [] sp;
-			delete sa;
-			delete [] ip;
-			delete ia;
-			break;
-		case LEAK_MISMATCH:
-			delete [] cp;
-			delete ca;
-			delete ip;
-			delete [] ia;
-			break;
-	}
+	good<char>();
+	mismatch<char>();
+	leak<char>();
 }
