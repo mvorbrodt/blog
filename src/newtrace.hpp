@@ -17,13 +17,14 @@ static_assert(__cplusplus >= 201703L, "C++17 compiler is required!");
 #include <new>
 #include <memory>
 #include <vector>
+#include <utility>
 #include <functional>
 #include <unordered_set>
 #include <iostream>
 #include <ostream>
 #include <cstdlib>
 
-namespace __new_delete_trace_impl__
+namespace ndt::detail
 {
 	template<typename T>
 	struct malloc_allocator_t : std::allocator<T>
@@ -41,17 +42,15 @@ namespace __new_delete_trace_impl__
 		struct rebind { typedef malloc_allocator_t<U> other; };
 	};
 
-	using ptr_t = void*;
-	using char_t = char;
-	using string_t = const char_t*;
+	using string_t = const char*;
 
 	struct new_entry_t
 	{
-		new_entry_t(ptr_t p = nullptr, bool a = false, std::size_t b = 0,
+		new_entry_t(void* p = nullptr, bool a = false, std::size_t b = 0,
 			string_t f = "N/A", int l = -1, string_t fn = "N/A")
 		: ptr{ p }, is_array{ a }, bytes{ b }, file{ f }, line{ l }, func{ fn } {}
 
-		ptr_t       ptr;
+		void*       ptr;
 		bool        is_array;
 		std::size_t bytes;
 		string_t    file;
@@ -68,9 +67,9 @@ namespace __new_delete_trace_impl__
 
 	inline bool operator == (const new_entry_t& lhs, const new_entry_t& rhs) { return lhs.ptr == rhs.ptr; }
 
-	struct new_entry_hash_t : std::hash<ptr_t>
+	struct new_entry_hash_t : std::hash<void*>
 	{
-		using base = std::hash<ptr_t>;
+		using base = std::hash<void*>;
 		std::size_t operator()(const new_entry_t& entry) { return base::operator()(entry.ptr); }
 	};
 
@@ -82,7 +81,7 @@ namespace __new_delete_trace_impl__
 	{
 		static new_entry_set_t* new_entry_set = []()
 		{
-			ptr_t raw = std::malloc(sizeof(new_entry_set_t));
+			void* raw = std::malloc(sizeof(new_entry_set_t));
 			if(!raw) throw std::bad_alloc();
 			return new (raw) new_entry_set_t;
 		}();
@@ -93,16 +92,38 @@ namespace __new_delete_trace_impl__
 	{
 		static new_entry_list_t* mismatch_list = []()
 		{
-			ptr_t raw = std::malloc(sizeof(new_entry_list_t));
+			void* raw = std::malloc(sizeof(new_entry_list_t));
 			if(!raw) throw std::bad_alloc();
 			return new (raw) new_entry_list_t;
 		}();
 		return mismatch_list;
 	}
 
+	inline void operator_delete(void* ptr, bool array_delete) noexcept
+	{
+		auto it = get_new_entry_set()->find(ptr);
+		if(it != get_new_entry_set()->end())
+		{
+			if(it->is_array == array_delete)
+			{
+				get_new_entry_set()->erase(it);
+			}
+			else
+			{
+				try { get_mismatch_list()->push_back(*it); }
+				catch(...) {}
+				get_new_entry_set()->erase(it);
+			}
+		}
+		std::free(ptr);
+	}
+}
+
+namespace ndt
+{
 	inline void dump_leak()
 	{
-		if(auto leaks = get_new_entry_set(); !leaks->empty())
+		if(auto leaks = detail::get_new_entry_set(); !leaks->empty())
 		{
 			std::cerr << "****************************\n";
 			std::cerr << "*** MEMORY LEAK(S) FOUND ***\n";
@@ -117,7 +138,7 @@ namespace __new_delete_trace_impl__
 
 	inline void dump_mismatch()
 	{
-		if(auto mismatches = get_mismatch_list(); !mismatches->empty())
+		if(auto mismatches = detail::get_mismatch_list(); !mismatches->empty())
 		{
 			std::cerr << "***************************\n";
 			std::cerr << "*** NEW/DELETE MISMATCH ***\n";
@@ -135,78 +156,56 @@ namespace __new_delete_trace_impl__
 		dump_leak();
 		dump_mismatch();
 	}
+}
 
-	inline void operator_delete(ptr_t ptr, bool array_delete) noexcept
-	{
-		auto it = get_new_entry_set()->find(ptr);
-		if(it != get_new_entry_set()->end())
-		{
-			if(it->is_array == array_delete)
-			{
-				get_new_entry_set()->erase(it);
-			}
-			else
-			{
-				try { get_mismatch_list()->push_back(*it); }
-				catch(...) {} // Eat all exceptions, we don't want to get in the way...
-				get_new_entry_set()->erase(it);
-			}
-		}
-		std::free(ptr);
-	}
-} // End of __new_delete_trace_impl__ namespace
-
-namespace ndt = ::__new_delete_trace_impl__;
-
-#ifdef NEW_DELETE_TRACE_DUMP
-// If NEW_DELETE_TRACE_DUMP is #define'd, this line will dump leaks/mismatches on program exit
+#ifdef ENABLE_NEW_DELETE_TRACE_DUMP
 namespace { inline const struct __dump_all__ { ~__dump_all__() { ndt::dump_all(); } } __dump_all_on_exit__; }
 #endif
 
-ndt::ptr_t operator new(std::size_t n)
+void* operator new (std::size_t n)
 {
-	ndt::ptr_t ptr = std::malloc(n);
+	void* ptr = std::malloc(n);
 	if(!ptr) throw std::bad_alloc();
 	return ptr;
 }
 
-ndt::ptr_t operator new (std::size_t n, ndt::new_entry_t entry)
+void* operator new (std::size_t n, ndt::detail::new_entry_t&& entry)
 {
-	ndt::ptr_t ptr = ::operator new(n);
+	void* ptr = ::operator new(n);
 	entry.ptr = ptr;
-	try { ndt::get_new_entry_set()->insert(entry); }
-	catch(...) {} // Eat all exceptions, we don't want to get in the way...
+	try { ndt::detail::get_new_entry_set()->insert(std::forward<decltype(entry)>(entry)); }
+	catch(...) {}
 	return ptr;
 }
 
-ndt::ptr_t operator new (std::size_t n, ndt::string_t file, int line, ndt::string_t func)
+void* operator new (std::size_t n, ndt::detail::string_t file, int line, ndt::detail::string_t func)
 {
-	return ::operator new(n, ndt::new_entry_t{ nullptr, false, n, file, line, func });
+	return ::operator new(n, ndt::detail::new_entry_t{ nullptr, false, n, file, line, func });
 }
 
-ndt::ptr_t operator new [] (std::size_t n, ndt::string_t file, int line, ndt::string_t func)
+void* operator new [] (std::size_t n, ndt::detail::string_t file, int line, ndt::detail::string_t func)
 {
-	return ::operator new(n, ndt::new_entry_t{ nullptr, true, n, file, line, func });
+	return ::operator new(n, ndt::detail::new_entry_t{ nullptr, true, n, file, line, func });
 }
 
-void operator delete (ndt::ptr_t ptr) noexcept
+void operator delete (void* ptr) noexcept
 {
-	ndt::operator_delete(ptr, false);
+	ndt::detail::operator_delete(ptr, false);
 }
 
-void operator delete [] (ndt::ptr_t ptr) noexcept
+void operator delete [] (void* ptr) noexcept
 {
-	ndt::operator_delete(ptr, true);
+	ndt::detail::operator_delete(ptr, true);
 }
 
-void operator delete (ndt::ptr_t ptr, ndt::string_t, int, ndt::string_t) noexcept
+void operator delete (void* ptr, ndt::detail::string_t, int, ndt::detail::string_t) noexcept
 {
-	ndt::operator_delete(ptr, false);
+	ndt::detail::operator_delete(ptr, false);
 }
 
-void operator delete [] (ndt::ptr_t ptr, ndt::string_t, int, ndt::string_t) noexcept
+void operator delete [] (void* ptr, ndt::detail::string_t, int, ndt::detail::string_t) noexcept
 {
-	ndt::operator_delete(ptr, true);
+	ndt::detail::operator_delete(ptr, true);
 }
 
 #warning If '__PRETTY_FUNCTION__' is undefined replace it with '__proc__' below. \
