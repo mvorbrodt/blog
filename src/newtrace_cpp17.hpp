@@ -4,12 +4,6 @@
 #error C++ compiler is required!"
 #endif
 
-#if __cplusplus < 201703L
-#error C++17 compiler is required!
-#endif
-
-static_assert(__cplusplus >= 201703L, "C++17 compiler is required!");
-
 #ifdef new
 #undef new
 #endif
@@ -29,6 +23,11 @@ namespace ndt::detail
 	template<typename T>
 	struct malloc_allocator_t : std::allocator<T>
 	{
+		malloc_allocator_t() = default;
+
+		template<class U>
+		malloc_allocator_t(const malloc_allocator_t<U>&) noexcept {}
+
 		T* allocate(std::size_t n)
 		{
 			T* ptr = (T*)std::malloc(n * sizeof(T));
@@ -37,6 +36,9 @@ namespace ndt::detail
 		}
 
 		void deallocate(T* ptr, std::size_t) { std::free(ptr); }
+
+		template<typename U>
+		struct rebind { typedef malloc_allocator_t<U> other; };
 	};
 
 	using string_t = const char*;
@@ -205,10 +207,6 @@ void operator delete [] (void* ptr, ndt::detail::string_t, int, ndt::detail::str
 	ndt::detail::operator_delete(ptr, true);
 }
 
-#warning If '__PRETTY_FUNCTION__' is undefined replace it with '__proc__' below. \
-Otherwise comment these warnings out and hope we get 'std::source_location' soon! \
-https://en.cppreference.com/w/cpp/utility/source_location/
-
 #ifndef new
-#define new new(__FILE__, __LINE__, __PRETTY_FUNCTION__)
+#define new new(__FILE__, __LINE__, __FUNCTION__)
 #endif
