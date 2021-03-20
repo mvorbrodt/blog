@@ -24,6 +24,6 @@ int main()
 
 	cout << fixed << setprecision(10);
 
-	for(int p = 1; auto it : a)
-		cout << p++ << ":\t" << it << endl;
+	for(int p = 1; auto v : a)
+		cout << p++ << ":\t" << v << endl;
 }

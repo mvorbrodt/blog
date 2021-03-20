@@ -37,6 +37,9 @@ struct power_of<B, 0, T>
 	static constexpr T value = T(1);
 };
 
+template<std::uint64_t B, unsigned char E, typename T>
+inline constexpr auto power_of_v = power_of<B, E, T>::value;
+
 // recursive function template to calculate b^e
 // if both parameters are constexpr it will evaluate at compile time
 // otherwise it will evaluate at run time
@@ -82,12 +85,16 @@ requires std::is_floating_point_v<T>
 constexpr auto my_round2(T v)
 {
 	/* option 1 */ //constexpr auto p = power_of_f<T>(10, D);
-	/* option 2 */ constexpr auto p = power_of<10, D, T>::value;
+	/* option 2 */ constexpr auto p = power_of_v<10, D, T>;
 	if(my_abs(v) > std::numeric_limits<T>::max() / p) return v; // v * p would overflow
 	if(my_abs(v) * p > std::numeric_limits<std::int64_t>::max() - 1) return v; // v * p would not fit in int64_t
 	return my_rnd(v * p) / p;
 }
 
 // PICK WHICH ONE TO USE HERE:
-//template<unsigned char D, typename T> auto my_round(T v) { return my_round1(v, D); } // using solution 1
-template<unsigned char D, typename T> constexpr auto my_round(T v) { return my_round2<D>(v); } // using solution 2
+
+//template<unsigned char D, typename T>
+//auto my_round(T v) { return my_round1(v, D); } // using solution 1
+
+template<unsigned char D, typename T>
+constexpr auto my_round(T v) { return my_round2<D>(v); } // using solution 2
