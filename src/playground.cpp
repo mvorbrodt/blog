@@ -40,7 +40,7 @@ auto get_type_tag()
 	{
 		{ typeid(N).hash_code(),           k_next_type_tag++ },
 		{ typeid(char).hash_code(),        k_next_type_tag++ },
-		{ typeid(const char*).hash_code(), k_next_type_tag++ },
+//		{ typeid(const char*).hash_code(), k_next_type_tag++ }, // not needed because of 'const char*' to 'std::string' transform
 		{ typeid(short).hash_code(),       k_next_type_tag++ },
 		{ typeid(int).hash_code(),         k_next_type_tag++ },
 		{ typeid(long).hash_code(),        k_next_type_tag++ },
@@ -68,8 +68,6 @@ constexpr decltype(auto) unpack_type_transform(T&& value) { return(value); }
 	inline auto pack_type_transform(from value) { return pack_proc(value); } \
 	inline auto unpack_type_transform(to value) { return unpack_proc(value); }
 
-#define PACK_TYPE_SIZE(T)      sizeof(PACK_TYPE_FROM_TYPE(T))
-
 #define PACK_TYPE_FROM_TYPE(T) std::decay_t<decltype(pack_type_transform(std::declval<T>()))>
 
 MAKE_PACK_TYPE_CAST(std::size_t, short);
@@ -79,7 +77,9 @@ MAKE_PACK_TYPE_TRANSFORM(const char*, std::string,
 	[](const std::string& v) { return v; });
 
 
-/*
+
+#define PACK_TYPE_SIZE(T) sizeof(PACK_TYPE_FROM_TYPE(T))
+
 template<typename T>
 auto pack_type_size(const T&) { return PACK_TYPE_SIZE(T); }
 
@@ -88,7 +88,7 @@ auto pack_type_size(const T&) { return PACK_TYPE_SIZE(T); }
 
 MAKE_PACK_TYPE_SIZE(const char*, [](auto v) { return PACK_TYPE_SIZE(decltype(std::strlen(""))) + std::strlen(v); });
 MAKE_PACK_TYPE_SIZE(const std::string&, [](auto v) { return PACK_TYPE_SIZE(std::string::size_type) + v.length(); });
-*/
+
 
 
 using buffer_t = std::vector<std::byte>;
@@ -110,8 +110,7 @@ private:
 template<typename T>
 void pack_bytes(buffer_t& buffer, const T* ptr, std::size_t count)
 {
-	auto bytes = buffer_ptr_t(ptr);
-	buffer.insert(std::end(buffer), bytes, bytes + count);
+	buffer.insert(std::end(buffer), buffer_ptr_t(ptr), buffer_ptr_t(ptr) + count);
 }
 
 template<typename T>
@@ -144,7 +143,7 @@ void pack_it(buffer_t& buffer, T&& value)
 {
 	using PT = PACK_TYPE_FROM_TYPE(T);
 	pack_type_tag<PT>(buffer);
-	decltype(auto) transformed = pack_type_transform(value);
+	decltype(auto) transformed = pack_type_transform(std::forward<T>(value));
 	pack_type(buffer, transformed);
 }
 
@@ -152,9 +151,9 @@ template<typename... T>
 auto pack(T&&... value)
 {
 	auto buffer = buffer_t();
-	/*auto value_count = sizeof...(T);
+	auto value_count = sizeof...(T);
 	auto buffer_size = (value_count * sizeof(type_tag_t)) + ((pack_type_size(value)) + ...);
-	buffer.reserve(buffer_size);*/
+	buffer.reserve(buffer_size);
 	(pack_it(buffer, std::forward<T>(value)) , ...);
 	return buffer;
 }
