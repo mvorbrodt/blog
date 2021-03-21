@@ -16,21 +16,23 @@ private:
 	int m_v;
 };
 
+const auto _add_N_type_tag_ = add_type_tag<N>();
+
 int main()
 {
 	using namespace std;
 
-	auto sb1 = pack(std::size_t(20));
-	auto ut1 = unpack<std::size_t>(sb1);
+	auto buf_1 = pack(std::size_t(20));
+	auto tup_1 = unpack<std::size_t>(buf_1);
 
-	auto sb2 = pack("this is a hardcoded string");
-	auto ut2 = unpack<std::string>(sb2);
+	auto buf_2 = pack("this is a hardcoded string");
+	auto tup_2 = unpack<std::string>(buf_2);
 
-	auto sb3 = pack("this is std::string"s);
-	auto ut3 = unpack<std::string>(sb3);
+	auto buf_3 = pack("this is std::string"s);
+	auto tup_3 = unpack<std::string>(buf_3);
 
-	auto sb4 = pack('C', '+', '+', 11, 14, 17, "this is a hardcoded string", "this is std::string"s, N(20), N(23));
-	auto ut4 = unpack<char, char, char, int, int, int, std::string, std::string, N, N>(sb4);
+	auto buf_4 = pack('C', '+', '+', 11, 14, 17, "this is a hardcoded string", "this is std::string"s, N(20), N(23));
+	auto tup_4 = unpack<char, char, char, int, int, int, std::string, std::string, N, N>(buf_4);
 
 	return rand();
 }

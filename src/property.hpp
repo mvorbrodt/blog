@@ -315,10 +315,10 @@ PROPERTY_FRIEND_OPERATOR(<<);
 
 // PROPERTY I/O OPERATORS
 template<typename T, template<typename> class P>
-inline std::istream& operator >> (std::istream& os, property<T, P>& p)
+inline std::istream& operator >> (std::istream& is, property<T, P>& p)
 {
-	os >> p.get();
-	return os;
+	is >> p.get();
+	return is;
 }
 
 template<typename T, template<typename> class P>
