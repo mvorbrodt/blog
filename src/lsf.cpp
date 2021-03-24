@@ -16,8 +16,6 @@ private:
 	int m_v;
 };
 
-const auto _add_N_type_tag_ = add_type_tag<N>();
-
 int main()
 {
 	using namespace std;
