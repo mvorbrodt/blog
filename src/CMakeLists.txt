@@ -113,7 +113,7 @@ add_custom_command(
 	COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} -I=${CMAKE_CURRENT_SOURCE_DIR}
 	--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/protobuf.proto)
-add_executable(protobuf protobuf.cpp protobuf.pb.cc)
+add_executable(protobuf protobuf.cpp protobuf.pb.h protobuf.pb.cc protobuf.proto)
 target_link_libraries(protobuf ${Protobuf_LIBRARIES})
 
 # add_executable(pstl pstl_test.cpp)

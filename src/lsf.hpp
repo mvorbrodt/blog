@@ -238,7 +238,7 @@ auto pack(T&&... value)
 template<typename T>
 decltype(auto) value_cast(const void* ptr)
 {
-	using value_ptr_t = const T*;
+	using value_ptr_t = T*;
 	return(*value_ptr_t(ptr));
 }
 
@@ -264,7 +264,7 @@ auto unpack_type(buffer_input_t& it)
 	decltype(auto) transform = get_unpack_transform<T>();
 	transform(it, storage);
 
-	return value_cast<T>(storage);
+	return std::move(value_cast<T>(storage));
 }
 
 template<typename... T>
