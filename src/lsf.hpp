@@ -21,7 +21,7 @@ using buffer_output_t = std::back_insert_iterator<buffer_t>;
 struct on_exit_t
 {
 	using proc_t = std::function<void()>;
-	on_exit_t(proc_t&& proc) : m_proc{ std::move(proc) } {}
+	on_exit_t(proc_t&& proc) : m_proc{ std::forward<proc_t>(proc) } {}
 	~on_exit_t() { m_proc(); }
 	proc_t m_proc;
 };
