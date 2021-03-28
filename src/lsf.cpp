@@ -82,7 +82,7 @@ int main()
 		[](buffer_input_t& it, std::string* v)
 		{
 			auto len = unpack_type<std::string::size_type>(it);
-			new (v) std::string(len, std::string::value_type()); // do this cleanly !!!
+			new (v) std::string(len, std::string::value_type());
 			unpack_bytes(it, v->data(), len);
 		});
 
