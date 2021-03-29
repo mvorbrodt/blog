@@ -34,9 +34,9 @@ int main()
 	add_pack_transform<std::uint32_t>([](std::uint32_t v, buffer_output_t& it) { pack_value(it, htonl(v)); });
 	add_pack_transform<std::uint64_t>([](std::uint64_t v, buffer_output_t& it) { pack_value(it, htonll(v)); });
 
-	add_unpack_transform<std::uint16_t>([](buffer_input_t& it, std::uint16_t* v) { *v = ntohs(unpack_value<std::uint16_t>(it)); });
-	add_unpack_transform<std::uint32_t>([](buffer_input_t& it, std::uint32_t* v) { *v = ntohl(unpack_value<std::uint32_t>(it)); });
-	add_unpack_transform<std::uint64_t>([](buffer_input_t& it, std::uint64_t* v) { *v = ntohll(unpack_value<std::uint64_t>(it)); });
+	add_unpack_transform<std::uint16_t>([](buffer_input_t& it) { return ntohs(unpack_value<std::uint16_t>(it)); });
+	add_unpack_transform<std::uint32_t>([](buffer_input_t& it) { return ntohl(unpack_value<std::uint32_t>(it)); });
+	add_unpack_transform<std::uint64_t>([](buffer_input_t& it) { return ntohll(unpack_value<std::uint64_t>(it)); });
 
 	auto buf_1 = pack(std::uint8_t(0x12), std::uint16_t(0x1234), std::uint32_t(0x12345678), std::uint64_t(0x1234567890ABCDEF));
 	auto tup_1 = unpack<std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t>(buf_1);
@@ -44,7 +44,7 @@ int main()
 
 
 	add_pack_transform<std::size_t>([](std::size_t v, buffer_output_t& it) { pack_value(it, std::uint16_t(v)); });
-	add_unpack_transform<std::size_t>([](buffer_input_t& it, std::size_t* v) { *v = unpack_value<std::uint16_t>(it); });
+	add_unpack_transform<std::size_t>([](buffer_input_t& it) { return unpack_value<std::uint16_t>(it); });
 	add_pack_size_proc<std::size_t>([](std::size_t) { return sizeof(std::uint16_t); });
 
 	auto buf_2_1 = pack(std::size_t(-1));
@@ -58,7 +58,7 @@ int main()
 	auto tup_2_2 = unpack<std::size_t>(buf_2_2);
 
 	add_pack_transform<std::size_t>([](std::size_t v, buffer_output_t& it) { pack_value(it, std::uint16_t(v)); });
-	add_unpack_transform<std::size_t>([](buffer_input_t& it, std::size_t* v) { *v = unpack_value<std::uint16_t>(it); });
+	add_unpack_transform<std::size_t>([](buffer_input_t& it) { return unpack_value<std::uint16_t>(it); });
 	add_pack_size_proc<std::size_t>([](std::size_t) { return sizeof(std::uint16_t); });
 
 
@@ -79,11 +79,12 @@ int main()
 		});
 
 	add_unpack_transform<std::string>(
-		[](buffer_input_t& it, std::string* v)
+		[](buffer_input_t& it)
 		{
 			auto len = unpack_type<std::string::size_type>(it);
-			new (v) std::string(len, std::string::value_type());
-			unpack_bytes(it, v->data(), len);
+			auto v = std::string(len, std::string::value_type());
+			unpack_bytes(it, v.data(), len);
+			return v;
 		});
 
 	add_pack_size_proc<const char*>([](const char* v) { return pack_size(std::strlen(v)) + std::strlen(v); });
@@ -100,11 +101,11 @@ int main()
 
 
 	add_pack_transform<int>([](int v, buffer_output_t& it) { pack_value(it, htonl(v)); });
-	add_unpack_transform<int>([](buffer_input_t& it, int* v) { *v = ntohl(unpack_value<decltype(htonl(0))>(it)); });
+	add_unpack_transform<int>([](buffer_input_t& it) { return ntohl(unpack_value<decltype(htonl(0))>(it)); });
 	add_pack_size_proc<int>([](int) { return sizeof(decltype(htonl(0))); });
 
 	add_pack_transform<N>([](const N& v, buffer_output_t& it) { pack_type(it, v.get_value()); });
-	add_unpack_transform<N>([](buffer_input_t& it, N* v) { new (v) N(unpack_type<int>(it)); });
+	add_unpack_transform<N>([](buffer_input_t& it) { return N(unpack_type<int>(it)); });
 	add_pack_size_proc<N>([](const N& v) { return pack_size(v.get_value()); });
 
 	auto n_1 = N(11);
@@ -127,13 +128,14 @@ int main()
 		});
 
 	add_unpack_transform<strings_t>(
-		[](buffer_input_t& it, strings_t* vs)
+		[](buffer_input_t& it)
 		{
 			auto size = unpack_type<strings_t::size_type>(it);
-			new (vs) strings_t();
-			vs->reserve(size);
-			std::generate_n(std::back_inserter(*vs), size,
+			auto vs = strings_t();
+			vs.reserve(size);
+			std::generate_n(std::back_inserter(vs), size,
 				[&]() { return unpack_type<std::string>(it); });
+			return vs;
 		});
 
 	add_pack_size_proc<strings_t>(

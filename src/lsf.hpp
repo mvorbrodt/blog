@@ -1,5 +1,6 @@
 #pragma once
 
+#include <any>
 #include <tuple>
 #include <vector>
 #include <utility>
@@ -21,9 +22,18 @@ using buffer_output_t = std::back_insert_iterator<buffer_t>;
 struct on_exit_t
 {
 	using proc_t = std::function<void()>;
-	on_exit_t(proc_t&& proc) : m_proc{ std::forward<proc_t>(proc) } {}
-	~on_exit_t() { m_proc(); }
+
+	on_exit_t(proc_t&& proc, bool do_it = true)
+	: m_proc{ std::forward<proc_t>(proc) }, m_do_it{ do_it } {}
+
+	~on_exit_t() { if(m_do_it) m_proc(); }
+
+	void dont() noexcept { m_do_it = false; }
+	void do_it() noexcept { m_do_it = true; }
+
+private:
 	proc_t m_proc;
+	bool m_do_it;
 };
 
 
@@ -39,7 +49,7 @@ template<typename T> decltype(auto) unpack_value(buffer_input_t& it);
 using type_hash_t = decltype(std::declval<std::type_info>().hash_code());
 
 using pack_transform_t = std::function<void(const void*, buffer_output_t&)>;
-using unpack_transform_t = std::function<void(buffer_input_t&, void*)>;
+using unpack_transform_t = std::function<std::any(buffer_input_t&)>;
 
 using pack_transform_map_t = std::unordered_map<type_hash_t, pack_transform_t>;
 using unpack_transform_map_t = std::unordered_map<type_hash_t, unpack_transform_t>;
@@ -49,7 +59,6 @@ using transform_maps_t = std::pair<pack_transform_map_t, unpack_transform_map_t>
 inline decltype(auto) get_transform_maps()
 {
 	static auto k_transform_maps = transform_maps_t();
-
 	return(k_transform_maps);
 }
 
@@ -60,7 +69,8 @@ auto add_pack_transform(P proc)
 {
 	auto& [pack_map, _] = get_transform_maps();
 	auto hash = typeid(T).hash_code();
-	auto transform = pack_transform_t([=](const void* pv, buffer_output_t& it) { proc(*((const T*)pv), it); });
+	auto transform = pack_transform_t([=](const void* pv, buffer_output_t& it)
+		{ proc(*((const T*)pv), it); });
 
 	auto [it, result] = pack_map.insert_or_assign(hash, transform);
 	return result == true;
@@ -70,7 +80,8 @@ template<typename T>
 decltype(auto) get_pack_transform()
 {
 	using DT = std::decay_t<T>;
-	static auto k_default_pack_transform = pack_transform_t([](const void* p, buffer_output_t& it) { pack_value(it, *((const DT*)p)); });
+	static auto k_default_pack_transform = pack_transform_t([](const void* p, buffer_output_t& it)
+		{ pack_value(it, *((const DT*)p)); });
 
 	auto& [pack_map, _] = get_transform_maps();
 	auto hash = typeid(DT).hash_code();
@@ -98,7 +109,8 @@ auto add_unpack_transform(P proc)
 {
 	auto& [_, unpack_map] = get_transform_maps();
 	auto hash = typeid(T).hash_code();
-	auto transform = unpack_transform_t([=](buffer_input_t& it, void* pv) { proc(it, (T*)pv); });
+	auto transform = unpack_transform_t([=](buffer_input_t& it)
+		{ return std::make_any<T>(proc(it)); });
 
 	auto [it, result] = unpack_map.insert_or_assign(hash, transform);
 	return result == true;
@@ -107,7 +119,8 @@ auto add_unpack_transform(P proc)
 template<typename T>
 decltype(auto) get_unpack_transform()
 {
-	static auto k_default_unpack_transform = unpack_transform_t([](buffer_input_t& it, void* p) { new (p) T(unpack_value<T>(it)); });
+	static auto k_default_unpack_transform = unpack_transform_t([](buffer_input_t& it)
+		{ return std::make_any<T>(unpack_value<T>(it)); });
 
 	auto& [_, unpack_map] = get_transform_maps();
 	auto hash = typeid(T).hash_code();
@@ -136,7 +149,6 @@ using pack_size_proc_map_t = std::unordered_map<type_hash_t, pack_size_proc_t>;
 inline decltype(auto) get_pack_size_proc_map()
 {
 	static auto k_pack_size_proc_map = pack_size_proc_map_t();
-
 	return(k_pack_size_proc_map);
 }
 
@@ -147,7 +159,8 @@ auto add_pack_size_proc(P proc)
 {
 	decltype(auto) proc_map = get_pack_size_proc_map();
 	auto hash = typeid(T).hash_code();
-	auto size_proc = pack_size_proc_t([=](const void* pv) { return proc(*((const T*)pv)); });
+	auto size_proc = pack_size_proc_t([=](const void* pv)
+		{ return proc(*((const T*)pv)); });
 
 	auto [it, result] = proc_map.insert_or_assign(hash, size_proc);
 	return result == true;
@@ -156,7 +169,8 @@ auto add_pack_size_proc(P proc)
 template<typename T>
 decltype(auto) get_pack_size_proc()
 {
-	static auto k_default_pack_size_proc = pack_size_proc_t([](const void*) { return sizeof(T); });
+	static auto k_default_pack_size_proc = pack_size_proc_t([](const void*)
+		{ return sizeof(T); });
 
 	decltype(auto) proc_map = get_pack_size_proc_map();
 	auto hash = typeid(T).hash_code();
@@ -258,13 +272,8 @@ decltype(auto) unpack_value(buffer_input_t& it)
 template<typename T>
 auto unpack_type(buffer_input_t& it)
 {
-	byte_t storage[sizeof(T)] = {};
-	auto clean_it = on_exit_t([&]() { value_cast<T>(storage).~T(); });
-
 	decltype(auto) transform = get_unpack_transform<T>();
-	transform(it, storage);
-
-	return std::move(value_cast<T>(storage));
+	return std::any_cast<T>(transform(it));
 }
 
 template<typename... T>
