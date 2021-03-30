@@ -81,10 +81,9 @@ int main()
 	add_unpack_transform<std::string>(
 		[](buffer_input_t& it)
 		{
+			using it_t = byte_cast_buffer_input_t<char>;
 			auto len = unpack_type<std::string::size_type>(it);
-			auto v = std::string(len, std::string::value_type());
-			unpack_bytes(it, v.data(), len);
-			return v;
+			return std::string(it_t(it), it_t(it + len));
 		});
 
 	add_pack_size_proc<const char*>([](const char* v) { return pack_size(std::strlen(v)) + std::strlen(v); });

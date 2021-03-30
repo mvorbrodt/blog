@@ -19,6 +19,30 @@ using buffer_ptr_t = buffer_t::pointer;
 using buffer_input_t = buffer_t::const_iterator;
 using buffer_output_t = std::back_insert_iterator<buffer_t>;
 
+template<typename T>
+struct byte_cast_buffer_input_t : std::iterator<std::random_access_iterator_tag, T>
+{
+	static_assert(sizeof(T) == sizeof(buffer_input_t::value_type));
+
+	using this_t = byte_cast_buffer_input_t;
+
+	byte_cast_buffer_input_t(buffer_input_t& it) : m_it{ it } {}
+	byte_cast_buffer_input_t(const buffer_input_t& it) : m_it{ const_cast<buffer_input_t&>(it) } {}
+
+	const T& operator * () const { return reinterpret_cast<const T&>(*m_it); }
+
+	this_t& operator ++ () { ++m_it; return *this; }
+	this_t operator ++ (int) { auto temp = *this; ++(*this); return temp; }
+
+	friend auto operator - (const this_t& lhs, const this_t& rhs) { return lhs.m_it - rhs.m_it; }
+
+	friend bool operator == (const this_t& lhs, const this_t& rhs) { return lhs.m_it == rhs.m_it; }
+	friend bool operator != (const this_t& lhs, const this_t& rhs) { return !(lhs == rhs); }
+
+private:
+	buffer_input_t& m_it;
+};
+
 struct on_exit_t
 {
 	using proc_t = std::function<void()>;
