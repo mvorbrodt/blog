@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <functional>
 #include "socket.hpp"
 
 int main(int argc, char** argv)
@@ -19,25 +20,33 @@ int main(int argc, char** argv)
 		auto server = server_socket(port);
 
 		server.set_accept_handler(
-			[](server_socket& ss, client_socket cs, host_info_t info)
+			[&](server_socket& ss, client_socket cs, host_info_t info)
 			{
 				cout << info.host << " (" << info.ip << ") : " << info.port << " connected" << endl;
 
-				cs.set_data_handler([=](client_socket& cs, socket_buffer_t data)
+				cs.set_data_handler([=, sref = ref(server)](client_socket& cs, socket_buffer_t data)
 				{
-					cout << info.host << " says: " << string((const char*)data.data(), data.size()) << endl;
-					cs.send({ rbegin(data), rend(data) });
+					auto msg = string((const char*)data.data(), data.size());
+					if(msg == "die")
+					{
+						sref.get().close();
+					}
+					else
+					{
+						cout << info.host << " says: " << msg << endl;
+						cs.send({ rbegin(data), rend(data) });
+					}
 				});
 
-				thread([cs = std::move(cs), info]() mutable
+				thread([=, cs = std::move(cs)]() mutable
 				{
-					cs.start();
+					cs.receive();
 					cout << info.host << " (" << info.ip << ") : " << info.port << " disconnected" << endl;
 				}).detach();
 			});
 
 		cout << "[ctrl-c] to exit, listening on port " << port << endl;
-		server.start();
+		server.accept();
 	}
 	catch(std::exception& ex)
 	{

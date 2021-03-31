@@ -23,28 +23,36 @@ int main(int argc, char** argv)
 
 		client.set_data_handler([&](client_socket& cs, socket_buffer_t data)
 		{
-			cout << "< " << string((const char*)data.data(), data.size()) << endl;
+			auto msg = string((const char*)data.data(), data.size());
+			cout << "< " << msg << endl;
 			event.signal();
 		});
 
 		thread([&]()
 		{
-			cout << "[enter] to send, [ctrl-c] to exit" << endl;
+			cout << "[enter] to send, ['q'] to exit, ['die'] to stop server" << endl;
 
 			while(true)
 			{
 				cout << "> ";
 				auto line = string();
 				getline(cin, line);
+
 				if(line.empty())
 					continue;
+
+				if(line == "q")
+				{
+					client.close();
+					break;
+				}
 
 				client.send(line.data(), line.length());
 				event.wait();
 			}
 		}).detach();
 
-		client.start();
+		client.receive();
 	}
 	catch(std::exception& ex)
 	{

@@ -58,7 +58,7 @@ public:
 	client_socket(client_socket&& other)
 	: m_socket{ std::exchange(other.m_socket, -1) }, m_handler{ std::exchange(other.m_handler, data_handler_t()) } {}
 
-	~client_socket() { stop(); }
+	~client_socket() { close(); }
 
 	client_socket& operator = (client_socket other)
 	{
@@ -68,7 +68,7 @@ public:
 
 	void set_data_handler(data_handler_t handler) { m_handler = std::move(handler); }
 
-	void start()
+	void receive()
 	{
 		while(true)
 		{
@@ -81,7 +81,7 @@ public:
 		}
 	}
 
-	void stop()
+	void close()
 	{
 		::shutdown(m_socket, SHUT_RDWR);
 		::close(m_socket);
@@ -148,7 +148,7 @@ public:
 	server_socket(server_socket&& other)
 	: m_socket{ std::exchange(other.m_socket, -1) }, m_port{ std::exchange(other.m_port, 0) }, m_handler{ std::exchange(other.m_handler, accept_handler_t()) } {}
 
-	~server_socket() { stop(); }
+	~server_socket() { close(); }
 
 	server_socket& operator = (server_socket other)
 	{
@@ -158,7 +158,7 @@ public:
 
 	void set_accept_handler(accept_handler_t handler) { m_handler = std::move(handler); }
 
-	void start()
+	void accept()
 	{
 		while(true)
 		{
@@ -176,7 +176,7 @@ public:
 		}
 	}
 
-	void stop()
+	void close()
 	{
 		::shutdown(m_socket, SHUT_RDWR);
 		::close(m_socket);
