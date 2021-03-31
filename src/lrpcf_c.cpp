@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
 		client.set_data_handler([](client_socket& cs, socket_buffer_t data)
 		{
-			cout << "reply: " << string((const char*)data.data(), data.size()) << endl << endl;
+			cout << "< " << string((const char*)data.data(), data.size()) << endl;
 		});
 
 		thread([&]()
@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 
 			while(true)
 			{
-				cout << "enter: ";
+				cout << "> ";
 				auto line = string();
 				getline(cin, line);
 				if(line.empty())

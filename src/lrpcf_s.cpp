@@ -23,10 +23,10 @@ int main(int argc, char** argv)
 			{
 				cout << info.host << " (" << info.ip << ") : " << info.port << " connected" << endl;
 
-				cs.set_data_handler([](client_socket& cs, socket_buffer_t data)
+				cs.set_data_handler([=](client_socket& cs, socket_buffer_t data)
 				{
-					cout << "client says: " << string((const char*)data.data(), data.size()) << endl;
-					cs.send(data);
+					cout << info.host << " says: " << string((const char*)data.data(), data.size()) << endl;
+					cs.send({ rbegin(data), rend(data) });
 				});
 
 				thread([cs = std::move(cs), info]() mutable
@@ -36,8 +36,7 @@ int main(int argc, char** argv)
 				}).detach();
 			});
 
-		cout << "starting server on port " << port << " ..." << endl;
-		cout << "[ctrl-c] to exit" << endl;
+		cout << "[ctrl-c] to exit, listening on port " << port << endl;
 		server.start();
 	}
 	catch(std::exception& ex)
