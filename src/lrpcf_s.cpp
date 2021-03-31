@@ -40,13 +40,14 @@ int main(int argc, char** argv)
 
 				thread([=, cs = std::move(cs)]() mutable
 				{
-					cs.receive();
+					while(cs.receive());
 					cout << info.host << " (" << info.ip << ") : " << info.port << " disconnected" << endl;
 				}).detach();
 			});
 
 		cout << "[ctrl-c] to exit, listening on port " << port << endl;
-		server.accept();
+
+		while(server.accept());
 	}
 	catch(std::exception& ex)
 	{

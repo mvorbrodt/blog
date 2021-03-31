@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 			}
 		}).detach();
 
-		client.receive();
+		while(client.receive());
 	}
 	catch(std::exception& ex)
 	{

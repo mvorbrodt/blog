@@ -68,25 +68,6 @@ public:
 
 	void set_data_handler(data_handler_t handler) { m_handler = std::move(handler); }
 
-	void receive()
-	{
-		while(true)
-		{
-			socket_buffer_t data(65535);
-			auto result = ::recv(m_socket, data.data(), data.size(), 0);
-			if(result <= 0)
-				break;
-
-			m_handler(*this, socket_buffer_t(data.data(), data.data() + result));
-		}
-	}
-
-	void close()
-	{
-		::shutdown(m_socket, SHUT_RDWR);
-		::close(m_socket);
-	}
-
 	void send(const void* data, std::size_t length) const
 	{
 		using ptr_t = socket_buffer_t::const_pointer;
@@ -98,6 +79,24 @@ public:
 		auto result = ::send(m_socket, data.data(), data.size(), 0);
 		if(result != data.size())
 			throw std::runtime_error("::send call failed!");
+	}
+
+	auto receive()
+	{
+		socket_buffer_t data(65535);
+		auto result = ::recv(m_socket, data.data(), data.size(), 0);
+		if(result <= 0)
+			return false;
+
+		m_handler(*this, socket_buffer_t(data.data(), data.data() + result));
+
+		return true;
+	}
+
+	void close()
+	{
+		::shutdown(m_socket, SHUT_RDWR);
+		::close(m_socket);
 	}
 
 private:
@@ -158,22 +157,21 @@ public:
 
 	void set_accept_handler(accept_handler_t handler) { m_handler = std::move(handler); }
 
-	void accept()
+	auto accept()
 	{
-		while(true)
-		{
-			auto addr = sockaddr_in();
-			auto len = socklen_t(sizeof(addr));
-			auto s = ::accept(m_socket, (sockaddr*)&addr, &len);
-			if(s == -1)
-				break;
+		auto addr = sockaddr_in();
+		auto len = socklen_t(sizeof(addr));
+		auto s = ::accept(m_socket, (sockaddr*)&addr, &len);
+		if(s == -1)
+			return false;
 
-			auto ip = ::inet_ntoa(addr.sin_addr);
-			auto ent = ::gethostbyaddr(&addr.sin_addr, sizeof(addr.sin_addr), AF_INET);
-			auto info = host_info_t{ ip, ent->h_name, ntohs(addr.sin_port) };
+		auto ip = ::inet_ntoa(addr.sin_addr);
+		auto ent = ::gethostbyaddr(&addr.sin_addr, sizeof(addr.sin_addr), AF_INET);
+		auto info = host_info_t{ ip, ent->h_name, ntohs(addr.sin_port) };
 
-			m_handler(*this, client_socket(s), info);
-		}
+		m_handler(*this, client_socket(s), info);
+
+		return true;
 	}
 
 	void close()
