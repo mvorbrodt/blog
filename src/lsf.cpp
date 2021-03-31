@@ -30,124 +30,126 @@ private:
 
 int main()
 {
-	add_pack_transform<std::uint16_t>([](std::uint16_t v, buffer_output_t& it) { pack_value(it, htons(v)); });
-	add_pack_transform<std::uint32_t>([](std::uint32_t v, buffer_output_t& it) { pack_value(it, htonl(v)); });
-	add_pack_transform<std::uint64_t>([](std::uint64_t v, buffer_output_t& it) { pack_value(it, htonll(v)); });
+	serializer lws;
 
-	add_unpack_transform<std::uint16_t>([](buffer_input_t& it) { return ntohs(unpack_value<std::uint16_t>(it)); });
-	add_unpack_transform<std::uint32_t>([](buffer_input_t& it) { return ntohl(unpack_value<std::uint32_t>(it)); });
-	add_unpack_transform<std::uint64_t>([](buffer_input_t& it) { return ntohll(unpack_value<std::uint64_t>(it)); });
+	lws.add_pack_transform<std::uint16_t>([](const serializer& s, std::uint16_t v, buffer_output_t& it) { s.pack_value(it, htons(v)); });
+	lws.add_pack_transform<std::uint32_t>([](const serializer& s, std::uint32_t v, buffer_output_t& it) { s.pack_value(it, htonl(v)); });
+	lws.add_pack_transform<std::uint64_t>([](const serializer& s, std::uint64_t v, buffer_output_t& it) { s.pack_value(it, htonll(v)); });
 
-	auto buf_1 = pack(std::uint8_t(0x12), std::uint16_t(0x1234), std::uint32_t(0x12345678), std::uint64_t(0x1234567890ABCDEF));
-	auto tup_1 = unpack<std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t>(buf_1);
+	lws.add_unpack_transform<std::uint16_t>([](const serializer& s, buffer_input_t& it) { return ntohs(s.unpack_value<std::uint16_t>(it)); });
+	lws.add_unpack_transform<std::uint32_t>([](const serializer& s, buffer_input_t& it) { return ntohl(s.unpack_value<std::uint32_t>(it)); });
+	lws.add_unpack_transform<std::uint64_t>([](const serializer& s, buffer_input_t& it) { return ntohll(s.unpack_value<std::uint64_t>(it)); });
 
-
-
-	add_pack_transform<std::size_t>([](std::size_t v, buffer_output_t& it) { pack_value(it, std::uint16_t(v)); });
-	add_unpack_transform<std::size_t>([](buffer_input_t& it) { return unpack_value<std::uint16_t>(it); });
-	add_pack_size_proc<std::size_t>([](std::size_t) { return sizeof(std::uint16_t); });
-
-	auto buf_2_1 = pack(std::size_t(-1));
-	auto tup_2_1 = unpack<std::size_t>(buf_2_1);
-
-	remove_pack_transform<std::size_t>();
-	remove_unpack_transform<std::size_t>();
-	remove_pack_size_proc<std::size_t>();
-
-	auto buf_2_2 = pack(std::size_t(-1));
-	auto tup_2_2 = unpack<std::size_t>(buf_2_2);
-
-	add_pack_transform<std::size_t>([](std::size_t v, buffer_output_t& it) { pack_value(it, std::uint16_t(v)); });
-	add_unpack_transform<std::size_t>([](buffer_input_t& it) { return unpack_value<std::uint16_t>(it); });
-	add_pack_size_proc<std::size_t>([](std::size_t) { return sizeof(std::uint16_t); });
+	auto buf_1 = lws.pack(std::uint8_t(0x12), std::uint16_t(0x1234), std::uint32_t(0x12345678), std::uint64_t(0x1234567890ABCDEF));
+	auto tup_1 = lws.unpack<std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t>(buf_1);
 
 
 
-	add_pack_transform<const char*>(
-		[](const char* v, buffer_output_t& it)
+	lws.add_pack_transform<std::size_t>([](const serializer& s, std::size_t v, buffer_output_t& it) { s.pack_value(it, std::uint16_t(v)); });
+	lws.add_unpack_transform<std::size_t>([](const serializer& s, buffer_input_t& it) { return s.unpack_value<std::uint16_t>(it); });
+	lws.add_pack_size_proc<std::size_t>([](const serializer&, std::size_t) { return sizeof(std::uint16_t); });
+
+	auto buf_2_1 = lws.pack(std::size_t(-1));
+	auto tup_2_1 = lws.unpack<std::size_t>(buf_2_1);
+
+	lws.remove_pack_transform<std::size_t>();
+	lws.remove_unpack_transform<std::size_t>();
+	lws.remove_pack_size_proc<std::size_t>();
+
+	auto buf_2_2 = lws.pack(std::size_t(-1));
+	auto tup_2_2 = lws.unpack<std::size_t>(buf_2_2);
+
+	lws.add_pack_transform<std::size_t>([](const serializer& s, std::size_t v, buffer_output_t& it) { s.pack_value(it, std::uint16_t(v)); });
+	lws.add_unpack_transform<std::size_t>([](const serializer& s, buffer_input_t& it) { return s.unpack_value<std::uint16_t>(it); });
+	lws.add_pack_size_proc<std::size_t>([](const serializer&, std::size_t) { return sizeof(std::uint16_t); });
+
+
+
+	lws.add_pack_transform<const char*>(
+		[](const serializer& s, const char* v, buffer_output_t& it)
 		{
 			auto len = std::strlen(v);
-			pack_type(it, len);
-			pack_bytes(it, v, len);
+			s.pack_type(it, len);
+			s.pack_bytes(it, v, len);
 		});
 
-	add_pack_transform<std::string>(
-		[](const std::string& v, buffer_output_t& it)
+	lws.add_pack_transform<std::string>(
+		[](const serializer& s, const std::string& v, buffer_output_t& it)
 		{
-			pack_type(it, v.length());
-			pack_bytes(it, v.data(), v.length());
+			s.pack_type(it, v.length());
+			s.pack_bytes(it, v.data(), v.length());
 		});
 
-	add_unpack_transform<std::string>(
-		[](buffer_input_t& it)
+	lws.add_unpack_transform<std::string>(
+		[](const serializer& s, buffer_input_t& it)
 		{
 			using it_t = byte_cast_buffer_input_t<char>;
-			auto len = unpack_type<std::string::size_type>(it);
+			auto len = s.unpack_type<std::string::size_type>(it);
 			return std::string(it_t(it), it_t(it + len));
 		});
 
-	add_pack_size_proc<const char*>([](const char* v) { return pack_size(std::strlen(v)) + std::strlen(v); });
-	add_pack_size_proc<std::string>([](const std::string& v) { return pack_size(v.length()) + v.length(); });
+	lws.add_pack_size_proc<const char*>([](const serializer& s, const char* v) { return s.pack_size(std::strlen(v)) + std::strlen(v); });
+	lws.add_pack_size_proc<std::string>([](const serializer& s, const std::string& v) { return s.pack_size(v.length()) + v.length(); });
 
 	auto ccp_1 = "this is hardcoded string #1";
-	auto buf_3 = pack(ccp_1, "this is hardcoded string #2");
-	auto tup_3 = unpack<std::string, std::string>(buf_3);
+	auto buf_3 = lws.pack(ccp_1, "this is hardcoded string #2");
+	auto tup_3 = lws.unpack<std::string, std::string>(buf_3);
 
 	auto str_1 = std::string("this is std::string #1");
-	auto buf_4 = pack(str_1, std::string("this is std::string #2"));
-	auto tup_4 = unpack<std::string, std::string>(buf_4);
+	auto buf_4 = lws.pack(str_1, std::string("this is std::string #2"));
+	auto tup_4 = lws.unpack<std::string, std::string>(buf_4);
 
 
 
-	add_pack_transform<int>([](int v, buffer_output_t& it) { pack_value(it, htonl(v)); });
-	add_unpack_transform<int>([](buffer_input_t& it) { return ntohl(unpack_value<decltype(htonl(0))>(it)); });
-	add_pack_size_proc<int>([](int) { return sizeof(decltype(htonl(0))); });
+	lws.add_pack_transform<int>([](const serializer& s, int v, buffer_output_t& it) { s.pack_value(it, htonl(v)); });
+	lws.add_unpack_transform<int>([](const serializer& s, buffer_input_t& it) { return ntohl(s.unpack_value<decltype(htonl(0))>(it)); });
+	lws.add_pack_size_proc<int>([](const serializer&, int) { return sizeof(decltype(htonl(0))); });
 
-	add_pack_transform<N>([](const N& v, buffer_output_t& it) { pack_type(it, v.get_value()); });
-	add_unpack_transform<N>([](buffer_input_t& it) { return N(unpack_type<int>(it)); });
-	add_pack_size_proc<N>([](const N& v) { return pack_size(v.get_value()); });
+	lws.add_pack_transform<N>([](const serializer& s, const N& v, buffer_output_t& it) { s.pack_type(it, v.get_value()); });
+	lws.add_unpack_transform<N>([](const serializer& s, buffer_input_t& it) { return N(s.unpack_type<int>(it)); });
+	lws.add_pack_size_proc<N>([](const serializer& s, const N& v) { return s.pack_size(v.get_value()); });
 
 	auto n_1 = N(11);
-	auto buf_5 = pack(n_1, N(17));
-	auto tup_5 = unpack<N, N>(buf_5);
+	auto buf_5 = lws.pack(n_1, N(17));
+	auto tup_5 = lws.unpack<N, N>(buf_5);
 
-	auto buf_6 = pack('C', '+', '+', 11, 14, 17, "this is hardcoded string", std::string("this is std::string"), N(20), N(23));
-	auto tup_6 = unpack<char, char, char, int, int, int, std::string, std::string, N, N>(buf_6);
+	auto buf_6 = lws.pack('C', '+', '+', 11, 14, 17, "this is hardcoded string", std::string("this is std::string"), N(20), N(23));
+	auto tup_6 = lws.unpack<char, char, char, int, int, int, std::string, std::string, N, N>(buf_6);
 
 
 
 	using strings_t = std::vector<std::string>;
 
-	add_pack_transform<strings_t>(
-		[](const strings_t& vs, buffer_output_t& it)
+	lws.add_pack_transform<strings_t>(
+		[](const serializer& s, const strings_t& vs, buffer_output_t& it)
 		{
-			pack_type(it, vs.size());
+			s.pack_type(it, vs.size());
 			std::for_each(std::begin(vs), std::end(vs),
-				[&](const std::string& s) { pack_type(it, s); });
+				[&](const std::string& str) { s.pack_type(it, str); });
 		});
 
-	add_unpack_transform<strings_t>(
-		[](buffer_input_t& it)
+	lws.add_unpack_transform<strings_t>(
+		[](const serializer& s, buffer_input_t& it)
 		{
-			auto size = unpack_type<strings_t::size_type>(it);
+			auto size = s.unpack_type<strings_t::size_type>(it);
 			auto vs = strings_t();
 			vs.reserve(size);
 			std::generate_n(std::back_inserter(vs), size,
-				[&]() { return unpack_type<std::string>(it); });
+				[&]() { return s.unpack_type<std::string>(it); });
 			return vs;
 		});
 
-	add_pack_size_proc<strings_t>(
-		[](const strings_t& v)
+	lws.add_pack_size_proc<strings_t>(
+		[](const serializer& s, const strings_t& v)
 		{
-			return pack_size(v.size()) +
+			return s.pack_size(v.size()) +
 				std::accumulate(std::begin(v), std::end(v), 0,
-					[](auto sum, const std::string& v) { return sum + pack_size(v); });
+					[&](auto sum, const std::string& v) { return sum + s.pack_size(v); });
 		});
 
 	auto vec_1 = strings_t{ "string 1", "string 2", "string 3" };
-	auto buf_7 = pack(vec_1);
-	auto tup_7 = unpack<strings_t>(buf_7);
+	auto buf_7 = lws.pack(vec_1);
+	auto tup_7 = lws.unpack<strings_t>(buf_7);
 
 	return rand();
 }
