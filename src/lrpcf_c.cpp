@@ -18,13 +18,13 @@ int main(int argc, char** argv)
 	{
 		auto host = argv[1];
 		auto port = stoul(argv[2]);
-		auto client = client_socket(host, port);
 		auto event = auto_event(false);
+		auto client = client_socket(host, port);
 
 		client.set_data_handler([&](client_socket& cs, socket_buffer_t data)
 		{
 			auto msg = string((const char*)data.data(), data.size());
-			cout << "< " << msg << endl;
+			if(!msg.empty()) cout << "< " << msg << endl;
 			event.signal();
 		});
 

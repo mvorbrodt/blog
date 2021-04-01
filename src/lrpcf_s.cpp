@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 					{
 						sref.get().close();
 					}
-					else
+					else if(!msg.empty())
 					{
 						cout << info.host << " says: " << msg << endl;
 						cs.send({ rbegin(data), rend(data) });
