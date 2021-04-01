@@ -3,7 +3,6 @@
 #include <mutex>
 #include <chrono>
 #include <condition_variable>
-#include <chrono>
 
 class manual_event
 {
@@ -23,6 +22,7 @@ public:
 	void wait()
 	{
 		std::unique_lock lock(m_mutex);
+		if(m_signaled == true) return;
 		m_cv.wait(lock, [&]() { return m_signaled != false; });
 	}
 
@@ -30,6 +30,7 @@ public:
 	bool wait_for(const std::chrono::duration<Rep, Period>& t)
 	{
 		std::unique_lock lock(m_mutex);
+		if(m_signaled == true) return;
 		return m_cv.wait_for(lock, t, [&]() { return m_signaled != false; });
 	}
 
@@ -37,6 +38,7 @@ public:
 	bool wait_until(const std::chrono::time_point<Clock, Duration>& t)
 	{
 		std::unique_lock lock(m_mutex);
+		if(m_signaled == true) return;
 		return m_cv.wait_until(lock, t, [&]() { return m_signaled != false; });
 	}
 

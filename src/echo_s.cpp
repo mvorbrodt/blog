@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 					}
 					else if(!msg.empty())
 					{
-						cout << info.host << " says: " << msg << endl;
+						cout << info.host << " > " << msg << endl;
 						cs.send({ rbegin(data), rend(data) });
 					}
 				});
