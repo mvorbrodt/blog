@@ -34,8 +34,8 @@ class client_socket
 public:
 	using data_handler_t = std::function<void(client_socket&, socket_buffer_t)>;
 
-	client_socket(const char* hostname, std::uint16_t port, data_handler_t handler = [](client_socket&, socket_buffer_t) {})
-	: m_socket{ ::socket(AF_INET, SOCK_STREAM, 0) }, m_handler{ std::move(handler) }
+	client_socket(const char* hostname, std::uint16_t port)
+	: m_socket{ ::socket(AF_INET, SOCK_STREAM, 0) }
 	{
 		if(m_socket == -1)
 			throw std::runtime_error("::socket call failed!");
@@ -121,8 +121,8 @@ class server_socket
 public:
 	using accept_handler_t = std::function<void(server_socket&, client_socket, host_info_t)>;
 
-	server_socket(std::uint16_t port, accept_handler_t handler = [](server_socket&, client_socket, host_info_t) {})
-	: m_socket{ ::socket(AF_INET, SOCK_STREAM, 0) }, m_port{ port }, m_handler{ std::move(handler) }
+	server_socket(std::uint16_t port)
+	: m_socket{ ::socket(AF_INET, SOCK_STREAM, 0) }, m_port{ port }
 	{
 		if(m_socket == -1)
 			throw std::runtime_error("::socket call failed!");
