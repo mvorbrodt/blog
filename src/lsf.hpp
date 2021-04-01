@@ -63,8 +63,8 @@ struct on_exit_t
 
 	~on_exit_t() { if(m_do_it) m_proc(); }
 
-	void dont() noexcept { m_do_it = false; }
 	void do_it() noexcept { m_do_it = true; }
+	void do_not() noexcept { m_do_it = false; }
 
 private:
 	proc_t m_proc;
