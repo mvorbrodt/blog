@@ -3,6 +3,7 @@
  *
  * https://www.haiku-os.org/legacy-docs/benewsletter/Issue1-26.html
  */
+
 #pragma once
 
 #include <mutex>
