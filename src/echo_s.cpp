@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 	if(argc != 2)
 	{
 		cerr << "USAGE: " << argv[0] << " [port]" << endl;
-		return;
+		return 1;
 	}
 
 	try

@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 	if(argc != 3)
 	{
 		cerr << "USAGE: " << argv[0] << " [host name] [port]" << endl;
-		return;
+		return 1;
 	}
 
 	try
