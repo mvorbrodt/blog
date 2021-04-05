@@ -9,7 +9,7 @@ struct S
 	S() = default;
 	S(const S&) { cout << "using S(const S&)" << endl; }
 
-	S* clone() const {
+	virtual S* clone() const {
 		cout << "using S::clone()" << endl;
 		return new S; }
 };
