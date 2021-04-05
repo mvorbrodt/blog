@@ -7,30 +7,43 @@
 #include <initializer_list>
 #include <cstddef>
 
-template<typename T, typename D = std::default_delete<T>>
+template<typename T>
+struct default_cloner
+{
+	using pointer = T*;
+	pointer operator () (pointer p) const
+	{
+		return (p ? new T{ *p } : nullptr);
+	}
+};
+
+template<typename T, typename C = default_cloner<T>, typename D = std::default_delete<T>>
 class deep_ptr
 {
 public:
 	using pointer = T*;
 	using element_type = T;
-	using deleter_type = D;
 	using reference_type = T&;
+	using cloner_type = C;
+	using deleter_type = D;
 
 	constexpr deep_ptr() noexcept = default;
 	constexpr deep_ptr(std::nullptr_t) noexcept {}
 
 	explicit deep_ptr(pointer p) noexcept : m_p{ p } {}
 
-	deep_ptr(pointer p, deleter_type d) : m_p{ p }, m_d{ d } {}
+	deep_ptr(pointer p, cloner_type c) : m_c{ c }, m_p{ p } {}
+	deep_ptr(pointer p, deleter_type d) : m_d{ d }, m_p{ p } {}
+	deep_ptr(pointer p, cloner_type c, deleter_type d) : m_c{ c }, m_d{ d }, m_p{ p } {}
 
-	deep_ptr(const deep_ptr& d) : m_p{ !d ? nullptr : new T{ *d } }, m_d{ d.m_d } {}
-	deep_ptr(deep_ptr&& d) noexcept : m_p{ std::exchange(d.m_p, nullptr) }, m_d{ std::move(d.m_d) } {}
+	deep_ptr(const deep_ptr& d) : m_c{ d.m_c }, m_d{ d.m_d }, m_p{ get_cloner()(d.m_p) } {}
+	deep_ptr(deep_ptr&& d) noexcept : m_c{ std::move(d.m_c) }, m_d{ std::move(d.m_d) }, m_p{ std::exchange(d.m_p, nullptr) } {}
 
-	template<typename U, typename V>
-	deep_ptr(const deep_ptr<U, V>& d) : m_p{ !d ? nullptr : new T{ *d } }, m_d{ d.m_d } {}
+	template<typename U, typename V, typename W>
+	deep_ptr(const deep_ptr<U, V, W>& d) : m_c{ d.m_c }, m_d{ d.m_d }, m_p{ get_cloner()(d.m_p) } {}
 
-	template<typename U, typename V>
-	deep_ptr(deep_ptr<U, V>&& d) noexcept : m_p{ std::exchange(d.m_p, nullptr) }, m_d{ std::move(d.m_d) } {}
+	template<typename U, typename V, typename W>
+	deep_ptr(deep_ptr<U, V, W>&& d) noexcept : m_c{ std::move(d.m_c) }, m_d{ std::move(d.m_d) }, m_p{ std::exchange(d.m_p, nullptr) } {}
 
 	~deep_ptr() noexcept { get_deleter()(get()); }
 
@@ -40,11 +53,11 @@ public:
 		return *this;
 	}
 
-	template<typename U>
-	friend bool operator == (const deep_ptr<T>& x, const deep_ptr<U>& y) noexcept { return x.m_p == y.m_p; }
+	template<typename U, typename V, typename W>
+	friend bool operator == (const deep_ptr<T, C, D>& x, const deep_ptr<U, V, W>& y) noexcept { return x.m_p == y.m_p; }
 
-	template<typename U>
-	friend auto operator <=> (const deep_ptr<T>& x, const deep_ptr<U>& y) noexcept { return x.m_p <=> y.m_p; }
+	template<typename U, typename V, typename W>
+	friend auto operator <=> (const deep_ptr<T, D, D>& x, const deep_ptr<U, V, W>& y) noexcept { return x.m_p <=> y.m_p; }
 
 	explicit operator bool () const noexcept { return m_p != nullptr; }
 
@@ -58,25 +71,31 @@ public:
 
 	const deleter_type& get_deleter() const noexcept { return m_d; }
 
+	cloner_type& get_cloner() noexcept { return m_c; }
+
+	const cloner_type& get_cloner() const noexcept { return m_c; }
+
 	pointer release() noexcept { return std::exchange(m_p, nullptr); }
 
 	void reset(pointer p = pointer()) noexcept { get_deleter()(std::exchange(m_p, p)); }
 
 	void swap(deep_ptr& o) noexcept
 	{
-		std::swap(m_p, o.m_p);
+		std::swap(m_c, o.m_c);
 		std::swap(m_d, o.m_d);
+		std::swap(m_p, o.m_p);
 	}
 
 private:
-	template<typename, typename> friend class deep_ptr;
+	template<typename, typename, typename> friend class deep_ptr;
 
-	pointer m_p = pointer();
+	cloner_type m_c = cloner_type();
 	deleter_type m_d = deleter_type();
+	pointer m_p = pointer();
 };
 
-template<typename T, typename D>
-inline void swap(deep_ptr<T, D>& x, deep_ptr<T, D>& y)
+template<typename T, typename C, typename D>
+inline void swap(deep_ptr<T, C, D>& x, deep_ptr<T, C, D>& y)
 {
 	x.swap(y);
 }

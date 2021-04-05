@@ -1,97 +1,44 @@
+#include <iostream>
+#include <utility>
 #include "deep_ptr.hpp"
-#include "I.hpp"
-#include "T.hpp"
 
 using namespace std;
 
-void f(deep_ptr<T> r) { if(r) r->foo(); }
+struct S
+{
+	S() = default;
+	S(const S&) { cout << "using S(const S&)" << endl; }
 
-void foo(T t) { t.foo(); }
-void bar(const T& t) { t.bar(); }
+	S* clone() const {
+		cout << "using S::clone()" << endl;
+		return new S; }
+};
 
 int main()
 {
-	foo("first"); cout << "\n";
-	bar("second"); cout << "\n";
-	T t{ "third" }; cout << "\n";
-	foo(t); cout << "\n";
-	bar(t); cout << "\n";
-	foo(std::move(t)); cout << "\n";
-	bar(std::move(t)); cout << "\n";
-	
-	return rand();
+	auto p1 = make_deep<S>();
+	auto p2 = p1;
+	auto p3 = std::move(p1);
+	p1 = std::move(p3);
+	p3 = p2;
 
-	using r = deep_ptr<T>;
-	using q = deep_ptr<Q>;
+	auto clone = [](S* p) { return p->clone(); };
+	using clone_ptr = deep_ptr<S, decltype(clone)>;
 
-	auto del = [](T* p) { delete p; };
-	using c = deep_ptr<T, decltype(del)>;
+	auto p4 = clone_ptr(new S, clone);
+	auto p5 = p4;
+	auto p6 = std::move(p4);
+	p4 = std::move(p6);
+	p6 = p5;
 
-	c c1{ new T{ "custom deleter" }, del };
+	auto del = [](S* p) {
+		cout << "using 'del' deleter" << endl;
+		delete p; };
+	using del_ptr = deep_ptr<S, decltype(clone), decltype(del)>;
 
-	return rand();
-	/*r x0{ T{ "by r-value" } };
-	T t1{ "by l-value" };
-	r x00{ std::move(t1) };*/
-
-	//auto mr1 = make_deep<int>(42);
-	//auto mr2 = make_deep<T>("C++ Rocks!");
-
-	r x1{ new T };
-	r x2{ new T };
-	r x3{ x2 };
-	r x4{ std::move(x1) };
-	//return;
-
-	if(x1) {}
-	if(!x1) {}
-
-	q q1{ new Q{ "C++98 sucks" } };
-	q1 = nullptr;
-	q1 = q{ new Q{ "C++03 sucks too" } };
-	r X{ std::move(q1) };
-	//q Y{ std::move(X) };
-
-	cout << (x1 == x1) << "," << (x1 != x1) << "," << (x1 < x1) << "," << (x1 <= x1) << "," << (x1 > x1) << "," << (x1 >= x1) << endl;
-	cout << (x1 == q1) << "," << (x1 != q1) << "," << (x1 < q1) << "," << (x1 <= q1) << "," << (x1 > q1) << "," << (x1 >= q1) << endl;
-	return rand();
-
-	x1 = q1;
-
-	r rr1{ q1 };
-	r rr2{ new Q };
-
-	q1.reset(new Q);
-	q1.release();
-
-	q q2;
-	r rr3{ std::move(rr2) };
-
-	rr3 = std::move(rr2);
-
-	//return;
-
-	f(nullptr);
-	f(r{ new Q{ "C++20" } });
-
-	//return;
-
-	r r1{ new T{ "C++98" } };
-	r r2{ new T{ "C++11" } };
-	r r3{ new T{ "C++14" } };
-	r r4{ new T{ 1, 2, 3} };
-	r r5{};
-	r r6{ nullptr };
-
-	r1 = r2;
-	r2 = std::move(r3);
-	r4 = r{ new T{ "C++17" } };
-	r5 = r{ new T{ "C++20" } };
-
-	r1->foo();
-	r2->bar();
-
-	cout << "\n" << *r4 << "\n\n";
-	if(r5) cout << "r5 is not nullptr\n\n";
-	if(!r6) cout << "r6 is nullptr\n\n";
+	auto p7 = del_ptr(new S, del);
+	auto p8 = p7;
+	auto p9 = std::move(p7);
+	p7 = std::move(p9);
+	p9 = p8;
 }
