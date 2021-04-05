@@ -21,6 +21,7 @@ int main()
 	auto p3 = std::move(p1);
 	p1 = std::move(p3);
 	p3 = p2;
+	p2 = nullptr;
 
 	auto clone = [](S* p) { return p->clone(); };
 	using clone_ptr = deep_ptr<S, decltype(clone)>;
@@ -30,6 +31,7 @@ int main()
 	auto p6 = std::move(p4);
 	p4 = std::move(p6);
 	p6 = p5;
+	p5 = nullptr;
 
 	auto del = [](S* p) {
 		cout << "using 'del' deleter" << endl;
@@ -41,4 +43,5 @@ int main()
 	auto p9 = std::move(p7);
 	p7 = std::move(p9);
 	p9 = p8;
+	p8 = nullptr;
 }
