@@ -36,7 +36,7 @@ int main()
 		delete p; };
 	using del_ptr = deep_ptr<S, decltype(clone), decltype(del)>;
 
-	auto p7 = del_ptr(new S, del);
+	auto p7 = del_ptr(new S, clone, del);
 	auto p8 = p7;
 	auto p9 = std::move(p7);
 	p7 = std::move(p9);
