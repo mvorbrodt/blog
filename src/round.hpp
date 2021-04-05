@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <type_traits>
+#include <stdexcept>
 #include <cmath>
 #include <cstdint>
 
@@ -10,9 +11,11 @@
 // slowest due to 2 function calls
 template<typename T>
 requires std::is_floating_point_v<T>
-auto my_round1(T v, unsigned char d)
+auto runtime_round(T v, unsigned char d)
 {
 	auto p = std::pow(T(10), T(d));
+	if(std::abs(v) > std::numeric_limits<T>::max() / p) // v * p would overflow
+		throw std::overflow_error("rounding would overflow");
 	return std::round(v * p) / p;
 }
 
@@ -82,19 +85,13 @@ constexpr auto my_rnd(T v)
 // as the first template parameter 'D'
 template<unsigned char D, typename T>
 requires std::is_floating_point_v<T>
-constexpr auto my_round2(T v)
+constexpr auto constexpr_round(T v)
 {
 	/* option 1 */ //constexpr auto p = power_of_f<T>(10, D);
 	/* option 2 */ constexpr auto p = power_of_v<10, D, T>;
-	if(my_abs(v) > std::numeric_limits<T>::max() / p) return v; // v * p would overflow
-	if(my_abs(v) * p > std::numeric_limits<std::int64_t>::max() - 1) return v; // v * p would not fit in int64_t
+	if(my_abs(v) > std::numeric_limits<T>::max() / p)
+		return v; // v * p would overflow
+	if(my_abs(v) * p > std::numeric_limits<std::int64_t>::max() - 1)
+		return v; // v * p would not fit in int64_t
 	return my_rnd(v * p) / p;
 }
-
-// PICK WHICH ONE TO USE HERE:
-
-//template<unsigned char D, typename T>
-//auto my_round(T v) { return my_round1(v, D); } // using solution 1
-
-template<unsigned char D, typename T>
-constexpr auto my_round(T v) { return my_round2<D>(v); } // using solution 2
