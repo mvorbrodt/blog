@@ -169,7 +169,8 @@ public:
 
 		auto ip = ::inet_ntoa(addr.sin_addr);
 		auto ent = ::gethostbyaddr(&addr.sin_addr, sizeof(addr.sin_addr), AF_INET);
-		auto info = host_info_t{ ip, ent->h_name, ntohs(addr.sin_port) };
+		auto host = std::string(ent && ent->h_name ? ent->h_name : "");
+		auto info = host_info_t{ ip, host, ntohs(addr.sin_port) };
 
 		m_handler(*this, client_socket(s), info);
 
