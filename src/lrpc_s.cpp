@@ -21,7 +21,7 @@ public:
 			auto ut = m_serializer.unpack<PAdd>(data);
 			auto& packet = std::get<0>(ut);
 
-			std::cout << "Client (" << hi.host << ") say PAdd(" << std::setfill('0') << std::setw(3) << int(packet.hdr.seq) << ") "
+			std::cout << "Client (" << hi.ip << ") say PAdd(" << std::setfill('0') << std::setw(3) << int(packet.hdr.seq) << ") "
 				<< std::setfill(' ') << std::setw(3) << packet.num1 << " + " << std::setw(3) << packet.num2 << std::endl;
 
 			auto reply_packet = PAddRep{ { cmd_t(CMD::AddRep), packet.hdr.seq }, packet.num1 + packet.num2 };
@@ -35,7 +35,7 @@ public:
 			auto ut = m_serializer.unpack<PSub>(data);
 			auto& packet = std::get<0>(ut);
 
-			std::cout << "Client (" << hi.host << ") say PSub(" << std::setfill('0') << std::setw(3) << int(packet.hdr.seq) << ") "
+			std::cout << "Client (" << hi.ip << ") say PSub(" << std::setfill('0') << std::setw(3) << int(packet.hdr.seq) << ") "
 				<< std::setfill(' ') << std::setw(3) << packet.num1 << " - " << std::setw(3) << packet.num2 << std::endl;
 
 			auto reply_packet = PSubRep{ { cmd_t(CMD::SubRep), packet.hdr.seq }, packet.num1 - packet.num2 };
