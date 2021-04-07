@@ -13,6 +13,8 @@ enum class CMD : cmd_t
 	SubRep = 0xDD
 };
 
+#pragma pack(push, 1)
+
 struct PHead
 {
 	cmd_t cmd;
@@ -44,3 +46,5 @@ struct PSubRep
 	PHead hdr;
 	int   res;
 };
+
+#pragma pack(pop)

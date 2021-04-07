@@ -13,10 +13,10 @@
 #include "event.hpp"
 #include "lrpc_proto.hpp"
 
-class Client
+class RPCClient
 {
 public:
-	Client(const char* host, std::uint16_t port)
+	RPCClient(const char* host, std::uint16_t port)
 	: m_socket{ host, port }
 	{
 		m_reply_handlers[cmd_t(CMD::AddRep)] = [this](client_socket&, socket_buffer_t data)
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
 
 		auto host = argv[1];
 		auto port = stoul(argv[2]);
-		auto c = Client(host, port);
+		auto c = RPCClient(host, port);
 
 		c.Start();
 

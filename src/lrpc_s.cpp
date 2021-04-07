@@ -10,10 +10,10 @@
 #include "socket.hpp"
 #include "lrpc_proto.hpp"
 
-class Server
+class RPCServer
 {
 public:
-	Server(std::uint16_t port)
+	RPCServer(std::uint16_t port)
 	: m_socket{ port }
 	{
 		m_cmd_handlers[cmd_t(CMD::Add)] = [this](client_socket& self, socket_buffer_t data, const host_info_t& hi)
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 	try
 	{
 		auto port = uint16_t(stoul(argv[1]));
-		auto s = Server(port);
+		auto s = RPCServer(port);
 
 		s.Run();
 	}
