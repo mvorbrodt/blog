@@ -4,6 +4,8 @@
 #include <map>
 #include <thread>
 #include <memory>
+#include <chrono>
+#include <stdexcept>
 #include <functional>
 #include <cstdint>
 #include <cstdlib>
@@ -16,8 +18,9 @@
 class RPCClient
 {
 public:
-	RPCClient(const char* host, std::uint16_t port)
-	: m_socket{ host, port }
+	template<typename Rep, typename Period>
+	RPCClient(const char* host, std::uint16_t port, std::chrono::duration<Rep, Period> timeout)
+	: m_socket{ host, port }, m_timeout{ std::chrono::duration_cast<std::chrono::milliseconds>(timeout) }
 	{
 		m_reply_handlers[cmd_t(CMD::AddRep)] = [this](client_socket&, socket_buffer_t data)
 		{
@@ -57,10 +60,12 @@ public:
 		auto& ctx = m_ctx[sn];
 
 		m_socket.send(data.data(), data.size());
-		ctx.reply_event->wait();
-
+		auto got_it = ctx.reply_event->wait_for(m_timeout);
 		auto reply = ctx.add_reply;
 		m_ctx.erase(sn);
+
+		if(!got_it)
+			throw std::runtime_error("RPCClient::Add timeout waiting for reply!");
 
 		return reply.res;
 	}
@@ -73,10 +78,12 @@ public:
 		auto& ctx = m_ctx[sn];
 
 		m_socket.send(data.data(), data.size());
-		ctx.reply_event->wait();
-
+		auto got_it = ctx.reply_event->wait_for(m_timeout);
 		auto reply = ctx.sub_reply;
 		m_ctx.erase(sn);
+
+		if(!got_it)
+			throw std::runtime_error("RPCClient::Sub timeout waiting for reply!");
 
 		return reply.res;
 	}
@@ -88,6 +95,7 @@ private:
 	seq_t m_next_seq_num = 1;
 	client_socket m_socket;
 	serializer m_serializer;
+	std::chrono::milliseconds m_timeout;
 
 	using reply_handler_t = std::function<void(client_socket&, socket_buffer_t)>;
 	using reply_handler_map_t = std::map<cmd_t, reply_handler_t>;
@@ -112,6 +120,7 @@ private:
 int main(int argc, char** argv)
 {
 	using namespace std;
+	using namespace std::chrono;
 
 	if(argc != 3)
 	{
@@ -125,7 +134,7 @@ int main(int argc, char** argv)
 
 		auto host = argv[1];
 		auto port = stoul(argv[2]);
-		auto c = RPCClient(host, port);
+		auto c = RPCClient(host, port, 1s);
 
 		c.Start();
 
