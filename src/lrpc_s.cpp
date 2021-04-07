@@ -16,12 +16,13 @@ public:
 	Server(std::uint16_t port)
 	: m_socket{ port }
 	{
-		m_cmd_handlers[cmd_t(CMD::Add)] = [this](client_socket& self, socket_buffer_t data, host_info_t hi)
+		m_cmd_handlers[cmd_t(CMD::Add)] = [this](client_socket& self, socket_buffer_t data, const host_info_t& hi)
 		{
 			auto ut = m_serializer.unpack<PAdd>(data);
 			auto& packet = std::get<0>(ut);
+			auto& name = (hi.host.empty() ? hi.ip : hi.host);
 
-			std::cout << "Client (" << hi.ip << ") say PAdd(" << std::setfill('0') << std::setw(3) << int(packet.hdr.seq) << ") "
+			std::cout << "Client (" << name << ") say PAdd(" << int(packet.hdr.seq) << ") "
 				<< std::setfill(' ') << std::setw(3) << packet.num1 << " + " << std::setw(3) << packet.num2 << std::endl;
 
 			auto reply_packet = PAddRep{ { cmd_t(CMD::AddRep), packet.hdr.seq }, packet.num1 + packet.num2 };
@@ -30,12 +31,13 @@ public:
 			self.send(reply_data.data(), reply_data.size());
 		};
 
-		m_cmd_handlers[cmd_t(CMD::Sub)] = [this](client_socket& self, socket_buffer_t data, host_info_t hi)
+		m_cmd_handlers[cmd_t(CMD::Sub)] = [this](client_socket& self, socket_buffer_t data, const host_info_t& hi)
 		{
 			auto ut = m_serializer.unpack<PSub>(data);
 			auto& packet = std::get<0>(ut);
+			auto& name = (hi.host.empty() ? hi.ip : hi.host);
 
-			std::cout << "Client (" << hi.ip << ") say PSub(" << std::setfill('0') << std::setw(3) << int(packet.hdr.seq) << ") "
+			std::cout << "Client (" << name << ") say PSub(" << int(packet.hdr.seq) << ") "
 				<< std::setfill(' ') << std::setw(3) << packet.num1 << " - " << std::setw(3) << packet.num2 << std::endl;
 
 			auto reply_packet = PSubRep{ { cmd_t(CMD::SubRep), packet.hdr.seq }, packet.num1 - packet.num2 };
@@ -52,7 +54,7 @@ public:
 				auto& header = std::get<0>(ut);
 				auto& handler = m_cmd_handlers.at(header.cmd);
 
-				handler(self, std::move(data), std::move(hi));
+				handler(self, std::move(data), hi);
 			});
 
 			std::thread([cs = std::move(cs)]() mutable
@@ -69,7 +71,7 @@ private:
 	server_socket m_socket;
 	serializer m_serializer;
 
-	using cmd_handler_t = std::function<void(client_socket&, socket_buffer_t, host_info_t)>;
+	using cmd_handler_t = std::function<void(client_socket&, socket_buffer_t, const host_info_t&)>;
 	using cmd_handler_map_t = std::map<cmd_t, cmd_handler_t>;
 	cmd_handler_map_t m_cmd_handlers;
 };
