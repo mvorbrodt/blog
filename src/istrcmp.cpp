@@ -1,19 +1,20 @@
 #include <iostream>
 #include "istrcmp.hpp"
 
+void f_std(const std::string& s) { std::cout << s << std::endl; }
+
+void f_is(const istring& s) { std::cout << s << std::endl; }
+
 int main()
 {
 	using namespace std;
 
-	string x1{"123"};
-	istring x2{"123"}, x3(x1);
-	auto rr = str_icmp(x1, x2);
-	auto qqq = (x1 == x2);
-	auto ttt = (std::string)x2;
-	auto rrr = istring{ "hardcoded" };
-	auto zzz = (std::string)rrr;
-	//x1 = x2;
-	//x2 = x1;
+	string std1{"abc"};
+	istring istr1{"ABC"};
+	auto result = (std1 == istr1);
+
+	f_std(istr1);
+	f_is(std1);
 
 	auto s1 = "abc"s;
 	auto s2 = "ABC"s;

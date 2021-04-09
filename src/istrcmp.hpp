@@ -1,11 +1,13 @@
 #pragma once
 
+#include <istream>
 #include <ostream>
 #include <iomanip>
 #include <compare>
 #include <string>
 #include <locale>
 #include <memory>
+#include <utility>
 #include <algorithm>
 #include <functional>
 #include <type_traits>
@@ -81,11 +83,12 @@ public:
 	using base = typename std::basic_string<CharT, char_itraits<CharT>, Alloc>;
 	using base::base;
 
-	template<typename Traits2, typename Alloc2>
-	explicit basic_istring(const std::basic_string<CharT, Traits2, Alloc2>& str)
+	template<typename Traits2, typename Alloc2,
+	std::enable_if_t<not std::is_same_v<char_itraits<CharT>, Traits2>, void>* = nullptr>
+	basic_istring(const std::basic_string<CharT, Traits2, Alloc2>& str)
 	: base(str.data(), str.length()) {}
 
-	explicit operator auto () const
+	operator auto () const
 	{
 		return std::basic_string<CharT>(this->data(), this->length());
 	}
@@ -134,6 +137,22 @@ inline auto operator ""_is(const char* istr, std::size_t len)
 inline auto operator ""_iws(const wchar_t* iwstr, std::size_t len)
 {
 	return iwstring(iwstr, len);
+}
+
+inline auto& operator >> (std::istream& is, istring& istr)
+{
+	std::string temp;
+	is >> temp;
+	istr = std::move(temp);
+	return is;
+}
+
+inline auto& operator >> (std::wistream& wis, iwstring& iwstr)
+{
+	std::wstring temp;
+	wis >> temp;
+	iwstr = std::move(temp);
+	return wis;
 }
 
 inline auto& operator << (std::ostream& os, const istring& istr)
