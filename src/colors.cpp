@@ -1,8 +1,8 @@
 #include <iostream>
-#include "ascii_escape_code.hpp"
+#include "ansi_escape_code.hpp"
 
 using namespace std;
-using namespace ascii_escape_code;
+using namespace ansi_escape_code;
 
 int main(int argc, char** argv)
 {

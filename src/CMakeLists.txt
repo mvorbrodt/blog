@@ -21,7 +21,7 @@ add_executable(bloom bloom.hpp hash.hpp bloom.cpp)
 add_executable(c_api_lambda c_api_lambda.cpp)
 add_executable(cache cache.cpp)
 add_executable(class class.cpp)
-add_executable(colors colors.cpp)
+add_executable(colors ansi_escape_code.hpp colors.cpp)
 
 add_executable(compression compression.cpp)
 target_link_libraries(compression ${LZ4_LIBRARY})
