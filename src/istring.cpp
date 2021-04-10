@@ -3,19 +3,23 @@
 #include "istring.hpp"
 using namespace std;
 
-void f_std(const string& s) {}
-void f_is(const istring& s) {}
-
 int main()
 {
-	string std1{"abc"};
-	istring istr1{"ABC"};
+	auto f_std = [](const string& s) {};
+	auto f_is = [](const istring& s) {};
+
+	auto std1 = string{"abc"};
+	auto istr1 = istring{"ABC"};
+	auto istr2 = "istring literal"_is;
 
 	f_std(istr1);
 	f_is(std1);
 
-	auto result = bool{};
-	result = (std1 == istr1);
+	auto result = (std1 == istr1);
+
+	std1 = istr1;
+	istr1 = std1;
+
 	result = (std1 != istr1);
 	result = (std1 <  istr1);
 	result = (std1 <= istr1);

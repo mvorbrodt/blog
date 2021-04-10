@@ -55,7 +55,7 @@ template<typename CharT, typename Alloc = std::allocator<CharT>>
 class basic_istring : public std::basic_string<CharT, char_itraits<CharT>, Alloc>
 {
 public:
-	using base = typename std::basic_string<CharT, char_itraits<CharT>, Alloc>;
+	using base = std::basic_string<CharT, char_itraits<CharT>, Alloc>;
 	using base::base;
 
 	template<typename Traits2, typename Alloc2,
