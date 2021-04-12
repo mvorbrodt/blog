@@ -4,8 +4,7 @@
 #include <vector>
 #include <random>
 #include <algorithm>
-#include <pstl/execution>
-#include <pstl/algorithm>
+#include <pstl/experimental/algorithm>
 
 using namespace std;
 using namespace pstl;
@@ -27,8 +26,8 @@ TEST_CASE("STL vs PSTL", "[benchmark]")
 
 	BENCHMARK("PSTL")
 	{
-		generate(pstl::execution::par_unseq, begin(data), end(data), mt19937{ seed });
-		sort(pstl::execution::par_unseq, begin(data), end(data));
-		is_sorted(pstl::execution::par_unseq, begin(data), end(data));
+		generate(execution::par_unseq, begin(data), end(data), mt19937{ seed });
+		sort(execution::par_unseq, begin(data), end(data));
+		is_sorted(execution::par_unseq, begin(data), end(data));
 	};
 }

@@ -31,9 +31,9 @@ add_executable(constructors constructors.cpp)
 add_executable(cpu_timer cpu_timer.cpp)
 target_link_libraries(cpu_timer ${Boost_TIMER_LIBRARY})
 
-# add_executable(crypto crypto.cpp)
-# target_include_directories(crypto PUBLIC "${BOTAN_INCLUDE_DIRS}")
-# target_link_libraries(crypto ${CRYPTOPP_LIBRARIES} ${WOLFSSL_LIBRARY} ${BOTAN_LIBRARIES})
+add_executable(crypto crypto.cpp)
+target_include_directories(crypto PUBLIC "${BOTAN_INCLUDE_DIRS}")
+target_link_libraries(crypto ${CRYPTOPP_LIBRARIES} ${WOLFSSL_LIBRARY} ${BOTAN_LIBRARIES})
 
 add_executable(database database.cpp)
 set_source_files_properties(database.cpp PROPERTIES COMPILE_FLAGS --std=c++11)

@@ -53,11 +53,9 @@ public:
 		return *this;
 	}
 
-	template<typename U, typename V, typename W>
-	friend bool operator == (const deep_ptr<T, C, D>& x, const deep_ptr<U, V, W>& y) noexcept { return x.m_p == y.m_p; }
+	friend bool operator == (const deep_ptr& x, const deep_ptr& y) noexcept { return x.m_p == y.m_p; }
 
-	template<typename U, typename V, typename W>
-	friend auto operator <=> (const deep_ptr<T, D, D>& x, const deep_ptr<U, V, W>& y) noexcept { return x.m_p <=> y.m_p; }
+	friend auto operator <=> (const deep_ptr& x, const deep_ptr& y) noexcept { return x.m_p <=> y.m_p; }
 
 	explicit operator bool () const noexcept { return m_p != nullptr; }
 
