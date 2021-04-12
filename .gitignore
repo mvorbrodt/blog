@@ -17,6 +17,7 @@ Makefile
 bin/
 blog.build/
 build/
+src/CMakeLists.txt
 src/*.dir
 src/*.filters
 src/*.vcxproj
