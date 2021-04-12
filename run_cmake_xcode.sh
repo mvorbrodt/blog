@@ -7,3 +7,8 @@ cd ..
 mkdir xcode
 cd xcode
 cmake -G Xcode ..
+cd ..
+
+cd src
+rm -f CMakeLists.txt
+cd ..

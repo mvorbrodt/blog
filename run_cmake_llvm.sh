@@ -21,3 +21,8 @@ cd ..
 mkdir llvm
 cd llvm
 cmake ..
+cd ..
+
+cd src
+rm -f CMakeLists.txt
+cd ..
