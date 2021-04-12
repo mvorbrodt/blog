@@ -1,10 +1,13 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20.1)
 
-project(blog VERSION 0.1
-	DESCRIPTION "Code samples from https://vorbrodt.blog"
+project(blog VERSION 1.0
+	DESCRIPTION "Vorbrodt's C++ Blog - Code Samples"
+	HOMEPAGE_URL "https://vorbrodt.blog"
 	LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
@@ -13,9 +16,9 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 include_directories("/usr/local/include")
-# include_directories(BEFORE "/usr/local/opt/llvm/include")
+include_directories("/usr/local/opt/llvm/include")
 link_directories("/usr/local/lib")
-# link_directories(BEFORE "/usr/local/opt/llvm/lib")
+link_directories("/usr/local/opt/llvm/lib")
 
 find_package(Threads REQUIRED)
 find_package(TBB REQUIRED)
@@ -51,8 +54,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
 set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib")
 
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
-set(LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 
 add_subdirectory(src)
 
