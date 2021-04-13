@@ -22,6 +22,7 @@ link_directories("/usr/local/opt/llvm/lib")
 
 find_package(Threads REQUIRED)
 find_package(TBB REQUIRED)
+find_package(PARALLELSTL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS
 	serialization
 	stacktrace_basic
