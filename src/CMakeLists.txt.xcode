@@ -103,7 +103,7 @@ add_custom_command(
 add_executable(protobuf protobuf.cpp protobuf.pb.h protobuf.pb.cc protobuf.proto)
 target_link_libraries(protobuf ${Protobuf_LIBRARIES})
 
-add_executable(queue queue.cpp)
+add_executable(queue queue.hpp queue.cpp)
 add_executable(random random_test.cpp)
 add_executable(round round.hpp round.cpp)
 add_executable(singleton singleton.hpp singleton.cpp)

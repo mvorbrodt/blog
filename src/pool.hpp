@@ -57,7 +57,7 @@ public:
 		auto task = std::make_shared<task_type>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 		auto result = task->get_future();
 
-		m_queue.push([task]() { (*task)(); });
+		m_queue.push([=]() { (*task)(); });
 
 		return result;
 	}
@@ -126,7 +126,7 @@ public:
 		using task_type = std::packaged_task<task_return_type()>;
 
 		auto task = std::make_shared<task_type>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
-		auto work = [task]() { (*task)(); };
+		auto work = [=]() { (*task)(); };
 		auto result = task->get_future();
 		auto i = m_index++;
 

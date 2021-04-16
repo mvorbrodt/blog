@@ -8,11 +8,14 @@ export AR=/usr/local/opt/llvm/bin/llvm-ar
 export RANLIB=/usr/local/opt/llvm/bin/llvm-ranlib
 export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
 export CPPFLAGS="-I/usr/local/opt/llvm/include -I/usr/local/opt/llvm/include/c++/v1/"
-#alias cc=$CC
-#alias c++=$CXX
-#alias ld=$LD
-#alias ar=$AR
-#alias ranlib=$RANLIB
+alias cc=$CC
+alias c++=$CXX
+alias ld=$LD
+alias ar=$AR
+alias ranlib=$RANLIB
+
+cd /Users/martin/Code/blog
+ln -sf CMakeLists.txt.llvm CMakeLists.txt
 
 cd src
 ln -sf CMakeLists.txt.llvm CMakeLists.txt
