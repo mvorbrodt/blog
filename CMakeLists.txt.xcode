@@ -39,7 +39,7 @@ find_package(XMLRPC REQUIRED)
 find_package(CURL REQUIRED)
 find_package(CURLpp REQUIRED)
 find_package(FMT REQUIRED)
-find_package(CryptoPP REQUIRED)
+# find_package(CryptoPP REQUIRED)
 find_package(WOLFSSL REQUIRED)
 find_package(BOTAN REQUIRED)
 
