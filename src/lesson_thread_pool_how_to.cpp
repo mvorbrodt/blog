@@ -16,7 +16,10 @@ class thread_pool
 public:
 	explicit thread_pool(std::size_t thread_count = std::thread::hardware_concurrency())
 	{
-		if(!thread_count) throw std::invalid_argument("bad thread count! must be non-zero!");
+		if(!thread_count)
+			throw std::invalid_argument("bad thread count! must be non-zero!");
+
+		m_threads.reserve(thread_count);
 
 		for(auto i = 0; i < thread_count; ++i)
 		{
@@ -85,7 +88,6 @@ int main()
 {
 	using namespace std;
 	srand(time(NULL));
-
 	mutex cout_guard;
 
 	cout << "main thread ID: " << this_thread::get_id() << endl;
