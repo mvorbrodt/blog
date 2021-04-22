@@ -31,6 +31,7 @@ public:
 			}
 		};
 
+		m_threads.reserve(threads);
 		for(auto i = 0; i < threads; ++i)
 			m_threads.emplace_back(worker);
 	}
@@ -94,6 +95,7 @@ public:
 			}
 		};
 
+		m_threads.reserve(threads);
 		for(auto i = 0; i < threads; ++i)
 			m_threads.emplace_back(worker, i);
 	}
