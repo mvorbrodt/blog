@@ -60,10 +60,10 @@ public:
 
 	template<typename Traits2, typename Alloc2,
 	std::enable_if_t<not std::is_same_v<char_itraits<CharT>, Traits2>, void>* = nullptr>
-	basic_istring(const std::basic_string<CharT, Traits2, Alloc2>& str)
+	explicit basic_istring(const std::basic_string<CharT, Traits2, Alloc2>& str)
 	: base(str.data(), str.length()) {}
 
-	operator auto () const
+	explicit operator auto () const
 	{
 		return std::basic_string<CharT>(this->data(), this->length());
 	}
@@ -104,7 +104,7 @@ inline auto& operator >> (std::istream& is, istring& istr)
 {
 	std::string temp;
 	is >> temp;
-	istr = std::move(temp);
+	istr = istring(temp.data(), temp.length());
 	return is;
 }
 
@@ -112,7 +112,7 @@ inline auto& operator >> (std::wistream& wis, iwstring& iwstr)
 {
 	std::wstring temp;
 	wis >> temp;
-	iwstr = std::move(temp);
+	iwstr = iwstring(temp.data(), temp.length());
 	return wis;
 }
 
