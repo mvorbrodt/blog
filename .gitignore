@@ -29,3 +29,4 @@ src/Makefile
 src/blog.build/
 src/cmake_install.cmake
 x64/
+blog.code-workspace
