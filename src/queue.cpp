@@ -9,7 +9,7 @@ const int COUNT = 10;
 
 int main(int argc, char** argv)
 {
-	fixed_blocking_queue<int> q(5);
+	bounded_queue<int> q(5);
 	mutex cout_lock;
 
 	thread producer([&]() {

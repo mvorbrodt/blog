@@ -15,10 +15,10 @@
 class simple_thread_pool
 {
 public:
-	explicit simple_thread_pool(unsigned int threads = std::thread::hardware_concurrency())
+	explicit simple_thread_pool(std::size_t thread_count = std::thread::hardware_concurrency())
 	{
-		if(!threads)
-			throw std::invalid_argument("Invalid thread count!");
+		if(!thread_count)
+			throw std::invalid_argument("bad thread count! must be non-zero!");
 
 		auto worker = [this]()
 		{
@@ -31,14 +31,14 @@ public:
 			}
 		};
 
-		m_threads.reserve(threads);
-		for(auto i = 0; i < threads; ++i)
+		m_threads.reserve(thread_count);
+		while(thread_count--)
 			m_threads.emplace_back(worker);
 	}
 
 	~simple_thread_pool()
 	{
-		m_queue.done();
+		m_queue.unblock();
 		for(auto& thread : m_threads)
 			thread.join();
 	}
@@ -65,21 +65,23 @@ public:
 
 private:
 	using Proc = std::function<void(void)>;
-	using Queue = blocking_queue<Proc>;
+	using Queue = unbounded_queue<Proc>;
 	Queue m_queue;
 
 	using Threads = std::vector<std::thread>;
 	Threads m_threads;
 };
 
+
+
 class thread_pool
 {
 public:
-	explicit thread_pool(unsigned int threads = std::thread::hardware_concurrency())
-	: m_queues(threads), m_count(threads)
+	explicit thread_pool(std::size_t thread_count = std::thread::hardware_concurrency())
+	: m_queues(thread_count), m_count(thread_count)
 	{
-		if(!threads)
-			throw std::invalid_argument("Invalid thread count!");
+		if(!thread_count)
+			throw std::invalid_argument("bad thread count! must be non-zero!");
 
 		auto worker = [this](auto i)
 		{
@@ -95,15 +97,15 @@ public:
 			}
 		};
 
-		m_threads.reserve(threads);
-		for(auto i = 0; i < threads; ++i)
+		m_threads.reserve(thread_count);
+		for(auto i = 0; i < thread_count; ++i)
 			m_threads.emplace_back(worker, i);
 	}
 
 	~thread_pool()
 	{
 		for(auto& queue : m_queues)
-			queue.done();
+			queue.unblock();
 		for(auto& thread : m_threads)
 			thread.join();
 	}
@@ -143,7 +145,7 @@ public:
 
 private:
 	using Proc = std::function<void(void)>;
-	using Queue = blocking_queue<Proc>;
+	using Queue = unbounded_queue<Proc>;
 	using Queues = std::vector<Queue>;
 	Queues m_queues;
 

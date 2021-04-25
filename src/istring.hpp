@@ -133,7 +133,7 @@ inline auto operator ""_is(const char* istr, std::size_t len)
 	return istring(istr, len);
 }
 
-inline auto operator ""_iws(const wchar_t* iwstr, std::size_t len)
+inline auto operator ""_is(const wchar_t* iwstr, std::size_t len)
 {
 	return iwstring(iwstr, len);
 }

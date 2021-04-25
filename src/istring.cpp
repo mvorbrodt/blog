@@ -61,13 +61,13 @@ int main()
 	wcout << L"'" << iws1 << L"' == '" << iws2 << L"' 2-way: " << boolalpha
 		<< (iws1 == iws2) << L", 3-way: " << iws1.compare(iws2) << endl;
 
-	iws1 = L"aaa"_iws;
-	iws2 = L"bbb"_iws;
+	iws1 = L"aaa"_is;
+	iws2 = L"bbb"_is;
 	wcout << L"'" << iws1 << L"' == '" << iws2 << L"' 2-way: " << boolalpha
 		<< (iws1 == iws2) << L", 3-way: " << iws1.compare(iws2) << endl;
 
-	iws1 = L"bbb"_iws;
-	iws2 = L"aaa"_iws;
+	iws1 = L"bbb"_is;
+	iws2 = L"aaa"_is;
 	wcout << L"'" << iws1 << L"' == '" << iws2 << L"' 2-way: " << boolalpha
 		<< (iws1 == iws2) << L", 3-way: " << iws1.compare(iws2) << endl;
 }

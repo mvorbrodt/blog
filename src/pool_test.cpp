@@ -3,10 +3,9 @@
 #include <iomanip>
 #include <locale>
 #include <chrono>
+#include <random>
 #include <atomic>
 #include <memory>
-#include <cstdlib>
-#include <cstdint>
 #include "pool.hpp"
 #include "ansi_escape_code.hpp"
 
@@ -22,18 +21,21 @@ std::string with_commas(uint64_t value)
 	return ss.str();
 }
 
-template<typename PT>
+template<typename PT, bool FAST>
 void benchmark(const char* pool_name, uint64_t tasks, uint64_t reps)
 {
 	cout << black << bold << pool_name << normal << " (" << red << with_commas(tasks) << black << " tasks, " << red << with_commas(reps) << black << " reps)" << flush;
 
+	random_device rd;
+	mt19937 mt(rd());
+
 	atomic_uint64_t result = 0;
-	auto work = [&result](uint64_t r)
+	auto work = [&](uint64_t r)
 	{
 		uint64_t sum = 0;
-		for (auto i = 1; i <= r; ++i)
+		while(r--)
 		{
-			auto t = rand();
+			auto t = mt();
 			sum += t + 1;
 			sum -= t;
 		}
@@ -43,10 +45,10 @@ void benchmark(const char* pool_name, uint64_t tasks, uint64_t reps)
 	auto start_time = high_resolution_clock::now();
 	{
 		PT pool;
-		for (uint64_t i = 1; i <= tasks / 2; ++i)
+		for (uint64_t i = 1; i <= tasks; ++i)
 		{
-			pool.enqueue_work(work, reps);
-			[[maybe_unused]] auto p = pool.enqueue_task(work, reps);
+			if(FAST) pool.enqueue_work(work, reps);
+			else [[maybe_unused]] auto p = pool.enqueue_task(work, reps);
 		}
 	}
 	auto end_time = high_resolution_clock::now();
@@ -67,13 +69,22 @@ int main()
 
 	for(auto t = TASK_START; t <= TASK_STOP; t += TASK_STEP)
 	{
-		if(TASK_START < TASK_STOP) cout << "********************************************************************************" << endl;
+		if(TASK_START < TASK_STOP)
+			cout << "********************************************************************************" << endl;
+
 		for(auto r = REPS_START; r <= REPS_STOP; r += REPS_STEP)
 		{
-			benchmark<simple_thread_pool>("simple  ", t, r);
-			benchmark<thread_pool>       ("advanced", t, r);
-			if(REPS_START < REPS_STOP) cout << endl;
+			benchmark<simple_thread_pool, true>("simple   (fast path)", t, r);
+			benchmark<thread_pool, true>       ("advanced (fast path)", t, r);
+			//cout << endl;
+			//benchmark<simple_thread_pool, false>("simple   (slow path)", t, r);
+			//benchmark<thread_pool, false>       ("advanced (slow path)", t, r);
+
+			if(REPS_START < REPS_STOP)
+				cout << endl;
 		}
-		if(TASK_START < TASK_STOP) cout << endl;
+
+		if(TASK_START < TASK_STOP)
+			cout << endl;
 	}
 }
