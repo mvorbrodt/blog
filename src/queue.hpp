@@ -5,21 +5,15 @@
 #include <utility>
 #include <stdexcept>
 #include <condition_variable>
-#include "mutex.hpp"
 
 
 
-template<typename T, typename Mutex = spinlock_mutex>
+template<typename T>
 class unbounded_queue
 {
 public:
 	explicit unbounded_queue(bool block = true)
 	: m_block{ block } {}
-
-	~unbounded_queue()
-	{
-		unblock();
-	};
 
 	void push(const T& item)
 	{
@@ -133,13 +127,13 @@ private:
 
 	bool m_block;
 
-	mutable Mutex m_queue_lock;
-	std::condition_variable_any m_condition;
+	mutable std::mutex m_queue_lock;
+	std::condition_variable m_condition;
 };
 
 
 
-template<typename T, typename Mutex = spinlock_mutex>
+template<typename T>
 class bounded_queue
 {
 public:
@@ -149,11 +143,6 @@ public:
 		if(!m_max_size)
 			throw std::invalid_argument("bad queue max-size! must be non-zero!");
 	}
-
-	~bounded_queue()
-	{
-		unblock();
-	};
 
 	bool push(const T& item)
 	{
@@ -261,7 +250,7 @@ private:
 	bool m_block;
 	const std::size_t m_max_size;
 
-	mutable Mutex m_queue_lock;
-	std::condition_variable_any m_condition_push;
-	std::condition_variable_any m_condition_pop;
+	mutable std::mutex m_queue_lock;
+	std::condition_variable m_condition_push;
+	std::condition_variable m_condition_pop;
 };

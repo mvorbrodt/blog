@@ -19,13 +19,7 @@
 #include "event.hpp"
 #include "semaphore.hpp"
 
-#if __cpp_lib_hardware_interference_size >= 201603
-using std::hardware_constructive_interference_size;
-using std::hardware_destructive_interference_size;
-#else
-constexpr std::size_t hardware_constructive_interference_size = 2 * sizeof(std::max_align_t);
-constexpr std::size_t hardware_destructive_interference_size = 2 * sizeof(std::max_align_t);
-#endif
+
 
 class simple_spinlock_mutex
 {
@@ -43,6 +37,8 @@ public:
 private:
 	std::atomic_flag flag = ATOMIC_FLAG_INIT;
 };
+
+
 
 class spinlock_mutex
 {
@@ -69,8 +65,17 @@ public:
 	}
 
 private:
+#if __cpp_lib_hardware_interference_size >= 201603
+	using std::hardware_constructive_interference_size;
+	using std::hardware_destructive_interference_size;
+#else
+	constexpr std::size_t hardware_constructive_interference_size = 2 * sizeof(std::max_align_t);
+	constexpr std::size_t hardware_destructive_interference_size = 2 * sizeof(std::max_align_t);
+#endif
 	alignas(hardware_destructive_interference_size) std::atomic_bool m_lock = false;
 };
+
+
 
 class fast_mutex
 {
@@ -94,6 +99,8 @@ private:
 	std::atomic_uint m_state;
 	auto_event m_waitset;
 };
+
+
 
 class rw_fast_mutex
 {

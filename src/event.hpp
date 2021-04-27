@@ -4,6 +4,8 @@
 #include <chrono>
 #include <condition_variable>
 
+
+
 class manual_event
 {
 public:
@@ -52,6 +54,8 @@ private:
 	std::mutex m_mutex;
 	std::condition_variable m_cv;
 };
+
+
 
 class auto_event
 {

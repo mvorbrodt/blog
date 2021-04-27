@@ -74,9 +74,9 @@ int main()
 	uint64_t TASK_STEP  = 100'000;
 	uint64_t TASK_STOP  = 1'000'000;
 
-	uint64_t REPS_START = 1;
-	uint64_t REPS_STEP  = 1;
-	uint64_t REPS_STOP  = 10;
+	uint64_t REPS_START = 0;
+	uint64_t REPS_STEP  = 10;
+	uint64_t REPS_STOP  = 100;
 
 	for(auto t = TASK_START; t <= TASK_STOP; t += TASK_STEP)
 	{
@@ -85,11 +85,11 @@ int main()
 
 		for(auto r = REPS_START; r <= REPS_STOP; r += REPS_STEP)
 		{
-			benchmark<simple_thread_pool>(true, "S/fast", t, r, cores, cores / 2);
-			benchmark<thread_pool>       (true, "A/fast", t, r, cores, cores / 2);
+			benchmark<simple_thread_pool>(true, "S/fast", t, !r ? 1 : r, cores, cores / 2);
+			benchmark<thread_pool>       (true, "A/fast", t, !r ? 1 : r, cores, cores / 2);
 			// cout << endl;
-			// benchmark<simple_thread_pool>(false, "S/slow", t, r, cores, cores / 2);
-			// benchmark<thread_pool>       (false, "A/slow", t, r, cores, cores / 2);
+			// benchmark<simple_thread_pool>(false, "S/slow", t, !r ? 1 : r, cores, cores / 2);
+			// benchmark<thread_pool>       (false, "A/slow", t, !r ? 1 : r, cores, cores / 2);
 
 			if(REPS_START < REPS_STOP)
 				cout << endl;
