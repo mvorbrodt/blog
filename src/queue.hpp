@@ -5,10 +5,11 @@
 #include <utility>
 #include <stdexcept>
 #include <condition_variable>
+#include "mutex.hpp"
 
 
 
-template<typename T>
+template<typename T, typename Mutex = spinlock_mutex>
 class unbounded_queue
 {
 public:
@@ -23,7 +24,7 @@ public:
 	void push(const T& item)
 	{
 		{
-			std::unique_lock guard(m_queue_lock);
+			std::scoped_lock guard(m_queue_lock);
 			m_queue.push(item);
 		}
 		m_condition.notify_one();
@@ -32,7 +33,7 @@ public:
 	void push(T&& item)
 	{
 		{
-			std::unique_lock guard(m_queue_lock);
+			std::scoped_lock guard(m_queue_lock);
 			m_queue.push(std::move(item));
 		}
 		m_condition.notify_one();
@@ -42,7 +43,7 @@ public:
 	void emplace(Args&&... args)
 	{
 		{
-			std::unique_lock guard(m_queue_lock);
+			std::scoped_lock guard(m_queue_lock);
 			m_queue.emplace(std::forward<Args>(args)...);
 		}
 		m_condition.notify_one();
@@ -95,26 +96,26 @@ public:
 
 	std::size_t size() const
 	{
-		std::unique_lock guard(m_queue_lock);
+		std::scoped_lock guard(m_queue_lock);
 		return m_queue.size();
 	}
 
 	bool empty() const
 	{
-		std::unique_lock guard(m_queue_lock);
+		std::scoped_lock guard(m_queue_lock);
 		return m_queue.empty();
 	}
 
 	void block()
 	{
-		std::unique_lock guard(m_queue_lock);
+		std::scoped_lock guard(m_queue_lock);
 		m_block = true;
 	}
 
 	void unblock()
 	{
 		{
-			std::unique_lock guard(m_queue_lock);
+			std::scoped_lock guard(m_queue_lock);
 			m_block = false;
 		}
 		m_condition.notify_all();
@@ -122,7 +123,7 @@ public:
 
 	bool blocking() const
 	{
-		std::unique_lock guard(m_queue_lock);
+		std::scoped_lock guard(m_queue_lock);
 		return m_block;
 	}
 
@@ -132,13 +133,13 @@ private:
 
 	bool m_block;
 
-	mutable std::mutex m_queue_lock;
-	std::condition_variable m_condition;
+	mutable Mutex m_queue_lock;
+	std::condition_variable_any m_condition;
 };
 
 
 
-template<typename T>
+template<typename T, typename Mutex = spinlock_mutex>
 class bounded_queue
 {
 public:
@@ -210,7 +211,7 @@ public:
 
 	std::size_t size() const
 	{
-		std::unique_lock guard(m_queue_lock);
+		std::scoped_lock guard(m_queue_lock);
 		return m_queue.size();
 	}
 
@@ -221,7 +222,7 @@ public:
 
 	bool empty() const
 	{
-		std::unique_lock guard(m_queue_lock);
+		std::scoped_lock guard(m_queue_lock);
 		return m_queue.empty();
 	}
 
@@ -233,14 +234,14 @@ public:
 
 	void block()
 	{
-		std::unique_lock guard(m_queue_lock);
+		std::scoped_lock guard(m_queue_lock);
 		m_block = true;
 	}
 
 	void unblock()
 	{
 		{
-			std::unique_lock guard(m_queue_lock);
+			std::scoped_lock guard(m_queue_lock);
 			m_block = false;
 		}
 		m_condition_push.notify_all();
@@ -249,7 +250,7 @@ public:
 
 	bool blocking() const
 	{
-		std::unique_lock guard(m_queue_lock);
+		std::scoped_lock guard(m_queue_lock);
 		return m_block;
 	}
 
@@ -260,7 +261,7 @@ private:
 	bool m_block;
 	const std::size_t m_max_size;
 
-	mutable std::mutex m_queue_lock;
-	std::condition_variable m_condition_push;
-	std::condition_variable m_condition_pop;
+	mutable Mutex m_queue_lock;
+	std::condition_variable_any m_condition_push;
+	std::condition_variable_any m_condition_pop;
 };

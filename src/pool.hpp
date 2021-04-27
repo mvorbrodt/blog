@@ -24,7 +24,7 @@ public:
 		{
 			while(true)
 			{
-				Proc f;
+				proc_t f;
 				if(!m_queue.pop(f))
 					break;
 				f();
@@ -64,12 +64,12 @@ public:
 	}
 
 private:
-	using Proc = std::function<void(void)>;
-	using Queue = unbounded_queue<Proc>;
-	Queue m_queue;
+	using proc_t = std::function<void(void)>;
+	using queue_t = unbounded_queue<proc_t>;
+	queue_t m_queue;
 
-	using Threads = std::vector<std::thread>;
-	Threads m_threads;
+	using threads_t = std::vector<std::thread>;
+	threads_t m_threads;
 };
 
 
@@ -87,7 +87,7 @@ public:
 		{
 			while(true)
 			{
-				Proc f;
+				proc_t f;
 				for(auto n = 0; n < m_count * K; ++n)
 					if(m_queues[(i + n) % m_count].try_pop(f))
 						break;
@@ -144,13 +144,13 @@ public:
 	}
 
 private:
-	using Proc = std::function<void(void)>;
-	using Queue = unbounded_queue<Proc>;
-	using Queues = std::vector<Queue>;
-	Queues m_queues;
+	using proc_t = std::function<void(void)>;
+	using queue_t = unbounded_queue<proc_t>;
+	using queues_t = std::vector<queue_t>;
+	queues_t m_queues;
 
-	using Threads = std::vector<std::thread>;
-	Threads m_threads;
+	using threads_t = std::vector<std::thread>;
+	threads_t m_threads;
 
 	const unsigned int m_count;
 	std::atomic_uint m_index = 0;

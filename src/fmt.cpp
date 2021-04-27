@@ -8,7 +8,7 @@
 #include <fmt/compile.h>
 #include <fmt/locale.h>
 #include <fmt/ostream.h>
-#include <fmt/posix.h>
+#include <fmt/os.h>
 #include <fmt/printf.h>
 
 using namespace std;
