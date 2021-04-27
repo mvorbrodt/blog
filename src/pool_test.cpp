@@ -87,9 +87,9 @@ int main()
 		{
 			benchmark<simple_thread_pool>(true, "S/fast", t, r, cores, cores / 2);
 			benchmark<thread_pool>       (true, "A/fast", t, r, cores, cores / 2);
-			cout << endl;
-			benchmark<simple_thread_pool>(false, "S/slow", t, r, cores, cores / 2);
-			benchmark<thread_pool>       (false, "A/slow", t, r, cores, cores / 2);
+			// cout << endl;
+			// benchmark<simple_thread_pool>(false, "S/slow", t, r, cores, cores / 2);
+			// benchmark<thread_pool>       (false, "A/slow", t, r, cores, cores / 2);
 
 			if(REPS_START < REPS_STOP)
 				cout << endl;
