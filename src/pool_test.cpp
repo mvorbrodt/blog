@@ -62,7 +62,7 @@ void benchmark(bool fast_path, const char* pool_name, uint64_t tasks, uint64_t r
 	auto good = (check == tasks * reps * push_threads);
 	cout << "\t" << red << duration_cast<microseconds>(end_time - start_time).count() / 1000.f << " ms" << "\t" << black;
 	if(good) cout << "(" << green << with_commas(check) << black << ")";
-	else cout << "(" << red << with_commas(check) << black << ")";
+	else cout << "(" << red << with_commas(check) << black << ")";wcout << blue;
 	cout << endl;
 }
 
@@ -70,12 +70,12 @@ int main()
 {
 	auto cores = std::thread::hardware_concurrency();
 
-	uint64_t TASK_START = 100'000;
-	uint64_t TASK_STEP  = 100'000;
+	uint64_t TASK_START = 0;
+	uint64_t TASK_STEP  = 250'000;
 	uint64_t TASK_STOP  = 1'000'000;
 
 	uint64_t REPS_START = 0;
-	uint64_t REPS_STEP  = 10;
+	uint64_t REPS_STEP  = 25;
 	uint64_t REPS_STOP  = 100;
 
 	for(auto t = TASK_START; t <= TASK_STOP; t += TASK_STEP)
@@ -85,11 +85,11 @@ int main()
 
 		for(auto r = REPS_START; r <= REPS_STOP; r += REPS_STEP)
 		{
-			benchmark<simple_thread_pool>(true, "S/fast", t, !r ? 1 : r, cores, cores / 2);
-			benchmark<thread_pool>       (true, "A/fast", t, !r ? 1 : r, cores, cores / 2);
+			benchmark<simple_thread_pool>(true, "S/fast", !t ? 100'000 : t, !r ? 1 : r, cores, cores / 2);
+			benchmark<thread_pool>       (true, "A/fast", !t ? 100'000 : t, !r ? 1 : r, cores, cores / 2);
 			// cout << endl;
-			// benchmark<simple_thread_pool>(false, "S/slow", t, !r ? 1 : r, cores, cores / 2);
-			// benchmark<thread_pool>       (false, "A/slow", t, !r ? 1 : r, cores, cores / 2);
+			// benchmark<simple_thread_pool>(false, "S/slow", !t ? 100'000 : t, !r ? 1 : r, cores, cores / 2);
+			// benchmark<thread_pool>       (false, "A/slow", !t ? 100'000 : t, !r ? 1 : r, cores, cores / 2);
 
 			if(REPS_START < REPS_STOP)
 				cout << endl;

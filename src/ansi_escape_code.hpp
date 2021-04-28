@@ -2,10 +2,24 @@
 
 #include <ostream>
 
+
+
 #define ANSI_ESCAPE_CODE(name, code) \
-	static inline struct name##_ansi_escape_code {} name; \
-	inline std::ostream& operator << (std::ostream& os, const name##_ansi_escape_code&) \
-	{ os << "\x1B[" #code "m"; return os; }
+	inline struct ansi_escape_code_##name \
+	{ \
+		inline friend std::ostream& operator << (std::ostream& os, ansi_escape_code_##name) \
+		{ \
+			os << "\x1B[" #code "m"; \
+			return os; \
+		} \
+		inline friend std::wostream& operator << (std::wostream& wos, ansi_escape_code_##name) \
+		{ \
+			wos << L"\x1B[" #code L"m"; \
+			return wos; \
+		} \
+	} name;
+
+
 
 namespace ansi_escape_code
 {
@@ -78,47 +92,91 @@ namespace ansi_escape_code
 	ANSI_ESCAPE_CODE(bright_cyan_bg, 106)
 	ANSI_ESCAPE_CODE(bright_white_bg, 107)
 
+
+
 	struct color_n
 	{
 		explicit color_n(unsigned char n) : m_n(n) {}
-		friend std::ostream& operator << (std::ostream& os, const color_n& n);
+
+		inline friend std::ostream& operator << (std::ostream& os, color_n n)
+		{
+			os << "\x1B[38;5;" << (int)n.m_n << "m";
+			return os;
+		}
+
+		inline friend std::wostream& operator << (std::wostream& wos, color_n n)
+		{
+			wos << L"\x1B[38;5;" << (int)n.m_n << L"m";
+			return wos;
+		}
+
 	private:
 		unsigned char m_n;
 	};
 
-	inline std::ostream& operator << (std::ostream& os, const color_n& n)
-	{ os << "\x1B[38;5;" << (int)n.m_n << "m"; return os; }
+
 
 	struct color_bg_n
 	{
 		explicit color_bg_n(unsigned char n) : m_n(n) {}
-		friend std::ostream& operator << (std::ostream& os, const color_bg_n& n);
+
+		inline friend std::ostream& operator << (std::ostream& os, color_bg_n n)
+		{
+			os << "\x1B[48;5;" << (int)n.m_n << "m";
+			return os;
+		}
+
+		inline friend std::wostream& operator << (std::wostream& wos, color_bg_n n)
+		{
+			wos << L"\x1B[48;5;" << (int)n.m_n << L"m";
+			return wos;
+		}
+
 	private:
 		unsigned char m_n;
 	};
 
-	inline std::ostream& operator << (std::ostream& os, const color_bg_n& n)
-	{ os << "\x1B[48;5;" << (int)n.m_n << "m"; return os; }
+
 
 	struct color_rgb
 	{
 		color_rgb(unsigned char r, unsigned char g, unsigned char b) : m_r(r), m_g(g), m_b(b) {}
-		friend std::ostream& operator << (std::ostream& os, const color_rgb& c);
+
+		inline friend std::ostream& operator << (std::ostream& os, color_rgb c)
+		{
+			os << "\x1B[38;2;" << (int)c.m_r << ";" << (int)c.m_g << ";" << (int)c.m_b << "m";
+			return os;
+		}
+
+		inline friend std::wostream& operator << (std::wostream& wos, color_rgb c)
+		{
+			wos << L"\x1B[38;2;" << (int)c.m_r << L";" << (int)c.m_g << L";" << (int)c.m_b << L"m";
+			return wos;
+		}
+
 	private:
 		unsigned char m_r, m_g, m_b;
 	};
 
-	inline std::ostream& operator << (std::ostream& os, const color_rgb& c)
-	{ os << "\x1B[38;2;" << (int)c.m_r << ";" << (int)c.m_g << ";" << (int)c.m_b << "m"; return os; }
+
 
 	struct color_bg_rgb
 	{
 		color_bg_rgb(unsigned char r, unsigned char g, unsigned char b) : m_r(r), m_g(g), m_b(b) {}
-		friend std::ostream& operator << (std::ostream& os, const color_bg_rgb& c);
+
+		inline friend std::ostream& operator << (std::ostream& os, color_bg_rgb c)
+		{
+			os << "\x1B[48;2;" << (int)c.m_r << ";" << (int)c.m_g << ";" << (int)c.m_b << "m";
+			return os;
+		}
+
+		inline friend std::wostream& operator << (std::wostream& wos, color_bg_rgb c)
+		{
+			wos << L"\x1B[48;2;" << (int)c.m_r << L";" << (int)c.m_g << L";" << (int)c.m_b << L"m";
+			return wos;
+		}
+
 	private:
 		unsigned char m_r, m_g, m_b;
 	};
-
-	inline std::ostream& operator << (std::ostream& os, const color_bg_rgb& c)
-	{ os << "\x1B[48;2;" << (int)c.m_r << ";" << (int)c.m_g << ";" << (int)c.m_b << "m"; return os; }
 }
