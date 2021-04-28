@@ -15,7 +15,7 @@ struct S
 {
 	S() : S(2019) { cout << "S::S() throws..." << endl; throw runtime_error("BOOM!"); }
 	S(int i) : S("C++") { cout << "S::S(int i = '" << i << "')" << endl; }
-	S(const char* s) : m_pM(make_unique<M>("by pointer")), m_vM("by value")
+	S(const char* s) : m_vM("by value"), m_pM(make_unique<M>("by pointer"))
 		{ cout << "S::S(const char* s = '" << s << "')" << endl; }
 	~S() { cout << "S::~S() cleans up..." << endl; }
 

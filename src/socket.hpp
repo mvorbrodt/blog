@@ -134,7 +134,7 @@ public:
 		if(result == -1)
 			throw std::runtime_error("::setsockopt call failed!");
 
-		sockaddr_in addr = { sizeof(sockaddr_in), AF_INET, htons(port), INADDR_ANY };
+		sockaddr_in addr = { sizeof(sockaddr_in), AF_INET, htons(port), { INADDR_ANY } };
 		result = ::bind(m_socket, (const sockaddr*)&addr, sizeof(addr));
 		if(result == -1)
 			throw std::runtime_error("::bind call failed!");

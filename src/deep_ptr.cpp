@@ -8,6 +8,7 @@ struct S
 {
 	S() = default;
 	S(const S&) { cout << "using S(const S&)" << endl; }
+	virtual ~S() = default;
 
 	virtual S* clone() const {
 		cout << "using S::clone()" << endl;

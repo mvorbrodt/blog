@@ -30,8 +30,8 @@ struct still_bad
 	}
 	catch(...)
 	{
-		if(p1) delete p1; // ILLEGAL~!!!
-		if(p2) delete p2; // ILLEGAL~!!!
+		// if(p1) delete p1; // ILLEGAL~!!!
+		// if(p2) delete p2; // ILLEGAL~!!!
 		/*
 		 * From: https://en.cppreference.com/w/cpp/language/function-try-block
 		 *
