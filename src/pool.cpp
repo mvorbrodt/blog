@@ -24,7 +24,7 @@ std::string with_commas(uint64_t value)
 template<typename PT>
 void benchmark(bool fast_path, const char* pool_name, uint64_t tasks, uint64_t reps, std::size_t pool_threads, std::size_t push_threads)
 {
-	cout << black << bold << pool_name << normal << " (" << red << with_commas(tasks) << black << " tasks, " << red << with_commas(reps) << black << " reps)" << flush;
+	cout << reset << bold << pool_name << normal << " (" << red << with_commas(tasks) << reset << " tasks, " << red << with_commas(reps) << reset << " reps)" << flush;
 
 	std::atomic_uint check{};
 	auto work = [&](uint64_t r)
@@ -60,9 +60,9 @@ void benchmark(bool fast_path, const char* pool_name, uint64_t tasks, uint64_t r
 	auto end_time = high_resolution_clock::now();
 
 	auto good = (check == tasks * reps * push_threads);
-	cout << "\t" << red << duration_cast<microseconds>(end_time - start_time).count() / 1000.f << " ms" << "\t" << black;
-	if(good) cout << "(" << green << with_commas(check) << black << ")";
-	else cout << "(" << red << with_commas(check) << black << ")";wcout << blue;
+	cout << "\t" << red << duration_cast<microseconds>(end_time - start_time).count() / 1000.f << " ms" << "\t" << reset;
+	if(good) cout << "(" << green << with_commas(check) << reset << ")";
+	else cout << "(" << red << with_commas(check) << reset << ")";wcout << blue;
 	cout << endl;
 }
 
