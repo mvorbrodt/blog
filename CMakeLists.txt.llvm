@@ -13,6 +13,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "/usr/local/Cellar/cmake/3.20.1/share/cmake/Modules")
 
 find_package(Threads REQUIRED)
 find_package(TBB REQUIRED)
