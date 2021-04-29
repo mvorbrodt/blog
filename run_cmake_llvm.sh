@@ -27,13 +27,14 @@ alias ld=$LD
 alias ar=$AR
 alias ranlib=$RANLIB
 
-cd /Users/martin/Code/blog
+cd ~/Code/blog
 ln -sf CMakeLists.txt.llvm CMakeLists.txt
 
 cd src
 ln -sf CMakeLists.txt.llvm CMakeLists.txt
 cd ..
 
+rm -rf llvm
 mkdir llvm
 cd llvm
 cmake -DCMAKE_TOOLCHAIN_FILE=/Users/martin/Code/vcpkg/scripts/buildsystems/vcpkg.cmake ..
