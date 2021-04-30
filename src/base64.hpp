@@ -52,7 +52,7 @@ namespace base64
 		return encoded;
 	}
 
-	std::vector<byte> decode(const std::string& input)
+	inline std::vector<byte> decode(const std::string& input)
 	{
 		if(input.length() % 4)
 			throw std::runtime_error("Invalid base64 length!");
