@@ -29,9 +29,13 @@ void benchmark(bool fast_path, const char* pool_name, uint64_t tasks, uint64_t r
 	std::atomic_uint check{};
 	auto work = [&](uint64_t r)
 	{
-		uint32_t sum = 0;
-		while(r--)
+		volatile uint32_t sum = 0;
+		while (r--)
+#ifdef _MSC_VER
+			++sum;
+#else
 			asm volatile("inc %0\n\t" : "+r" (sum));
+#endif
 		check.fetch_add(sum, std::memory_order_relaxed);
 	};
 

@@ -49,8 +49,8 @@ add_executable(unordered unordered.cpp)
 add_executable(fmt fmt.cpp)
 target_link_libraries(fmt PRIVATE fmt::fmt fmt::fmt-header-only)
 
-add_executable(pstl pstl_test.cpp)
-target_link_libraries(pstl PRIVATE TBB::tbb)
+# add_executable(pstl pstl_test.cpp)
+# target_link_libraries(pstl PRIVATE TBB::tbb)
 
 add_executable(geoip geoip.cpp)
 target_link_libraries(geoip PRIVATE CURL::libcurl unofficial::curlpp::curlpp)
@@ -80,8 +80,8 @@ add_library(plugin SHARED plugin_lib.cpp)
 add_executable(file_hash file_hash.cpp)
 target_link_libraries(file_hash botan)
 
-add_executable(crypto crypto.cpp)
-target_link_libraries(crypto PRIVATE cryptopp-static botan wolfssl)
+# add_executable(crypto crypto.cpp)
+# target_link_libraries(crypto PRIVATE cryptopp-static botan wolfssl)
 
 add_executable(benchmark-celero benchmark-celero.cpp)
 target_link_libraries(benchmark-celero PRIVATE celero)
@@ -93,8 +93,8 @@ target_link_libraries(benchmark-hayai PRIVATE hayai_main)
 add_executable(benchmark-google benchmark-google.cpp)
 target_link_libraries(benchmark-google PRIVATE benchmark::benchmark benchmark::benchmark_main shlwapi)
 
-add_executable(benchmark-nonius benchmark-nonius.cpp)
-target_link_libraries(benchmark-nonius PRIVATE Nonius::nonius)
+# add_executable(benchmark-nonius benchmark-nonius.cpp)
+# target_link_libraries(benchmark-nonius PRIVATE Nonius::nonius)
 
 
 
@@ -126,10 +126,10 @@ add_custom_command(
 		--grpc_out=${CMAKE_CURRENT_SOURCE_DIR}
 		--plugin=protoc-gen-grpc=${gRPC_CPP_PLUGIN_EXECUTABLE}
 		${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.proto)
-add_executable(grpc_service_c grpc_service_c.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
-target_link_libraries(grpc_service_c PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc_cronet)
-add_executable(grpc_service_s grpc_service_s.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
-target_link_libraries(grpc_service_s PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc_cronet)
+add_executable(grpc_c grpc_service_c.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
+target_link_libraries(grpc_c PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite gRPC::gpr gRPC::grpc gRPC::grpc++)
+add_executable(grpc_s grpc_service_s.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
+target_link_libraries(grpc_s PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite gRPC::gpr gRPC::grpc gRPC::grpc++)
 
 
 
@@ -144,7 +144,7 @@ add_custom_command(
 	COMMAND "${THRIFT_BIN_DIR}\\thrift.exe"
 	ARGS -out ${CMAKE_CURRENT_SOURCE_DIR}
 		-gen cpp ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service.thrift)
-add_executable(thrift_service_c thrift_service_c.cpp ThriftService.cpp thrift_service_constants.cpp thrift_service_types.cpp)
-target_link_libraries(thrift_service_c PRIVATE thrift::thrift)
-add_executable(thrift_service_s thrift_service_s.cpp ThriftService.cpp thrift_service_constants.cpp thrift_service_types.cpp)
-target_link_libraries(thrift_service_s PRIVATE thrift::thrift)
+add_executable(thrift_c thrift_service_c.cpp ThriftService.cpp thrift_service_constants.cpp thrift_service_types.cpp)
+target_link_libraries(thrift_c PRIVATE thrift::thrift)
+add_executable(thrift_s thrift_service_s.cpp ThriftService.cpp thrift_service_constants.cpp thrift_service_types.cpp)
+target_link_libraries(thrift_s PRIVATE thrift::thrift)

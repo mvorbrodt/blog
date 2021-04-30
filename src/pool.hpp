@@ -154,7 +154,7 @@ private:
 	using threads_t = std::vector<std::thread>;
 	threads_t m_threads;
 
-	const unsigned int m_count;
+	const std::size_t m_count;
 	std::atomic_uint m_index = 0;
 
 	inline static const unsigned int K = 2;
