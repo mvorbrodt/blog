@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.20.1)
+cmake_minimum_required(VERSION 3.19.2)
+
+set(CMAKE_TOOLCHAIN_FILE "/Users/martin/Code/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 project(blog VERSION 1.0
 	DESCRIPTION "Vorbrodt's C++ Blog - Code Samples"
@@ -46,10 +48,10 @@ find_package(BOTAN REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-I/usr/local/include -I/usr/local/include/c++/v1 -Wall -pedantic ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
-# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native -O3 -mllvm -polly -mllvm -polly-parallel -mllvm -polly-vectorizer=stripmine")
-# set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -Wl,-rpath,/usr/local/lib ${CMAKE_EXE_LINKER_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -Wl,-rpath,/usr/local/lib -lgomp ${CMAKE_EXE_LINKER_FLAGS}")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
+# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native -O3 -mllvm -polly -mllvm -polly-parallel -mllvm -polly-vectorizer=stripmine")
+set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -Wl,-rpath,/usr/local/lib ${CMAKE_EXE_LINKER_FLAGS}")
+# set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -Wl,-rpath,/usr/local/lib -lgomp ${CMAKE_EXE_LINKER_FLAGS}")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")

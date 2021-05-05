@@ -10,5 +10,5 @@ cd ..
 rm -rf xcode
 mkdir xcode
 cd xcode
-cmake -DCMAKE_TOOLCHAIN_FILE=/Users/martin/Code/vcpkg/scripts/buildsystems/vcpkg.cmake -G Xcode ..
+cmake -G Xcode ..
 cd ..

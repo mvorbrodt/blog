@@ -60,7 +60,7 @@ cd ..
 rm -rf jenkins
 mkdir jenkins
 cd jenkins
-cmake -DCMAKE_TOOLCHAIN_FILE=/Users/martin/Code/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+cmake ..
 #
 # ------------------------------
 

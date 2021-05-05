@@ -4,6 +4,7 @@
 *.vcxproj
 *.xcodeproj/
 .DS_Store
+.idea/
 .vs/
 .vscode/
 CMakeCache.txt
@@ -15,6 +16,8 @@ bin/
 blog.build/
 blog.code-workspace
 build/
+cmake-build-debug/
+cmake-build-release/
 cmake_install.cmake
 llvm/
 msvc/
@@ -28,9 +31,6 @@ src/Makefile
 src/ThriftService.cpp
 src/ThriftService.h
 src/ThriftService_server.skeleton.cpp
-src/thrift_service_constants.cpp
-src/thrift_service_constants.h
-src/thrift_service_types.cpp
 src/blog.build/
 src/cmake_install.cmake
 src/grpc_service.grpc.pb.cc
@@ -39,6 +39,9 @@ src/grpc_service.pb.cc
 src/grpc_service.pb.h
 src/protobuf.pb.cc
 src/protobuf.pb.h
+src/thrift_service_constants.cpp
+src/thrift_service_constants.h
+src/thrift_service_types.cpp
 src/thrift_service_types.h
 vs/
 x64/

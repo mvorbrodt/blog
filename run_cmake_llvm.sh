@@ -1,16 +1,5 @@
 #!/bin/sh
 
-# Old paths using brew's llvm
-# export PATH="/usr/local/opt/llvm/bin:$PATH"
-# export CC=/usr/local/opt/llvm/bin/clang
-# export CXX=/usr/local/opt/llvm/bin/clang++
-# export LD=/usr/local/opt/llvm/bin/ld.lld
-# export AR=/usr/local/opt/llvm/bin/llvm-ar
-# export RANLIB=/usr/local/opt/llvm/bin/llvm-ranlib
-# export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
-# export CPPFLAGS="-I/usr/local/opt/llvm/include -I/usr/local/opt/llvm/include/c++/v1/"
-# export CXXFLAGS="$CPPFLAGS"
-
 export PATH="/usr/local/bin:$PATH"
 export CC=/usr/local/bin/clang
 export CXX=/usr/local/bin/clang++
@@ -37,5 +26,5 @@ cd ..
 rm -rf llvm
 mkdir llvm
 cd llvm
-cmake -DCMAKE_TOOLCHAIN_FILE=/Users/martin/Code/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+cmake ..
 cd ..
