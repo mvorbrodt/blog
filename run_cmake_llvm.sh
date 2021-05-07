@@ -7,7 +7,7 @@ export LD=/usr/local/bin/ld.lld
 export AR=/usr/local/bin/llvm-ar
 export RANLIB=/usr/local/bin/llvm-ranlib
 export LDFLAGS="-L/usr/local/lib -Wl,-rpath,/usr/local/lib"
-export CPPFLAGS="-I/usr/local/include -I/usr/local/include/c++/v1/"
+export CPPFLAGS="-I/usr/local/include/c++/v1 -I/usr/local/include"
 export CXXFLAGS="$CPPFLAGS"
 
 alias cc=$CC

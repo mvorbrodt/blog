@@ -1,33 +1,39 @@
 #define CATCH_CONFIG_MAIN
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
-#include <vector>
+
+#include <pstl/algorithm>
+#include <pstl/execution>
 #include <random>
-#include <algorithm>
-#include <pstl/experimental/algorithm>
+#include <vector>
+#include <cstdint>
 
-using namespace std;
-using namespace pstl;
-
-const unsigned long long COUNT = 100'000'000;
+auto N = 100'000'000ull;
 
 TEST_CASE("STL vs PSTL", "[benchmark]")
 {
-	auto seed = random_device{}();
+	using namespace std;
+	using namespace std::execution;
 
-	vector<int> data(COUNT);
+	using vec_of_64_bit_ints_t = vector<uint64_t>;
+
+	auto seed = random_device{}();
 
 	BENCHMARK("STL")
 	{
-		generate(begin(data), end(data), mt19937{ seed });
+		auto gen = mt19937_64{ seed };
+		auto data = vec_of_64_bit_ints_t(N);
+		generate(begin(data), end(data), gen);
 		sort(begin(data), end(data));
 		is_sorted(begin(data), end(data));
 	};
 
 	BENCHMARK("PSTL")
 	{
-		generate(execution::par_unseq, begin(data), end(data), mt19937{ seed });
-		sort(execution::par_unseq, begin(data), end(data));
-		is_sorted(execution::par_unseq, begin(data), end(data));
+		auto gen = mt19937_64{ seed };
+		auto data = vec_of_64_bit_ints_t(N);
+		generate(par_unseq, begin(data), end(data), gen);
+		sort(par_unseq, begin(data), end(data));
+		is_sorted(par_unseq, begin(data), end(data));
 	};
 }

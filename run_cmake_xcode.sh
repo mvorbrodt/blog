@@ -10,5 +10,5 @@ cd ..
 rm -rf xcode
 mkdir xcode
 cd xcode
-cmake -G Xcode ..
+cmake -G Xcode -T buildsystem=1 ..
 cd ..

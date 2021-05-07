@@ -31,9 +31,9 @@ add_executable(constructors constructors.cpp)
 add_executable(cpu_timer cpu_timer.cpp)
 target_link_libraries(cpu_timer ${Boost_TIMER_LIBRARY})
 
-# add_executable(crypto crypto.cpp)
-# target_include_directories(crypto PUBLIC "${BOTAN_INCLUDE_DIRS}")
-# target_link_libraries(crypto ${CRYPTOPP_LIBRARIES} ${WOLFSSL_LIBRARY} ${BOTAN_LIBRARIES})
+add_executable(crypto crypto.cpp)
+target_include_directories(crypto PUBLIC "${BOTAN_INCLUDE_DIRS}")
+target_link_libraries(crypto ${CRYPTOPP_LIBRARIES} ${WOLFSSL_LIBRARY} ${BOTAN_LIBRARIES})
 
 add_executable(database database.cpp)
 set_source_files_properties(database.cpp PROPERTIES COMPILE_FLAGS --std=c++11)
@@ -118,11 +118,11 @@ add_custom_command(
 	COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} -I=${CMAKE_CURRENT_SOURCE_DIR}
 	--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/protobuf.proto)
-add_executable(protobuf protobuf.cpp protobuf.pb.h protobuf.pb.cc protobuf.proto)
-target_link_libraries(protobuf ${Protobuf_LIBRARIES})
+add_executable(proto_buf protobuf.cpp protobuf.pb.h protobuf.pb.cc protobuf.proto)
+target_link_libraries(proto_buf ${Protobuf_LIBRARIES})
 
-# add_executable(pstl pstl_test.cpp)
-# target_link_libraries(pstl ${TBB_LIBRARIES})
+add_executable(pstl pstl_test.cpp)
+target_link_libraries(pstl PRIVATE TBB::tbb pstl::ParallelSTL)
 
 add_executable(queue queue.hpp queue.cpp)
 add_executable(random random_test.cpp)
@@ -159,8 +159,8 @@ add_executable(xml xml.cpp)
 target_link_libraries(xml ${Boost_SERIALIZATION_LIBRARY})
 
 add_executable(xmlrpc_c xmlrpc_c.cpp)
-set_source_files_properties(xmlrpc_c.cpp PROPERTIES COMPILE_FLAGS --std=c++98)
+set_source_files_properties(xmlrpc_c.cpp PROPERTIES COMPILE_FLAGS "--std=c++98 -Wno-c++11-long-long")
 target_link_libraries(xmlrpc_c -lxmlrpc++ -lxmlrpc_client++ -lxmlrpc_util++)
 add_executable(xmlrpc_s xmlrpc_s.cpp)
-set_source_files_properties(xmlrpc_s.cpp PROPERTIES COMPILE_FLAGS --std=c++98)
+set_source_files_properties(xmlrpc_s.cpp PROPERTIES COMPILE_FLAGS "--std=c++98 -Wno-c++11-long-long")
 target_link_libraries(xmlrpc_s -lxmlrpc++ -lxmlrpc_server++ -lxmlrpc_server_abyss++ -lxmlrpc_util++)
