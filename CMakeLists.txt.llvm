@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19.2)
 
-set(CMAKE_TOOLCHAIN_FILE "/Users/martin/Code/vcpkg/scripts/buildsystems/vcpkg.cmake")
+set(CMAKE_TOOLCHAIN_FILE "/usr/local/Cellar/vcpkg/2020.11-1/libexec/scripts/buildsystems/vcpkg.cmake")
 
 project(blog VERSION 1.0
 	DESCRIPTION "Vorbrodt's C++ Blog - Code Samples"
