@@ -26,5 +26,5 @@ cd ..
 rm -rf llvm
 mkdir llvm
 cd llvm
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 cd ..
