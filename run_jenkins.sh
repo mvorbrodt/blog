@@ -16,7 +16,7 @@ brew cleanup
 
 # update vcpkg packages used by the code-base...
 #
-git -C /Users/martin/Code/vcpkg pull
+vcpkg update
 vcpkg upgrade
 vcpkg remove --outdated
 #
