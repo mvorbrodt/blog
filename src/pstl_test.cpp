@@ -8,16 +8,16 @@
 #include <vector>
 #include <cstdint>
 
-auto N = 100'000'000ull;
-
 TEST_CASE("STL vs PSTL", "[benchmark]")
 {
+#ifdef _LIBCPP_HAS_PARALLEL_ALGORITHMS
 	using namespace std;
 	using namespace std::execution;
 
-	using vec_of_64_bit_ints_t = vector<uint64_t>;
-
+	auto N = 1'000'000ull;
 	auto seed = random_device{}();
+
+	using vec_of_64_bit_ints_t = vector<uint64_t>;
 
 	BENCHMARK("STL")
 	{
@@ -36,4 +36,7 @@ TEST_CASE("STL vs PSTL", "[benchmark]")
 		sort(par_unseq, begin(data), end(data));
 		is_sorted(par_unseq, begin(data), end(data));
 	};
+#else
+	CATCH_ERROR("Parallel STL missing!");
+#endif
 }

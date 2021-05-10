@@ -163,7 +163,9 @@ public:
 		return *this;
 	}
 
-	#ifndef PROPERTY_INC_DEC_OPERATOR
+	#ifdef PROPERTY_INC_DEC_OPERATOR
+	#error "PROPERTY_INC_DEC_OPERATOR should not be defined!"
+	#endif
 	#define PROPERTY_INC_DEC_OPERATOR(op) \
 	property& operator op () \
 	{ \
@@ -178,12 +180,13 @@ public:
 		operator op (); \
 		return temp; \
 	}
-	PROPERTY_INC_DEC_OPERATOR(++);
-	PROPERTY_INC_DEC_OPERATOR(--);
+	PROPERTY_INC_DEC_OPERATOR(++)
+	PROPERTY_INC_DEC_OPERATOR(--)
 	#undef PROPERTY_INC_DEC_OPERATOR
-	#endif
 
-	#ifndef PROPERTY_OPERATOR
+	#ifdef PROPERTY_OPERATOR
+	#error "PROPERTY_OPERATOR should not be defined!"
+	#endif
 	#define PROPERTY_OPERATOR(op) \
 	property& operator op (const T& v) \
 	{ \
@@ -215,20 +218,21 @@ public:
 		set(std::move(temp)); \
 		return *this; \
 	}
-	PROPERTY_OPERATOR(+=);
-	PROPERTY_OPERATOR(-=);
-	PROPERTY_OPERATOR(*=);
-	PROPERTY_OPERATOR(/=);
-	PROPERTY_OPERATOR(&=);
-	PROPERTY_OPERATOR(|=);
-	PROPERTY_OPERATOR(^=);
-	PROPERTY_OPERATOR(%=);
-	PROPERTY_OPERATOR(>>=);
-	PROPERTY_OPERATOR(<<=);
+	PROPERTY_OPERATOR(+=)
+	PROPERTY_OPERATOR(-=)
+	PROPERTY_OPERATOR(*=)
+	PROPERTY_OPERATOR(/=)
+	PROPERTY_OPERATOR(&=)
+	PROPERTY_OPERATOR(|=)
+	PROPERTY_OPERATOR(^=)
+	PROPERTY_OPERATOR(%=)
+	PROPERTY_OPERATOR(>>=)
+	PROPERTY_OPERATOR(<<=)
 	#undef PROPERTY_OPERATOR
-	#endif
 
-	#ifndef PROPERTY_FRIEND_OPERATOR
+	#ifdef PROPERTY_FRIEND_OPERATOR
+	#error "PROPERTY_FRIEND_OPERATOR should not be defined!"
+	#endif
 	#define PROPERTY_FRIEND_OPERATOR(op) \
 	template<typename T2, template<typename> class P2, typename V> \
 	friend auto operator op (const property<T2, P2>& lhs, const V& rhs) \
@@ -239,18 +243,17 @@ public:
 	template<typename T2, typename T3, template<typename> class P2> \
 	friend auto operator op (const property<T2, P2>& lhs, const property<T3, P2>& rhs) \
 		-> property<decltype(std::declval<T2>() op std::declval<T3>()), P2>;
-	PROPERTY_FRIEND_OPERATOR(+);
-	PROPERTY_FRIEND_OPERATOR(-);
-	PROPERTY_FRIEND_OPERATOR(*);
-	PROPERTY_FRIEND_OPERATOR(/);
-	PROPERTY_FRIEND_OPERATOR(&);
-	PROPERTY_FRIEND_OPERATOR(|);
-	PROPERTY_FRIEND_OPERATOR(^);
-	PROPERTY_FRIEND_OPERATOR(%);
-	PROPERTY_FRIEND_OPERATOR(>>);
-	PROPERTY_FRIEND_OPERATOR(<<);
+	PROPERTY_FRIEND_OPERATOR(+)
+	PROPERTY_FRIEND_OPERATOR(-)
+	PROPERTY_FRIEND_OPERATOR(*)
+	PROPERTY_FRIEND_OPERATOR(/)
+	PROPERTY_FRIEND_OPERATOR(&)
+	PROPERTY_FRIEND_OPERATOR(|)
+	PROPERTY_FRIEND_OPERATOR(^)
+	PROPERTY_FRIEND_OPERATOR(%)
+	PROPERTY_FRIEND_OPERATOR(>>)
+	PROPERTY_FRIEND_OPERATOR(<<)
 	#undef PROPERTY_FRIEND_OPERATOR
-	#endif
 
 	decltype(auto) get() { return(PT::get_value(m_value)); }
 	decltype(auto) get() const { return(PT::get_value(m_value)); }
@@ -280,7 +283,9 @@ private:
 
 
 // PROPERTY FRIEND OPERATORS
-#ifndef PROPERTY_FRIEND_OPERATOR
+#ifdef PROPERTY_FRIEND_OPERATOR
+#error "PROPERTY_FRIEND_OPERATOR should not be defined!"
+#endif
 #define PROPERTY_FRIEND_OPERATOR(op) \
 template<typename T2, template<typename> class P2, typename V> \
 auto operator op (const property<T2, P2>& lhs, const V& rhs) \
@@ -300,18 +305,17 @@ auto operator op (const property<T2, P2>& lhs, const property<T3, P2>& rhs) \
 { \
 	return property(lhs.get() op rhs.get()); \
 }
-PROPERTY_FRIEND_OPERATOR(+);
-PROPERTY_FRIEND_OPERATOR(-);
-PROPERTY_FRIEND_OPERATOR(*);
-PROPERTY_FRIEND_OPERATOR(/);
-PROPERTY_FRIEND_OPERATOR(&);
-PROPERTY_FRIEND_OPERATOR(|);
-PROPERTY_FRIEND_OPERATOR(^);
-PROPERTY_FRIEND_OPERATOR(%);
-PROPERTY_FRIEND_OPERATOR(>>);
-PROPERTY_FRIEND_OPERATOR(<<);
+PROPERTY_FRIEND_OPERATOR(+)
+PROPERTY_FRIEND_OPERATOR(-)
+PROPERTY_FRIEND_OPERATOR(*)
+PROPERTY_FRIEND_OPERATOR(/)
+PROPERTY_FRIEND_OPERATOR(&)
+PROPERTY_FRIEND_OPERATOR(|)
+PROPERTY_FRIEND_OPERATOR(^)
+PROPERTY_FRIEND_OPERATOR(%)
+PROPERTY_FRIEND_OPERATOR(>>)
+PROPERTY_FRIEND_OPERATOR(<<)
 #undef PROPERTY_FRIEND_OPERATOR
-#endif
 
 // PROPERTY I/O OPERATORS
 template<typename T, template<typename> class P>
@@ -353,7 +357,7 @@ public:
 		set(v);
 		return *this;
 	}
-	
+
 	property& operator = (T*&& v)
 	{
 		set(std::move(v));
@@ -390,7 +394,9 @@ public:
 		return *this;
 	}
 
-	#ifndef POINTER_INC_DEC_OPERATOR
+	#ifdef POINTER_INC_DEC_OPERATOR
+	#error "POINTER_INC_DEC_OPERATOR should not be defined!"
+	#endif
 	#define POINTER_INC_DEC_OPERATOR(op) \
 	property& operator op () \
 	{ \
@@ -405,12 +411,13 @@ public:
 		operator op (); \
 		return temp; \
 	}
-	POINTER_INC_DEC_OPERATOR(++);
-	POINTER_INC_DEC_OPERATOR(--);
+	POINTER_INC_DEC_OPERATOR(++)
+	POINTER_INC_DEC_OPERATOR(--)
 	#undef POINTER_INC_DEC_OPERATOR
-	#endif
 
-	#ifndef POINTER_ARITHMETIC_OPERATOR
+	#ifdef POINTER_ARITHMETIC_OPERATOR
+	#error "POINTER_ARITHMETIC_OPERATOR should not be defined!"
+	#endif
 	#define POINTER_ARITHMETIC_OPERATOR(op) \
 	property& operator op (std::ptrdiff_t v) \
 	{ \
@@ -419,10 +426,9 @@ public:
 		set(temp); \
 		return *this; \
 	}
-	POINTER_ARITHMETIC_OPERATOR(+=);
-	POINTER_ARITHMETIC_OPERATOR(-=);
+	POINTER_ARITHMETIC_OPERATOR(+=)
+	POINTER_ARITHMETIC_OPERATOR(-=)
 	#undef POINTER_ARITHMETIC_OPERATOR
-	#endif
 
 	T* & get() { return PT::get_value(m_value); }
 	T* const & get() const { return PT::get_value(m_value); }
@@ -520,7 +526,9 @@ public:
 		return *this;
 	}
 
-	#ifndef POINTER_INC_DEC_OPERATOR
+	#ifdef POINTER_INC_DEC_OPERATOR
+	#error "POINTER_INC_DEC_OPERATOR should not be defined!"
+	#endif
 	#define POINTER_INC_DEC_OPERATOR(op) \
 	property& operator op () \
 	{ \
@@ -535,12 +543,13 @@ public:
 		operator op (); \
 		return temp; \
 	}
-	POINTER_INC_DEC_OPERATOR(++);
-	POINTER_INC_DEC_OPERATOR(--);
+	POINTER_INC_DEC_OPERATOR(++)
+	POINTER_INC_DEC_OPERATOR(--)
 	#undef POINTER_INC_DEC_OPERATOR
-	#endif
 
-	#ifndef POINTER_ARITHMETIC_OPERATOR
+	#ifdef POINTER_ARITHMETIC_OPERATOR
+	#error "POINTER_ARITHMETIC_OPERATOR should not be defined!"
+	#endif
 	#define POINTER_ARITHMETIC_OPERATOR(op) \
 	property& operator op (std::ptrdiff_t v) \
 	{ \
@@ -549,10 +558,9 @@ public:
 		set(temp); \
 		return *this; \
 	}
-	POINTER_ARITHMETIC_OPERATOR(+=);
-	POINTER_ARITHMETIC_OPERATOR(-=);
+	POINTER_ARITHMETIC_OPERATOR(+=)
+	POINTER_ARITHMETIC_OPERATOR(-=)
 	#undef POINTER_ARITHMETIC_OPERATOR
-	#endif
 
 	T* & get() { return PT::get_value(m_value); }
 	T* const & get() const { return PT::get_value(m_value); }

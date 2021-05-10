@@ -8,8 +8,6 @@
 #include "T.hpp"
 #include "property.hpp"
 
-#pragma warning(disable : 4244)
-
 using namespace std;
 
 int main()
