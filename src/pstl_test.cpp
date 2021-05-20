@@ -10,7 +10,7 @@
 
 TEST_CASE("STL vs PSTL", "[benchmark]")
 {
-#ifdef _LIBCPP_HAS_PARALLEL_ALGORITHMS
+#if defined(_LIBCPP_HAS_PARALLEL_ALGORITHMS) or (defined(_WIN64) and defined(_HAS_CXX17))
 	using namespace std;
 	using namespace std::execution;
 
@@ -25,7 +25,7 @@ TEST_CASE("STL vs PSTL", "[benchmark]")
 		auto data = vec_of_64_bit_ints_t(N);
 		generate(begin(data), end(data), gen);
 		sort(begin(data), end(data));
-		is_sorted(begin(data), end(data));
+		[[maybe_unused]] auto is = is_sorted(begin(data), end(data));
 	};
 
 	BENCHMARK("PSTL")
@@ -34,7 +34,7 @@ TEST_CASE("STL vs PSTL", "[benchmark]")
 		auto data = vec_of_64_bit_ints_t(N);
 		generate(par_unseq, begin(data), end(data), gen);
 		sort(par_unseq, begin(data), end(data));
-		is_sorted(par_unseq, begin(data), end(data));
+		[[maybe_unused]] auto is = is_sorted(par_unseq, begin(data), end(data));
 	};
 #else
 	CATCH_ERROR("Parallel STL missing!");
