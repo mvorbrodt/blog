@@ -9,6 +9,6 @@ cd ..
 
 mkdir xcode 2> /dev/null
 cd xcode
-rm CMakeCache.txt
+rm CMakeCache.txt 2> /dev/null
 cmake -G Xcode -T buildsystem=1 ..
 cd ..
