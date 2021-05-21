@@ -1,0 +1,39 @@
+This code REQUIRES AT LEAST C++17
+
+Include the following 2 lines in every h/cpp file in your project:
+
+#define ENABLE_NEW_DELETE_TRACE_DUMP
+#include "newtrace.hpp"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! PUT CODE LINES RIGHT AFTER YOUR LAST #include STATEMENT !!!
+!!! AND BEFORE ANY CODE THAT CALLS NEW OR DELETE OPERATORS  !!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Defining ENABLE_NEW_DELETE_TRACE_DUMP will produce leak/mismatch
+printout when program exits. Alternatively you can include only
+"newtrace.hpp" then issue one of the following calls:
+
+1) ndt::dump_leak(); // to print leaks detected so far
+2) ndt::dump_mismatch(); // to print mismatches detected so far
+3) ndt::dump_all(); // #1 followed by #2
+
+This tracing works with new/new[] as well as delete/delete[] calls
+and properly detects mismatch cases: memory allocated with new[]
+is released with delete, and vice versa. Both cases are leaks at
+best and crashed or heap corruption at worse!
+
+This tracing works correctly in the presence of exceptions coming
+from constructors after memory has be successfully allocated;
+such cases are not memory leaks so don't look for traces of it...
+
+This tracing is NOT COMPATIBLE with:
+1) Placement new operator: new ( ptr ) T;
+2) nothrow new operator: new ( std::nothrow ) T;
+Those will produce a compile time error; to use placement/nothrow
+new you must first #undef new. 
+
+
+
+Thou Shalt Not Leak.
+-V

@@ -7,8 +7,8 @@ cd src
 ln -sf CMakeLists.txt.llvm CMakeLists.txt
 cd ..
 
-rm -rf xcode
-mkdir xcode
+mkdir xcode 2> /dev/null
 cd xcode
+rm CMakeCache.txt
 cmake -G Xcode -T buildsystem=1 ..
 cd ..

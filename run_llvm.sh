@@ -22,8 +22,8 @@ cd src
 ln -sf CMakeLists.txt.llvm CMakeLists.txt
 cd ..
 
-rm -rf llvm
-mkdir llvm
+mkdir llvm 2> /dev/null
 cd llvm
+rm CMakeCache.txt
 cmake -DCMAKE_BUILD_TYPE=Release ..
 cd ..
