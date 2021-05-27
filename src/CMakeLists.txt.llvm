@@ -86,6 +86,13 @@ add_executable(interview_5 interview_5.cpp)
 add_executable(interview_6 interview_6.cpp)
 add_executable(inverting inverting.cpp)
 add_executable(istring istring.hpp istring.cpp)
+
+add_executable(lesson_thread_pool_how_to lesson_thread_pool_how_to.cpp)
+add_executable(lesson_pool_allocator_benchmark lesson_pool_allocator_benchmark.cpp)
+add_executable(lesson_pool_allocator lesson_pool_allocator.cpp)
+add_executable(lesson_spinlock_event_semaphore_how_to lesson_spinlock_event_semaphore_how_to.cpp)
+add_executable(lesson_queue_how_to lesson_queue_how_to.cpp)
+
 add_executable(lrpc_c lsf.hpp socket.hpp event.hpp lrpc_proto.hpp lrpc_c.cpp)
 add_executable(lrpc_s lsf.hpp socket.hpp lrpc_proto.hpp lrpc_s.cpp)
 add_executable(lsf lsf.hpp lsf.cpp)
