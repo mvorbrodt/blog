@@ -4,29 +4,24 @@
 #include <vector>
 #include "memory_pool.hpp"
 
-struct T
-{
-	int m_int = ++k_seq;
-	inline static int k_seq = 0;
-};
-
 int main()
 {
 	using namespace std;
 
-	auto I = 3;
-	auto BLOCKS = 3;
-	auto CHUNKS_PER_BLOCK = 2;
-	auto CHUNKS_TO_MALLOC = CHUNKS_PER_BLOCK * BLOCKS;
-	auto BLOCK_RESERVE = 1;
+	constexpr auto I = 3;
+	constexpr auto BLOCKS = 3;
+	constexpr auto CHUNK_SIZE = 10;
+	constexpr auto CHUNKS_PER_BLOCK = 10;
+	constexpr auto CHUNKS_TO_MALLOC = CHUNKS_PER_BLOCK * BLOCKS;
+	constexpr auto BLOCK_RESERVE = 1;
 
-	using chunks_t = std::vector<T*>;
+	using chunks_t = std::vector<void*>;
 
 	auto chunks = chunks_t{};
 	auto gen = std::mt19937{ (std::random_device{})() };
 
-	auto pool = memory_pool<T>(CHUNKS_PER_BLOCK);
-	pool.reserve(BLOCK_RESERVE);
+	auto pool = memory_pool<CHUNK_SIZE, CHUNKS_PER_BLOCK>{};
+	pool.reserve_blocks(BLOCK_RESERVE);
 
 	cout << pool << endl << endl;
 
