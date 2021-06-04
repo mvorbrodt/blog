@@ -87,6 +87,7 @@ add_executable(interview_6 interview_6.cpp)
 add_executable(inverting inverting.cpp)
 add_executable(istring istring.hpp istring.cpp)
 
+add_executable(lesson_memory_pool_how_to lesson_memory_pool_how_to.cpp)
 add_executable(lesson_thread_pool_how_to lesson_thread_pool_how_to.cpp)
 add_executable(lesson_pool_allocator_benchmark lesson_pool_allocator_benchmark.cpp)
 add_executable(lesson_pool_allocator lesson_pool_allocator.cpp)
