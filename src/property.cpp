@@ -20,7 +20,7 @@ int main()
 	const property<double> p5(p1), p6{p2};
 	property<int> p7{}, p8{123}, p9(p1), p10{p2};
 
-	p1.add_update_event([](void* p) { cout << "~~~ p1 updated with value: " << property_cast_to_ref<int>(p) << endl; });
+	p1.add_update_event([](property<int>* p) { cout << "~~~ p1 updated with value: " << (*p) << endl; });
 
 	p1 = 1;
 	p1 = 0.f;
@@ -30,8 +30,6 @@ int main()
 	p1 = p2 + p3;
 	++p1;
 	p1 *= p4;
-
-
 
 	// W/ POINTERS
 	auto pp1 = make_property<T*>(new T);
@@ -47,8 +45,8 @@ int main()
 	*pp1++ = T{"C++11"};
 	*pp2++ = Q{"C++14"};
 
-	pp1.add_update_event([](void* p) { cout << "~~~ pp1 updated with value: " << property_cast<T*>(p) << " containing: " << property_cast_to_val<T*>(p) << endl; });
-	pp2.add_update_event([](void* p) { cout << "~~~ pp2 updated with value: " << property_cast<Q[]>(p) << " containing: " << property_cast_to_val<Q[]>(p) << endl; });
+	pp1.add_update_event([](property<T*>* p) { cout << "~~~ pp1 updated with value: " << (*p) << " containing: " << (**p) << endl; });
+	pp2.add_update_event([](property<Q*>* p) { cout << "~~~ pp2 updated with value: " << (*p) << " containing: " << (*p[0]) << endl; });
 
 	--pp1, pp2 -= 1;
 

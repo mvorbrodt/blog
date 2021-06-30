@@ -11,13 +11,20 @@
 
 
 
+// FORWARD DECLARATIONS
+template<typename T>
+struct default_property_policy;
+
+template<typename T, template<typename> class P = default_property_policy>
+class property;
+
 // AGGREGATE PROPERTY POLICY: CONTROLS ACCESS + EVENTS
 // OVERLOADED FOR T, T*, T[], NO ACCESS RESTRICTIONS, FIRES EVENTS
 template<typename T>
 struct default_property_policy
 {
-	using update_event_t = std::function<void(void*)>;
-	void add_update_event(const update_event_t& proc) { m_update_events.push_back(proc); }
+	using update_event_t = std::function<void(property<T>*)>;
+	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
 
 protected:
 	template<typename U> void validate(const U& v) const {}
@@ -28,7 +35,7 @@ protected:
 	template<typename U> void set_value(T& v, const U& nv) { validate(nv); v = nv; fire_update_event(); }
 	template<typename U> void set_value(T& v, U&& nv) { validate(nv); v = std::forward<U>(nv); fire_update_event(); }
 
-	void fire_update_event() { for(auto& event : m_update_events) event(this); }
+	void fire_update_event() { for(auto& event : m_update_events) event((property<T>*)this); }
 
 private:
 	using update_event_list_t = std::vector<update_event_t>;
@@ -38,8 +45,8 @@ private:
 template<typename TP>
 struct default_property_policy<TP*>
 {
-	using update_event_t = std::function<void(void*)>;
-	void add_update_event(const update_event_t& proc) { m_update_events.push_back(proc); }
+	using update_event_t = std::function<void(property<TP*>*)>;
+	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
 
 protected:
 	using T = TP*;
@@ -52,7 +59,7 @@ protected:
 	void set_value(T& v, const T& nv) { validate(nv); v = nv; fire_update_event(); }
 	void set_value(T& v, T&& nv) { validate(nv); v = nv; nv = nullptr; fire_update_event(); }
 
-	void fire_update_event() { for(auto& event : m_update_events) event(this); }
+	void fire_update_event() { for(auto& event : m_update_events) event((property<TP*>*)this); }
 
 private:
 	using update_event_list_t = std::vector<update_event_t>;
@@ -65,9 +72,6 @@ struct default_property_policy<TA[]> : default_property_policy<TA*> {};
 
 
 // PROPERTY TYPE TRAITS
-template<typename T, template<typename> class P = default_property_policy>
-class property;
-
 template<typename>
 struct is_property : std::false_type {};
 
@@ -621,25 +625,4 @@ inline auto make_property(A&&... a)
 {
 	using U = std::decay_t<T>;
 	return property<T, P>(U(std::forward<A>(a)...));
-}
-
-
-
-// PROPERTY CAST HELPERS
-template<typename T>
-inline property<T>* property_cast(void* p)
-{
-	return reinterpret_cast<property<T>*>(p);
-}
-
-template<typename T>
-inline decltype(auto) property_cast_to_ref(void* p)
-{
-	return(*property_cast<T>(p));
-}
-
-template<typename T>
-inline decltype(auto) property_cast_to_val(void* p)
-{
-	return(*property_cast_to_ref<T>(p));
 }
