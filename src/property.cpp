@@ -16,7 +16,7 @@ int main()
 	auto p1 = make_property<int>(1);
 	auto p2 = make_property<int>(2);
 
-	property<const float> p3(p1), p4{p2};
+	property<float> p3(p1), p4{p2};
 	const property<double> p5(p1), p6{p2};
 	property<int> p7{}, p8{123}, p9(p1), p10{p2};
 
@@ -88,7 +88,7 @@ int main()
 	auto c4 = make_property<T>(4, 5, 6);
 	auto c5 = make_property<Q>(7, 8, 9);
 
-	property<const T> c6{}, c7{"C++Rocks!"}, c8{1, 2, 3}; // const stripped away here
+	property<T> c6{}, c7{"C++Rocks!"}, c8{1, 2, 3}; // const stripped away here
 	const property<T> c9{c6}, c10{std::move(c7)};
 
 	c5.add_update_event([](void* p) { cout << "~~~ c5 updated with value: " << p << endl; });
