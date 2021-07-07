@@ -7,6 +7,8 @@
 #include <map>
 #include <string>
 #include <algorithm>
+#include <thread>
+#include <mutex>
 #include "T.hpp"
 #include "property.hpp"
 
@@ -16,10 +18,13 @@ struct on_disk_property_policy;
 template<>
 struct on_disk_property_policy<std::string>
 {
-	on_disk_property_policy(const char* path, const std::string& v) : m_path(path) { validate(v); store(v); }
+	on_disk_property_policy(const char* path, const std::string& v) : m_path(path), m_value(v) { validate(v); store(v); }
 
 	using update_event_t = std::function<void(property<T>*)>;
 	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
+
+	bool is_dirty() const { return m_is_dirty; }
+	void clear_dirty() { m_is_dirty = false; }
 
 protected:
 	void validate(const std::string& v) const {}
@@ -29,8 +34,10 @@ protected:
 	void set_value(const std::string& nv) { validate(nv); store(nv); fire_update_event(); }
 
 private:
-	void store(const std::string& v) const
+	void store(const std::string& v)
 	{
+		if(v == m_value) return;
+
 		std::ofstream ofs;
 
 		ofs.exceptions(std::ios::failbit | std::ios::badbit);
@@ -40,6 +47,9 @@ private:
 		ofs.write((const char*)&length, sizeof(length));
 		ofs.write(v.c_str(), length);
 		ofs.close();
+
+		m_value = v;
+		m_is_dirty = true;
 	}
 
 	std::string load() const
@@ -57,10 +67,14 @@ private:
 		ifs.read(buffer.data(), length);
 		ifs.close();
 
-		return std::string(std::begin(buffer), std::end(buffer));
+		m_value = std::string(std::begin(buffer), std::end(buffer));
+
+		return m_value;
 	}
 
 	std::string m_path;
+	bool m_is_dirty = true;
+	mutable std::string m_value;
 
 	void fire_update_event() { for(auto& event : m_update_events) event((property<T>*)this); }
 
@@ -73,21 +87,38 @@ int main()
 	using namespace std;
 
 	// W/ STORAGE BEING FILE ON DISK
-	property<std::string, on_disk_property_policy> disk_p1("disk_p1.txt", "disk_p1");
-	property<std::string, on_disk_property_policy> disk_p2("disk_p2.txt", "disk_p2");
-	property<std::string, on_disk_property_policy> disk_p3("disk_p3.txt", "disk_p3");
+	property<std::string, on_disk_property_policy> disk_p1("/Users/martin/disk_p1.txt", "1");
 
-	cout << disk_p1 << endl;
+	const property<std::string, on_disk_property_policy> disk_p2("/Users/martin/disk_p2.txt", "2");
 	cout << disk_p2 << endl;
-	cout << disk_p3 << endl;
 
-	disk_p1 = "new value of disk_p1";
-	disk_p2 = "new value of disk_p2";
-	disk_p3 = "new value of disk_p3";
+	disk_p1.clear_dirty();
 
-	cout << disk_p1 << endl;
-	cout << disk_p2 << endl;
-	cout << disk_p3 << endl;
+	thread([&]
+		{
+			disk_p1	= "2";
+		}).join();
+
+	if(disk_p1.is_dirty())
+	{
+		// ops, dirty, do something...
+		cout << "1 dirty with value '" << disk_p1 << "'" << endl;
+		disk_p1.clear_dirty();
+	}
+
+	disk_p1 = "2";
+	if(disk_p1.is_dirty())
+	{
+		cout << "2 dirty with value '" << disk_p1 << "'\n";
+	}
+
+	disk_p1 = "3";
+	if(disk_p1.is_dirty())
+	{
+		cout << "3 dirty with value '" << disk_p1 << "'\n";
+	}
+
+	return 0;
 
 	// W/ PRIMITIVE TYPES
 	auto p1 = make_property<int>(1);
