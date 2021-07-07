@@ -15,7 +15,7 @@
 template<typename T>
 struct default_property_policy;
 
-template<typename T, template<typename> class P = default_property_policy>
+template<typename T, typename P = default_property_policy<T>>
 class property;
 
 // AGGREGATE PROPERTY POLICY: CONTROLS STORAGE + ACCESS + EVENTS
@@ -91,7 +91,7 @@ struct default_property_policy<TA[]> : default_property_policy<TA*> {};
 template<typename>
 struct is_property : std::false_type {};
 
-template<typename T, template<typename> class P>
+template<typename T, typename P>
 struct is_property<property<T, P>> : std::true_type {};
 
 template<typename T>
@@ -100,11 +100,11 @@ inline constexpr bool is_property_v = is_property<std::decay_t<T>>::value;
 
 
 // PROPERTY TEMPLATE
-template<typename T, template<typename> class P>
-class property : public P<T>
+template<typename T, typename P>
+class property : public P
 {
 public:
-	using PT = P<T>;
+	using PT = P;
 
 	property() = default;
 	~property() = default;
@@ -115,8 +115,8 @@ public:
 	property(const property& p) : PT(p.get()) {}
 	property(property&& p) : PT(std::move(p.get())) {}
 
-	template<typename U> property(const property<U, P>& p) : PT(p.get()) {}
-	template<typename U> property(property<U, P>&& p) : PT(std::move(p.get())) {}
+	template<typename U, typename P2> property(const property<U, P2>& p) : PT(p.get()) {}
+	template<typename U, typename P2> property(property<U, P2>&& p) : PT(std::move(p.get())) {}
 
 	template<typename... A, std::enable_if_t<
 		std::is_constructible_v<PT, A...>>* = nullptr>
@@ -184,10 +184,26 @@ public:
 		return *this;
 	}
 
-	#ifdef PROPERTY_INC_DEC_OPERATOR
-	#error "PROPERTY_INC_DEC_OPERATOR should not be defined!"
+	template<typename U, typename V>
+	property& operator = (const property<U, V>& p)
+	{
+		if(this != (decltype(this))&p)
+			set(p.get());
+		return *this;
+	}
+
+	template<typename U, typename V>
+	property& operator = (property<U, V>&& p)
+	{
+		if(this != (decltype(this))&p)
+			set(std::move(p.get()));
+		return *this;
+	}
+
+	#ifdef PROPERTY_OPERATOR
+	#error "PROPERTY_OPERATOR should not be defined!"
 	#endif
-	#define PROPERTY_INC_DEC_OPERATOR(op) \
+	#define PROPERTY_OPERATOR(op) \
 	property& operator op () \
 	{ \
 		auto temp(get()); \
@@ -201,9 +217,9 @@ public:
 		operator op (); \
 		return temp; \
 	}
-	PROPERTY_INC_DEC_OPERATOR(++)
-	PROPERTY_INC_DEC_OPERATOR(--)
-	#undef PROPERTY_INC_DEC_OPERATOR
+	PROPERTY_OPERATOR(++)
+	PROPERTY_OPERATOR(--)
+	#undef PROPERTY_OPERATOR
 
 	#ifdef PROPERTY_OPERATOR
 	#error "PROPERTY_OPERATOR should not be defined!"
@@ -251,31 +267,6 @@ public:
 	PROPERTY_OPERATOR(<<=)
 	#undef PROPERTY_OPERATOR
 
-	#ifdef PROPERTY_FRIEND_OPERATOR
-	#error "PROPERTY_FRIEND_OPERATOR should not be defined!"
-	#endif
-	#define PROPERTY_FRIEND_OPERATOR(op) \
-	template<typename T2, template<typename> class P2, typename V> \
-	friend auto operator op (const property<T2, P2>& lhs, const V& rhs) \
-		-> property<decltype(std::declval<T2>() op std::declval<V>()), P2>; \
-	template<typename V, typename T2, template<typename> class P2> \
-	friend auto operator op (const V& lhs, const property<T2, P2>& rhs) \
-		-> property<decltype(std::declval<V>() op std::declval<T2>()), P2>; \
-	template<typename T2, typename T3, template<typename> class P2> \
-	friend auto operator op (const property<T2, P2>& lhs, const property<T3, P2>& rhs) \
-		-> property<decltype(std::declval<T2>() op std::declval<T3>()), P2>;
-	PROPERTY_FRIEND_OPERATOR(+)
-	PROPERTY_FRIEND_OPERATOR(-)
-	PROPERTY_FRIEND_OPERATOR(*)
-	PROPERTY_FRIEND_OPERATOR(/)
-	PROPERTY_FRIEND_OPERATOR(&)
-	PROPERTY_FRIEND_OPERATOR(|)
-	PROPERTY_FRIEND_OPERATOR(^)
-	PROPERTY_FRIEND_OPERATOR(%)
-	PROPERTY_FRIEND_OPERATOR(>>)
-	PROPERTY_FRIEND_OPERATOR(<<)
-	#undef PROPERTY_FRIEND_OPERATOR
-
 	decltype(auto) get() { return(PT::get_value()); }
 	decltype(auto) get() const { return(PT::get_value()); }
 
@@ -298,50 +289,50 @@ public:
 
 
 
-// PROPERTY FRIEND OPERATORS
-#ifdef PROPERTY_FRIEND_OPERATOR
-#error "PROPERTY_FRIEND_OPERATOR should not be defined!"
+// PROPERTY OPERATORS
+#ifdef PROPERTY_OPERATOR
+#error "PROPERTY_OPERATOR should not be defined!"
 #endif
-#define PROPERTY_FRIEND_OPERATOR(op) \
-template<typename T2, template<typename> class P2, typename V> \
+#define PROPERTY_OPERATOR(op) \
+template<typename T2, typename P2, typename V, std::enable_if_t<!is_property_v<V>, int> = 0> \
 auto operator op (const property<T2, P2>& lhs, const V& rhs) \
 	-> property<decltype(std::declval<T2>() op std::declval<V>()), P2> \
 { \
 	return property(lhs.get() op rhs); \
 } \
-template<typename V, typename T2, template<typename> class P2> \
+template<typename V, typename T2, typename P2, std::enable_if_t<!is_property_v<V>, int> = 0> \
 auto operator op (const V& lhs, const property<T2, P2>& rhs) \
 	-> property<decltype(std::declval<V>() op std::declval<T2>()), P2> \
 { \
 	return property(lhs op rhs.get()); \
 } \
-template<typename T2, typename T3, template<typename> class P2> \
+template<typename T2, typename T3, typename P2> \
 auto operator op (const property<T2, P2>& lhs, const property<T3, P2>& rhs) \
 	-> property<decltype(std::declval<T2>() op std::declval<T3>()), P2> \
 { \
 	return property(lhs.get() op rhs.get()); \
 }
-PROPERTY_FRIEND_OPERATOR(+)
-PROPERTY_FRIEND_OPERATOR(-)
-PROPERTY_FRIEND_OPERATOR(*)
-PROPERTY_FRIEND_OPERATOR(/)
-PROPERTY_FRIEND_OPERATOR(&)
-PROPERTY_FRIEND_OPERATOR(|)
-PROPERTY_FRIEND_OPERATOR(^)
-PROPERTY_FRIEND_OPERATOR(%)
-PROPERTY_FRIEND_OPERATOR(>>)
-PROPERTY_FRIEND_OPERATOR(<<)
-#undef PROPERTY_FRIEND_OPERATOR
+PROPERTY_OPERATOR(+)
+PROPERTY_OPERATOR(-)
+PROPERTY_OPERATOR(*)
+PROPERTY_OPERATOR(/)
+PROPERTY_OPERATOR(&)
+PROPERTY_OPERATOR(|)
+PROPERTY_OPERATOR(^)
+PROPERTY_OPERATOR(%)
+PROPERTY_OPERATOR(>>)
+PROPERTY_OPERATOR(<<)
+#undef PROPERTY_OPERATOR
 
 // PROPERTY I/O OPERATORS
-template<typename T, template<typename> class P>
+template<typename T, typename P>
 inline std::istream& operator >> (std::istream& is, property<T, P>& p)
 {
 	is >> p.get();
 	return is;
 }
 
-template<typename T, template<typename> class P>
+template<typename T, typename P>
 inline std::ostream& operator << (std::ostream& os, const property<T, P>& p)
 {
 	os << p.get();
@@ -351,11 +342,11 @@ inline std::ostream& operator << (std::ostream& os, const property<T, P>& p)
 
 
 // POINTER SPECIALIZATION
-template<typename T, template<typename> class P>
-class property<T*, P> : public P<T*>
+template<typename T, typename P>
+class property<T*, P> : public P
 {
 public:
-	using PT = P<T*>;
+	using PT = P;
 
 	property() { PT::validate(m_value); }
 
@@ -410,10 +401,10 @@ public:
 		return *this;
 	}
 
-	#ifdef POINTER_INC_DEC_OPERATOR
-	#error "POINTER_INC_DEC_OPERATOR should not be defined!"
+	#ifdef PROPERTY_OPERATOR
+	#error "PROPERTY_OPERATOR should not be defined!"
 	#endif
-	#define POINTER_INC_DEC_OPERATOR(op) \
+	#define PROPERTY_OPERATOR(op) \
 	property& operator op () \
 	{ \
 		auto temp(m_value); \
@@ -427,14 +418,14 @@ public:
 		operator op (); \
 		return temp; \
 	}
-	POINTER_INC_DEC_OPERATOR(++)
-	POINTER_INC_DEC_OPERATOR(--)
-	#undef POINTER_INC_DEC_OPERATOR
+	PROPERTY_OPERATOR(++)
+	PROPERTY_OPERATOR(--)
+	#undef PROPERTY_OPERATOR
 
-	#ifdef POINTER_ARITHMETIC_OPERATOR
-	#error "POINTER_ARITHMETIC_OPERATOR should not be defined!"
+	#ifdef PROPERTY_OPERATOR
+	#error "PROPERTY_OPERATOR should not be defined!"
 	#endif
-	#define POINTER_ARITHMETIC_OPERATOR(op) \
+	#define PROPERTY_OPERATOR(op) \
 	property& operator op (std::ptrdiff_t v) \
 	{ \
 		auto temp(m_value); \
@@ -442,9 +433,9 @@ public:
 		set(temp); \
 		return *this; \
 	}
-	POINTER_ARITHMETIC_OPERATOR(+=)
-	POINTER_ARITHMETIC_OPERATOR(-=)
-	#undef POINTER_ARITHMETIC_OPERATOR
+	PROPERTY_OPERATOR(+=)
+	PROPERTY_OPERATOR(-=)
+	#undef PROPERTY_OPERATOR
 
 	T* & get() { return PT::get_value(m_value); }
 	T* const & get() const { return PT::get_value(m_value); }
@@ -475,7 +466,7 @@ public:
 	{ return std::invoke(std::forward<F>(f), get()[i], std::forward<A>(a)...); }
 
 private:
-	template<typename, template<typename> class> friend class property;
+	template<typename, typename> friend class property;
 
 	T* m_value = nullptr;
 };
@@ -483,11 +474,11 @@ private:
 
 
 // ARRAY SPECIALIZATION
-template<typename T, template<typename> class P>
-class property<T[], P> : public P<T[]>
+template<typename T, typename P>
+class property<T[], P> : public P
 {
 public:
-	using PT = P<T[]>;
+	using PT = P;
 
 	property() { PT::validate(m_value); }
 
@@ -542,10 +533,10 @@ public:
 		return *this;
 	}
 
-	#ifdef POINTER_INC_DEC_OPERATOR
-	#error "POINTER_INC_DEC_OPERATOR should not be defined!"
+	#ifdef PROPERTY_OPERATOR
+	#error "PROPERTY_OPERATOR should not be defined!"
 	#endif
-	#define POINTER_INC_DEC_OPERATOR(op) \
+	#define PROPERTY_OPERATOR(op) \
 	property& operator op () \
 	{ \
 		auto temp(m_value); \
@@ -559,14 +550,14 @@ public:
 		operator op (); \
 		return temp; \
 	}
-	POINTER_INC_DEC_OPERATOR(++)
-	POINTER_INC_DEC_OPERATOR(--)
-	#undef POINTER_INC_DEC_OPERATOR
+	PROPERTY_OPERATOR(++)
+	PROPERTY_OPERATOR(--)
+	#undef PROPERTY_OPERATOR
 
-	#ifdef POINTER_ARITHMETIC_OPERATOR
-	#error "POINTER_ARITHMETIC_OPERATOR should not be defined!"
+	#ifdef PROPERTY_OPERATOR
+	#error "PROPERTY_OPERATOR should not be defined!"
 	#endif
-	#define POINTER_ARITHMETIC_OPERATOR(op) \
+	#define PROPERTY_OPERATOR(op) \
 	property& operator op (std::ptrdiff_t v) \
 	{ \
 		auto temp(m_value); \
@@ -574,9 +565,9 @@ public:
 		set(temp); \
 		return *this; \
 	}
-	POINTER_ARITHMETIC_OPERATOR(+=)
-	POINTER_ARITHMETIC_OPERATOR(-=)
-	#undef POINTER_ARITHMETIC_OPERATOR
+	PROPERTY_OPERATOR(+=)
+	PROPERTY_OPERATOR(-=)
+	#undef PROPERTY_OPERATOR
 
 	T* & get() { return PT::get_value(m_value); }
 	T* const & get() const { return PT::get_value(m_value); }
@@ -603,7 +594,7 @@ public:
 	{ return std::invoke(std::forward<F>(f), get()[i], std::forward<A>(a)...); }
 
 private:
-	template<typename, template<typename> class> friend class property;
+	template<typename, typename> friend class property;
 
 	T* m_value = nullptr;
 };
@@ -618,7 +609,7 @@ inline auto make_property(std::initializer_list<V> l)
 	return property<T>(U(l));
 }
 
-template<typename T, template<typename> class P, typename V>
+template<typename T, typename P, typename V>
 inline auto make_property(std::initializer_list<V> l)
 {
 	using U = std::decay_t<T>;
@@ -632,7 +623,7 @@ inline auto make_property(A&&... a)
 	return property<T>(U(std::forward<A>(a)...));
 }
 
-template<typename T, template<typename> class P, typename... A>
+template<typename T, typename P, typename... A>
 inline auto make_property(A&&... a)
 {
 	using U = std::decay_t<T>;

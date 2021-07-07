@@ -12,29 +12,31 @@
 #include "T.hpp"
 #include "property.hpp"
 
-struct IProvider
+
+
+template<typename T>
+struct ram_storage
 {
-	virtual void save(char v) = 0;
-	virtual void load(char& v) = 0;
+	void save(T v) { m_value = v; }
+	void load(T& v) const { v = m_value; }
 
-	virtual void save(int v) = 0;
-	virtual void load(int& v) = 0;
-
-	virtual void save(const std::string& v) = 0;
-	virtual void load(std::string&) = 0;
+private:
+	T m_value = T{};
 };
 
-struct DiskProvider : IProvider
+
+
+struct disk_storage
 {
-	DiskProvider(const char* path) : m_path(path) {}
+	explicit disk_storage(const char* path) : m_path(path) {}
 
-	virtual void save(char v) final override { save_simple(v); }
-	virtual void load(char& v) final override { load_simple(v); }
+	void save(char v) { save_raw(v); }
+	void load(char& v) const { load_raw(v); }
 
-	virtual void save(int v) final override { save_simple(v); }
-	virtual void load(int& v) final override { load_simple(v); }
+	void save(int v) { save_raw(v); }
+	void load(int& v) const { load_raw(v); }
 
-	virtual void save(const std::string& v) final override
+	void save(const std::string& v)
 	{
 		std::ofstream ofs;
 		ofs.exceptions(std::ios::failbit | std::ios::badbit);
@@ -45,7 +47,7 @@ struct DiskProvider : IProvider
 		ofs.close();
 	}
 
-	virtual void load(std::string& v) final override
+	void load(std::string& v) const
 	{
 		std::uint8_t length = {};
 		using buffer_t = std::vector<char>;
@@ -66,7 +68,7 @@ private:
 	std::string m_path;
 
 	template<typename T>
-	void save_simple(T v)
+	void save_raw(T v)
 	{
 		std::ofstream ofs;
 		ofs.exceptions(std::ios::failbit | std::ios::badbit);
@@ -76,7 +78,7 @@ private:
 	}
 
 	template<typename T>
-	void load_simple(T& v)
+	void load_raw(T& v) const
 	{
 		std::ifstream ifs;
 		ifs.exceptions(std::ios::failbit | std::ios::badbit);
@@ -88,98 +90,73 @@ private:
 
 
 
-template<typename T>
-struct provider_property_policy
+template<typename T, typename P>
+struct storage_property_policy
 {
-	provider_property_policy(IProvider* provider, const T& v) : m_provider(provider) { validate(v); store(v); }
+	storage_property_policy(const T& v, P p = P{}) : m_provider(p) { validate(v); save(v); }
 
-	provider_property_policy(const char* path, const T& v) : m_provider(new DiskProvider(path)) { validate(v); store(v); }
-
-	using update_event_t = std::function<void(property<T>*)>;
+	using update_event_t = std::function<void(property<T, P>*)>;
 	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
-
-	bool is_dirty() const { return m_is_dirty; }
-	void clear_dirty() { m_is_dirty = false; }
 
 protected:
 	void validate(const T& v) const {}
 
 	auto get_value() const { return load(); }
 
-	void set_value(const T& nv) { validate(nv); store(nv); fire_update_event(); }
+	void set_value(const T& nv) { validate(nv); save(nv); fire_update_event(); }
 
 private:
-	void store(const T& v)
+	void save(const T& v)
 	{
-		std::scoped_lock lock(m_lock);
-		if(v == m_value) return;
-		m_provider->save(v);
-		m_value = v;
-		m_is_dirty = true;
+		m_provider.save(v);
 	}
 
 	T load() const
 	{
-		std::scoped_lock lock(m_lock);
-		m_provider->load(m_value);
-		return m_value;
+		T temp;
+		m_provider.load(temp);
+		return temp;
 	}
 
-	IProvider* m_provider;
-	bool m_is_dirty = true;
-	mutable T m_value = T{};
-	mutable std::mutex m_lock;
+	P m_provider;
 
-	void fire_update_event() { for(auto& event : m_update_events) event((property<T>*)this); }
+	void fire_update_event() { for(auto& event : m_update_events) event((property<T, P>*)this); }
 
 	using update_event_list_t = std::vector<update_event_t>;
 	update_event_list_t m_update_events;
 };
 
-template<typename TT>
-using provider_property = property<TT, provider_property_policy>;
+
+
+template<typename T>
+using ram_property = property<T, storage_property_policy<T, ram_storage<T>>>;
+
+template<typename T>
+using disk_property = property<T, storage_property_policy<T, disk_storage>>;
+
+
 
 int main()
 {
 	using namespace std;
 
 	// W/ STORAGE BEING FILE ON DISK
-	provider_property<std::string> disk_p1(new DiskProvider("/Users/martin/disk_p1.txt"), "1");
-	provider_property<std::string> disk_p2(new DiskProvider("/Users/martin/disk_p2.txt"), "2");
+	disk_property<std::string> disk_p1("initial value 1", disk_storage("/Users/martin/disk_p1.txt"));
+	disk_property<std::string> disk_p2("initial value 2", disk_storage("/Users/martin/disk_p2.txt"));
 
-	disk_p1 = disk_p2;
+	disk_property<char> disk_p3('C', disk_storage("/Users/martin/disk_p3.txt"));
+	disk_property<int> disk_p4(0xaabbccdd, disk_storage("/Users/martin/disk_p4.txt"));
 
-	provider_property<char> disk_p3(new DiskProvider("/Users/martin/disk_p3.txt"), 'C');
+	cout << disk_p1 << endl;
 	cout << disk_p2 << endl;
-
-	provider_property<int> disk_p4("/Users/martin/disk_p4.txt", 0xaabbccdd);
 	cout << disk_p3 << endl;
+	cout << disk_p4 << endl;
 
-	disk_p1.clear_dirty();
+	ram_property<int> ram_p1 = 1;
+	ram_property<int> ram_p2 = 2;
 
-	thread([&]
-		{
-			disk_p1	= "2";
-		}).join();
-
-	if(disk_p1.is_dirty())
-	{
-		// ops, dirty, do something...
-		cout << "1 dirty with value '" << disk_p1 << "'" << endl;
-		disk_p1.clear_dirty();
-	}
-
-	disk_p1 = "2";
-	if(disk_p1.is_dirty())
-	{
-		cout << "2 dirty with value '" << disk_p1 << "'\n";
-	}
-
-	disk_p1 = "3";
-	if(disk_p1.is_dirty())
-	{
-		cout << "3 dirty with value '" << disk_p1 << "'\n";
-	}
+	cout << ram_p1 << endl;
+	cout << ram_p2 << endl;
 
 	// W/ PRIMITIVE TYPES
 	auto p1 = make_property<int>(1);
