@@ -119,11 +119,11 @@ public:
 	template<typename U> property(property<U, P>&& p) : PT(std::move(p.get())) {}
 
 	template<typename... A, std::enable_if_t<
-		std::is_constructible_v<T, A...>>* = nullptr>
+		std::is_constructible_v<PT, A...>>* = nullptr>
 	property(A&&... a) : PT(std::forward<A>(a)...) {}
 
 	template<typename V, std::enable_if_t<
-		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
+		std::is_constructible_v<PT, std::initializer_list<V>>>* = nullptr>
 	property(std::initializer_list<V> l) : PT(std::move(l)) {}
 
 	property& operator = (const T& v)
