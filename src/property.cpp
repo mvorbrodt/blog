@@ -12,13 +12,88 @@
 #include "T.hpp"
 #include "property.hpp"
 
-template<typename T>
-struct on_disk_property_policy;
-
-template<>
-struct on_disk_property_policy<std::string>
+struct IProvider
 {
-	on_disk_property_policy(const char* path, const std::string& v) : m_path(path), m_value(v) { validate(v); store(v); }
+	virtual void save(char v) = 0;
+	virtual void load(char& v) = 0;
+
+	virtual void save(int v) = 0;
+	virtual void load(int& v) = 0;
+
+	virtual void save(const std::string& v) = 0;
+	virtual void load(std::string&) = 0;
+};
+
+struct DiskProvider : IProvider
+{
+	DiskProvider(const char* path) : m_path(path) {}
+
+	virtual void save(char v) final override { save_simple(v); }
+	virtual void load(char& v) final override { load_simple(v); }
+
+	virtual void save(int v) final override { save_simple(v); }
+	virtual void load(int& v) final override { load_simple(v); }
+
+	virtual void save(const std::string& v) final override
+	{
+		std::ofstream ofs;
+		ofs.exceptions(std::ios::failbit | std::ios::badbit);
+		ofs.open(m_path, std::ios_base::out);
+		std::uint8_t length = v.length();
+		ofs.write((const char*)&length, sizeof(length));
+		ofs.write(v.c_str(), length);
+		ofs.close();
+	}
+
+	virtual void load(std::string& v) final override
+	{
+		std::uint8_t length = {};
+		using buffer_t = std::vector<char>;
+		buffer_t buffer;
+
+		std::ifstream ifs;
+		ifs.exceptions(std::ios::failbit | std::ios::badbit);
+		ifs.open(m_path);
+		ifs.read((char*)&length, sizeof(length));
+		buffer.resize(length);
+		ifs.read(buffer.data(), length);
+		ifs.close();
+
+		v = std::string(std::begin(buffer), std::end(buffer));
+	}
+
+private:
+	std::string m_path;
+
+	template<typename T>
+	void save_simple(T v)
+	{
+		std::ofstream ofs;
+		ofs.exceptions(std::ios::failbit | std::ios::badbit);
+		ofs.open(m_path, std::ios_base::out);
+		ofs.write((const char*)&v, sizeof(v));
+		ofs.close();
+	}
+
+	template<typename T>
+	void load_simple(T& v)
+	{
+		std::ifstream ifs;
+		ifs.exceptions(std::ios::failbit | std::ios::badbit);
+		ifs.open(m_path);
+		ifs.read((char*)&v, sizeof(v));
+		ifs.close();
+	}
+};
+
+
+
+template<typename T>
+struct provider_property_policy
+{
+	provider_property_policy(IProvider* provider, const T& v) : m_provider(provider) { validate(v); store(v); }
+
+	provider_property_policy(const char* path, const T& v) : m_provider(new DiskProvider(path)) { validate(v); store(v); }
 
 	using update_event_t = std::function<void(property<T>*)>;
 	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
@@ -27,54 +102,33 @@ struct on_disk_property_policy<std::string>
 	void clear_dirty() { m_is_dirty = false; }
 
 protected:
-	void validate(const std::string& v) const {}
+	void validate(const T& v) const {}
 
 	auto get_value() const { return load(); }
 
-	void set_value(const std::string& nv) { validate(nv); store(nv); fire_update_event(); }
+	void set_value(const T& nv) { validate(nv); store(nv); fire_update_event(); }
 
 private:
-	void store(const std::string& v)
+	void store(const T& v)
 	{
+		std::scoped_lock lock(m_lock);
 		if(v == m_value) return;
-
-		std::ofstream ofs;
-
-		ofs.exceptions(std::ios::failbit | std::ios::badbit);
-		ofs.open(m_path, std::ios_base::out);
-
-		std::uint8_t length = v.length();
-		ofs.write((const char*)&length, sizeof(length));
-		ofs.write(v.c_str(), length);
-		ofs.close();
-
+		m_provider->save(v);
 		m_value = v;
 		m_is_dirty = true;
 	}
 
-	std::string load() const
+	T load() const
 	{
-		std::uint8_t length = {};
-		using buffer_t = std::vector<char>;
-		buffer_t buffer;
-
-		std::ifstream ifs;
-
-		ifs.exceptions(std::ios::failbit | std::ios::badbit);
-		ifs.open(m_path);
-		ifs.read((char*)&length, sizeof(length));
-		buffer.resize(length);
-		ifs.read(buffer.data(), length);
-		ifs.close();
-
-		m_value = std::string(std::begin(buffer), std::end(buffer));
-
+		std::scoped_lock lock(m_lock);
+		m_provider->load(m_value);
 		return m_value;
 	}
 
-	std::string m_path;
+	IProvider* m_provider;
 	bool m_is_dirty = true;
-	mutable std::string m_value;
+	mutable T m_value = T{};
+	mutable std::mutex m_lock;
 
 	void fire_update_event() { for(auto& event : m_update_events) event((property<T>*)this); }
 
@@ -82,15 +136,24 @@ private:
 	update_event_list_t m_update_events;
 };
 
+template<typename TT>
+using provider_property = property<TT, provider_property_policy>;
+
 int main()
 {
 	using namespace std;
 
 	// W/ STORAGE BEING FILE ON DISK
-	property<std::string, on_disk_property_policy> disk_p1("/Users/martin/disk_p1.txt", "1");
+	provider_property<std::string> disk_p1(new DiskProvider("/Users/martin/disk_p1.txt"), "1");
+	provider_property<std::string> disk_p2(new DiskProvider("/Users/martin/disk_p2.txt"), "2");
 
-	const property<std::string, on_disk_property_policy> disk_p2("/Users/martin/disk_p2.txt", "2");
+	disk_p1 = disk_p2;
+
+	provider_property<char> disk_p3(new DiskProvider("/Users/martin/disk_p3.txt"), 'C');
 	cout << disk_p2 << endl;
+
+	provider_property<int> disk_p4("/Users/martin/disk_p4.txt", 0xaabbccdd);
+	cout << disk_p3 << endl;
 
 	disk_p1.clear_dirty();
 
@@ -117,8 +180,6 @@ int main()
 	{
 		cout << "3 dirty with value '" << disk_p1 << "'\n";
 	}
-
-	return 0;
 
 	// W/ PRIMITIVE TYPES
 	auto p1 = make_property<int>(1);
