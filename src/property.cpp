@@ -1,151 +1,23 @@
 #include <iostream>
-#include <fstream>
-#include <ios>
 #include <memory>
 #include <vector>
 #include <array>
 #include <map>
-#include <string>
 #include <algorithm>
 #include <thread>
 #include <mutex>
 #include "T.hpp"
 #include "property.hpp"
 
-
-
-template<typename T>
-struct ram_storage
-{
-	void save(T v) { m_value = v; }
-	void load(T& v) const { v = m_value; }
-
-private:
-	T m_value = T{};
-};
-
-
-
-struct disk_storage
-{
-	explicit disk_storage(const char* path) : m_path(path) {}
-
-	void save(char v) { save_raw(v); }
-	void load(char& v) const { load_raw(v); }
-
-	void save(int v) { save_raw(v); }
-	void load(int& v) const { load_raw(v); }
-
-	void save(const std::string& v)
-	{
-		std::ofstream ofs;
-		ofs.exceptions(std::ios::failbit | std::ios::badbit);
-		ofs.open(m_path, std::ios_base::out);
-		std::uint8_t length = v.length();
-		ofs.write((const char*)&length, sizeof(length));
-		ofs.write(v.c_str(), length);
-		ofs.close();
-	}
-
-	void load(std::string& v) const
-	{
-		std::uint8_t length = {};
-		using buffer_t = std::vector<char>;
-		buffer_t buffer;
-
-		std::ifstream ifs;
-		ifs.exceptions(std::ios::failbit | std::ios::badbit);
-		ifs.open(m_path);
-		ifs.read((char*)&length, sizeof(length));
-		buffer.resize(length);
-		ifs.read(buffer.data(), length);
-		ifs.close();
-
-		v = std::string(std::begin(buffer), std::end(buffer));
-	}
-
-private:
-	std::string m_path;
-
-	template<typename T>
-	void save_raw(T v)
-	{
-		std::ofstream ofs;
-		ofs.exceptions(std::ios::failbit | std::ios::badbit);
-		ofs.open(m_path, std::ios_base::out);
-		ofs.write((const char*)&v, sizeof(v));
-		ofs.close();
-	}
-
-	template<typename T>
-	void load_raw(T& v) const
-	{
-		std::ifstream ifs;
-		ifs.exceptions(std::ios::failbit | std::ios::badbit);
-		ifs.open(m_path);
-		ifs.read((char*)&v, sizeof(v));
-		ifs.close();
-	}
-};
-
-
-
-template<typename T, typename P>
-struct storage_property_policy
-{
-	storage_property_policy(const T& v, P p = P{}) : m_provider(p) { validate(v); save(v); }
-
-	using update_event_t = std::function<void(property<T, P>*)>;
-	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
-
-protected:
-	void validate(const T& v) const {}
-
-	auto get_value() const { return load(); }
-
-	void set_value(const T& nv) { validate(nv); save(nv); fire_update_event(); }
-
-private:
-	void save(const T& v)
-	{
-		m_provider.save(v);
-	}
-
-	T load() const
-	{
-		T temp;
-		m_provider.load(temp);
-		return temp;
-	}
-
-	P m_provider;
-
-	void fire_update_event() { for(auto& event : m_update_events) event((property<T, P>*)this); }
-
-	using update_event_list_t = std::vector<update_event_t>;
-	update_event_list_t m_update_events;
-};
-
-
-
-template<typename T>
-using ram_property = property<T, storage_property_policy<T, ram_storage<T>>>;
-
-template<typename T>
-using disk_property = property<T, storage_property_policy<T, disk_storage>>;
-
-
-
 int main()
 {
 	using namespace std;
 
-	// W/ STORAGE BEING FILE ON DISK
+	// W/ STORAGE BEING FILE ON DISK OR RAM (RAM == DEFAULT PROPERTY)
 	disk_property<std::string> disk_p1("initial value 1", disk_storage("/Users/martin/disk_p1.txt"));
 	disk_property<std::string> disk_p2("initial value 2", disk_storage("/Users/martin/disk_p2.txt"));
-
-	disk_property<char> disk_p3('C', disk_storage("/Users/martin/disk_p3.txt"));
-	disk_property<int> disk_p4(0xaabbccdd, disk_storage("/Users/martin/disk_p4.txt"));
+	disk_property<char>        disk_p3('C',               disk_storage("/Users/martin/disk_p3.txt"));
+	disk_property<int>         disk_p4(17,                disk_storage("/Users/martin/disk_p4.txt"));
 
 	cout << disk_p1 << endl;
 	cout << disk_p2 << endl;
@@ -177,54 +49,8 @@ int main()
 	++p1;
 	p1 *= p4;
 
-	// W/ POINTERS
-	auto pp1 = make_property<T*>(new T);
-	auto pp2 = make_property<Q[]>(new Q[3]);
-	property<int[]> pp3 = new int[3] {1, 2, 3};
-	property<const T*> pp4 = new T{"property<const T*>"};
-
-	int* ip1 = new int;
-	property<int*> pp5, pp6(ip1), pp7{ip1};
-	pp5 = ip1;
-	pp6 = std::move(pp7);
-
-	*pp1++ = T{"C++11"};
-	*pp2++ = Q{"C++14"};
-
-	pp1.add_update_event([](property<T*>* p) { cout << "~~~ pp1 updated with value: " << (*p) << " containing: " << (**p) << endl; });
-	pp2.add_update_event([](property<Q*>* p) { cout << "~~~ pp2 updated with value: " << (*p) << " containing: " << (*p[0]) << endl; });
-
-	--pp1, pp2 -= 1;
-
-	((T*)pp1)->foo();
-	((T*)pp1)->bar();
-	pp1.get()->foo();
-	pp1.get()->bar();
-	pp1.invoke(&T::foo);
-	pp1.invoke(0, &T::bar);
-
-	((Q*)pp2 + 1)->foo();
-	((Q*)pp2 + 1)->bar();
-	pp2[1].foo();
-	pp2[1].bar();
-	pp2.invoke(1, &Q::foo);
-	pp2.invoke(1, &Q::bar);
-
-	//((const T*)pp4)->foo(); // Compile error becasue foo() is non-const :o)
-	((const T*)pp4)->bar();
-	//pp4.get()->foo(); // Compile error becasue foo() is non-const :o)
-	pp4.get()->bar();
-	//pp4.invoke(&T::foo); // Compile error becasue foo() is non-const :o)
-	pp4.invoke(&T::bar);
-
-	pp2[0] = Q{"C++17"};
-	pp2[1] = Q{"C++20"};
-
-	delete pp1;
-	delete [] pp2;
-	delete pp4;
-
-
+	// USE property of unique_ptr/shared_ptr or array/vector
+	// instead of specializing property template for T* and T[]
 
 	// W/ COMPLEX TYPES
 	property<Q> c1(1, 2, 3);
