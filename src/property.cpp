@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <ios>
 #include <memory>
 #include <vector>
 #include <array>
@@ -8,10 +10,85 @@
 #include "T.hpp"
 #include "property.hpp"
 
-using namespace std;
+template<typename T>
+struct on_disk_property_policy;
+
+template<>
+struct on_disk_property_policy<std::string>
+{
+	on_disk_property_policy(const char* path, const std::string& v) : m_path(path) { validate(v); store(v); }
+
+	using update_event_t = std::function<void(property<T>*)>;
+	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
+
+protected:
+	void validate(const std::string& v) const {}
+
+	auto get_value() const { return load(); }
+
+	void set_value(const std::string& nv) { validate(nv); store(nv); fire_update_event(); }
+
+private:
+	void store(const std::string& v) const
+	{
+		std::ofstream ofs;
+
+		ofs.exceptions(std::ios::failbit | std::ios::badbit);
+		ofs.open(m_path, std::ios_base::out);
+
+		std::uint8_t length = v.length();
+		ofs.write((const char*)&length, sizeof(length));
+		ofs.write(v.c_str(), length);
+		ofs.close();
+	}
+
+	std::string load() const
+	{
+		std::uint8_t length = {};
+		using buffer_t = std::vector<char>;
+		buffer_t buffer;
+
+		std::ifstream ifs;
+
+		ifs.exceptions(std::ios::failbit | std::ios::badbit);
+		ifs.open(m_path);
+		ifs.read((char*)&length, sizeof(length));
+		buffer.resize(length);
+		ifs.read(buffer.data(), length);
+		ifs.close();
+
+		return std::string(std::begin(buffer), std::end(buffer));
+	}
+
+	std::string m_path;
+
+	void fire_update_event() { for(auto& event : m_update_events) event((property<T>*)this); }
+
+	using update_event_list_t = std::vector<update_event_t>;
+	update_event_list_t m_update_events;
+};
 
 int main()
 {
+	using namespace std;
+
+	// W/ STORAGE BEING FILE ON DISK
+	property<std::string, on_disk_property_policy> disk_p1("disk_p1.txt", "disk_p1");
+	property<std::string, on_disk_property_policy> disk_p2("disk_p2.txt", "disk_p2");
+	property<std::string, on_disk_property_policy> disk_p3("disk_p3.txt", "disk_p3");
+
+	cout << disk_p1 << endl;
+	cout << disk_p2 << endl;
+	cout << disk_p3 << endl;
+
+	disk_p1 = "new value of disk_p1";
+	disk_p2 = "new value of disk_p2";
+	disk_p3 = "new value of disk_p3";
+
+	cout << disk_p1 << endl;
+	cout << disk_p2 << endl;
+	cout << disk_p3 << endl;
+
 	// W/ PRIMITIVE TYPES
 	auto p1 = make_property<int>(1);
 	auto p2 = make_property<int>(2);

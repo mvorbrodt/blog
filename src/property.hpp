@@ -30,11 +30,11 @@ struct default_property_policy
 	default_property_policy(T&& v) : m_value(std::move(v)) { validate(m_value); }
 
 	template<typename... A, std::enable_if_t<
-	std::is_constructible_v<T, A...>>* = nullptr>
+		std::is_constructible_v<T, A...>>* = nullptr>
 	default_property_policy(A&&... a) : m_value(std::forward<A>(a)...) { validate(m_value); }
 
 	template<typename V, std::enable_if_t<
-	std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
+		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
 	default_property_policy(std::initializer_list<V> l) : m_value(std::move(l)) { validate(m_value); }
 
 	using update_event_t = std::function<void(property<T>*)>;
@@ -123,7 +123,7 @@ public:
 	property(A&&... a) : PT(std::forward<A>(a)...) {}
 
 	template<typename V, std::enable_if_t<
-	std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
+		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
 	property(std::initializer_list<V> l) : PT(std::move(l)) {}
 
 	property& operator = (const T& v)
