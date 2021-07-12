@@ -14,21 +14,53 @@ int main()
 	using namespace std;
 
 	// W/ STORAGE BEING FILE ON DISK OR RAM (RAM == DEFAULT PROPERTY)
-	disk_property<std::string> disk_p1("initial value 1", disk_storage("/Users/martin/disk_p1.txt"));
-	disk_property<std::string> disk_p2("initial value 2", disk_storage("/Users/martin/disk_p2.txt"));
-	disk_property<char>        disk_p3('C',               disk_storage("/Users/martin/disk_p3.txt"));
-	disk_property<int>         disk_p4(17,                disk_storage("/Users/martin/disk_p4.txt"));
+	file_property<std::string>  disk_p1( "initial value 1", file_storage_provider("/Users/martin/disk_p1.txt"));
+	file_property<std::string>  disk_p2( "initial value 2", file_storage_provider("/Users/martin/disk_p2.txt"));
+	file_property<std::wstring> disk_p3(L"initial value 3", file_storage_provider("/Users/martin/disk_p3.txt"));
+	file_property<std::wstring> disk_p4(L"initial value 4", file_storage_provider("/Users/martin/disk_p4.txt"));
+	file_property<char>         disk_p5('C',                file_storage_provider("/Users/martin/disk_p5.txt"));
+	file_property<int>          disk_p6(17,                 file_storage_provider("/Users/martin/disk_p6.txt"));
+	file_property<short>        disk_p7(11,                 file_storage_provider("/Users/martin/disk_p7.txt"));
+	file_property<long long>    disk_p8(0xDEADBEEF,         file_storage_provider("/Users/martin/disk_p8.txt"));
+
+	disk_p1.add_update_event([](file_property<std::string>* p) { cout << "~~~ disk_p1 updated with value: " << (*p) << endl; });
+	disk_p2.add_update_event([](decltype(disk_p2)* p) { cout << "~~~ disk_p2 updated with value: " << (*p) << endl; });
+
+	string xxxxx = disk_p1;
+
+	disk_p1 = disk_p2;
+	disk_p1 = std::move(disk_p2);
+	disk_p2 = "foo"s;
+	disk_p2 = disk_p1;
 
 	cout << disk_p1 << endl;
 	cout << disk_p2 << endl;
-	cout << disk_p3 << endl;
-	cout << disk_p4 << endl;
+	cout.flush();
+	wcout << disk_p3 << endl;
+	wcout << disk_p4 << endl;
+	wcout.flush();
+	cout << disk_p5 << endl;
+	cout << disk_p6 << endl << endl;
 
-	ram_property<int> ram_p1 = 1;
-	ram_property<int> ram_p2 = 2;
+	disk_p1 = "v5"s;
+	disk_p2 = "v6";
+	disk_p3 = L"v7"s;
+	disk_p4 = L"v8";
+	disk_p5 = 'D';
+	disk_p6 = 20;
 
-	cout << ram_p1 << endl;
-	cout << ram_p2 << endl;
+	cout << disk_p1 << endl;
+	cout << disk_p2 << endl;
+	cout.flush();
+	wcout << disk_p3 << endl;
+	wcout << disk_p4 << endl;
+	wcout.flush();
+	cout << disk_p5 << endl;
+	cout << disk_p6 << endl;
+
+	return 0;
+
+
 
 	// W/ PRIMITIVE TYPES
 	auto p1 = make_property<int>(1);

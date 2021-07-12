@@ -41,8 +41,8 @@ struct basic_property_policy
 	basic_property_policy() { validate(m_value); }
 	~basic_property_policy() = default;
 
-	basic_property_policy(const T& v) : m_value(v) { validate(m_value); }
-	basic_property_policy(T&& v) : m_value(std::move(v)) { validate(m_value); }
+	explicit basic_property_policy(const T& v) : m_value(v) { validate(m_value); }
+	explicit basic_property_policy(T&& v) : m_value(std::move(v)) { validate(m_value); }
 
 	template<typename... A, std::enable_if_t<
 		std::is_constructible_v<T, A...>>* = nullptr>
@@ -50,9 +50,9 @@ struct basic_property_policy
 
 	template<typename V, std::enable_if_t<
 		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
-	basic_property_policy(std::initializer_list<V> l) : m_value(std::move(l)) { validate(m_value); }
+	basic_property_policy(std::initializer_list<V> l) : m_value(l) { validate(m_value); }
 
-	using update_event_t = std::function<void(basic_property<T>*)>;
+	using update_event_t = std::function<void(basic_property<T, basic_property_policy>*)>;
 	using update_event_list_t = std::vector<update_event_t>;
 
 	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
@@ -73,7 +73,7 @@ protected:
 	template<typename U> void set(U&& nv)
 	{
 		validate(nv);
-		m_value = std::move(nv);
+		m_value = std::forward<U>(nv);
 		fire_update_event();
 	}
 
@@ -81,7 +81,7 @@ private:
 	void fire_update_event()
 	{
 		for(auto& event : m_update_events)
-			event((basic_property<T>*)this);
+			event((basic_property<T, basic_property_policy>*)this);
 	}
 
 	T m_value = T{};
@@ -100,19 +100,25 @@ private:
 template<typename T, typename P>
 struct storage_property_policy
 {
-	storage_property_policy(const T& v, P p = P{}) : m_provider(p)
+	storage_property_policy() { validate(m_value); }
+	~storage_property_policy() = default;
+
+	storage_property_policy(storage_property_policy&&) = delete;
+	storage_property_policy& operator = (storage_property_policy&&) = delete;
+
+	explicit storage_property_policy(const T& v, P p) : m_value(v), m_storage_provider(std::move(p))
 	{
-		validate(v);
-		save(v);
+		validate(m_value);
+		m_storage_provider.save(m_value);
 	}
 
-	storage_property_policy(T&& v, P p = P{}) : m_provider(p)
+	explicit storage_property_policy(T&& v, P p) : m_value(std::move(v)), m_storage_provider(std::move(p))
 	{
-		validate(v);
-		save(std::move(v));
+		validate(m_value);
+		m_storage_provider.save(m_value);
 	}
 
-	using update_event_t = std::function<void(basic_property<T, P>*)>;
+	using update_event_t = std::function<void(basic_property<T, storage_property_policy>*)>;
 	using update_event_list_t = std::vector<update_event_t>;
 
 	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
@@ -120,58 +126,44 @@ struct storage_property_policy
 protected:
 	void validate(const T& v) const {}
 
-	auto get() const { return load(); }
+	decltype(auto) get() const
+	{
+		m_storage_provider.load(m_value);
+		return(m_value);
+	}
+
+	decltype(auto) get()
+	{
+		m_storage_provider.load(m_value);
+		return(m_value);
+	}
 
 	void set(const T& nv)
 	{
 		validate(nv);
-		save(nv);
+		m_value = nv;
+		m_storage_provider.save(m_value);
 		fire_update_event();
 	}
 
 	void set(T&& nv)
 	{
 		validate(nv);
-		save(std::move(nv));
+		m_value = std::move(nv);
+		m_storage_provider.save(m_value);
 		fire_update_event();
 	}
 
 private:
-	void save(const T& v) { m_provider.save(v); }
-
-	T load() const
-	{
-		T temp;
-		m_provider.load(temp);
-		return temp;
-	}
-
 	void fire_update_event()
 	{
 		for(auto& event : m_update_events)
-			event((basic_property<T, P>*)this);
+			event((basic_property<T, storage_property_policy>*)this);
 	}
 
-	P m_provider;
+	mutable T m_value = T{};
+	P m_storage_provider;
 	update_event_list_t m_update_events;
-};
-
-
-
-// ===--------------------------------------------===
-// ===---                                      ---===
-// ===---   RAM BASED PROPERTY VALUE STORAGE   ---===
-// ===---                                      ---===
-// ===--------------------------------------------===
-
-template<typename T>
-struct ram_storage
-{
-	void save(T v) { m_value = v; }
-	void load(T& v) const { v = m_value; }
-
-private:
-	T m_value = T{};
 };
 
 
@@ -182,62 +174,82 @@ private:
 // ===---                                       ---===
 // ===---------------------------------------------===
 
-struct disk_storage
+struct file_storage_provider
 {
-	explicit disk_storage(const char* path) : m_path(path) {}
+	explicit file_storage_provider(const char* path) : m_path(path) {}
+	~file_storage_provider() = default;
 
-	void save(char v) { save_raw(v); }
-	void load(char& v) const { load_raw(v); }
+	file_storage_provider(const file_storage_provider&) = delete;
+	file_storage_provider(file_storage_provider&&) = default;
 
-	void save(int v) { save_raw(v); }
-	void load(int& v) const { load_raw(v); }
+	file_storage_provider& operator = (const file_storage_provider&) = delete;
+	file_storage_provider& operator = (file_storage_provider&&) = default;
 
-	void save(const std::string& v)
+	template<typename T>
+	std::enable_if_t<std::is_trivial_v<T> && std::is_standard_layout_v<T>, void>
+	save(const T& v) const
 	{
-		decltype(std::declval<std::string>().length()) length = v.length();
-		std::ofstream ofs;
+		using out_char_t = typename std::ofstream::char_type;
+
+		std::ofstream ofs(m_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
 		ofs.exceptions(std::ios::failbit | std::ios::badbit);
-		ofs.open(m_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
-		ofs.write((const char*)&length, sizeof(length));
-		ofs.write(v.c_str(), length);
+
+		ofs.write(reinterpret_cast<const out_char_t*>(&v), sizeof(v));
+		ofs.flush();
 		ofs.close();
 	}
 
-	void load(std::string& v) const
+	template<typename T>
+	std::enable_if_t<std::is_trivial_v<T> && std::is_standard_layout_v<T>, void>
+	load(T& v) const
 	{
-		std::ifstream ifs;
+		using in_char_t = typename std::ifstream::char_type;
+
+		std::ifstream ifs(m_path, std::ios_base::binary | std::ios_base::in);
 		ifs.exceptions(std::ios::failbit | std::ios::badbit);
-		ifs.open(m_path, std::ios_base::binary | std::ios_base::in);
-		decltype(std::declval<std::string>().length()) length = {};
-		ifs.read((char*)&length, sizeof(length));
-		using buffer_t = std::vector<char>;
-		buffer_t buffer(length);
-		ifs.read(buffer.data(), length);
+
+		ifs.read(reinterpret_cast<in_char_t*>(&v), sizeof(v));
 		ifs.close();
-		v = std::string(std::begin(buffer), std::end(buffer));
+	}
+
+	template<class CharT, class Traits, class Allocator>
+	void save(const std::basic_string<CharT, Traits, Allocator>& v) const
+	{
+		using str_t = std::basic_string<CharT, Traits, Allocator>;
+		using str_char_t = typename str_t::value_type;
+		using out_char_t = typename std::ofstream::char_type;
+
+		std::ofstream ofs(m_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+		ofs.exceptions(std::ios::failbit | std::ios::badbit);
+
+		typename str_t::size_type bytes = v.length() * sizeof(str_char_t);
+
+		ofs.write(reinterpret_cast<const out_char_t*>(v.data()), bytes);
+		ofs.flush();
+		ofs.close();
+	}
+
+	template<class CharT, class Traits, class Allocator>
+	void load(std::basic_string<CharT, Traits, Allocator>& v) const
+	{
+		using str_t = std::basic_string<CharT, Traits, Allocator>;
+		using str_char_t = typename str_t::value_type;
+		using in_char_t = typename std::ifstream::char_type;
+
+		std::ifstream ifs(m_path, std::ios_base::binary | std::ios_base::in | std::ios::ate);
+		ifs.exceptions(std::ios::failbit | std::ios::badbit);
+
+		typename str_t::size_type bytes = ifs.tellg();
+		str_t temp(bytes / sizeof(str_char_t), str_char_t{});
+		ifs.seekg(0);
+
+		ifs.read(reinterpret_cast<in_char_t*>(temp.data()), bytes);
+		ifs.close();
+
+		v = std::move(temp);
 	}
 
 private:
-	template<typename T>
-	void save_raw(T v)
-	{
-		std::ofstream ofs;
-		ofs.exceptions(std::ios::failbit | std::ios::badbit);
-		ofs.open(m_path, std::ios_base::out);
-		ofs.write((const char*)&v, sizeof(v));
-		ofs.close();
-	}
-
-	template<typename T>
-	void load_raw(T& v) const
-	{
-		std::ifstream ifs;
-		ifs.exceptions(std::ios::failbit | std::ios::badbit);
-		ifs.open(m_path);
-		ifs.read((char*)&v, sizeof(v));
-		ifs.close();
-	}
-
 	std::string m_path;
 };
 
@@ -503,15 +515,15 @@ PROPERTY_OPERATOR(<<)
 // ===---                                     ---===
 // ===-------------------------------------------===
 
-template<typename T, typename P>
-inline std::istream& operator >> (std::istream& is, basic_property<T, P>& p)
+template<class CharT, class Traits, typename T, typename P>
+inline auto& operator >> (std::basic_istream<CharT, Traits>& is, basic_property<T, P>& p)
 {
 	is >> p.get();
 	return is;
 }
 
-template<typename T, typename P>
-inline std::ostream& operator << (std::ostream& os, const basic_property<T, P>& p)
+template<class CharT, class Traits, typename T, typename P>
+inline auto& operator << (std::basic_ostream<CharT, Traits>& os, const basic_property<T, P>& p)
 {
 	os << p.get();
 	return os;
@@ -565,10 +577,7 @@ template<typename T>
 using property = basic_property<T, basic_property_policy<T>>;
 
 template<typename T>
-using ram_property = basic_property<T, storage_property_policy<T, ram_storage<T>>>;
-
-template<typename T>
-using disk_property = basic_property<T, storage_property_policy<T, disk_storage>>;
+using file_property = basic_property<T, storage_property_policy<T, file_storage_provider>>;
 
 
 
