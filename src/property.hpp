@@ -39,7 +39,6 @@ template<typename T>
 struct basic_property_policy
 {
 	basic_property_policy() { validate(m_value); }
-	~basic_property_policy() = default;
 
 	explicit basic_property_policy(const T& v) : m_value(v) { validate(m_value); }
 	explicit basic_property_policy(T&& v) : m_value(std::move(v)) { validate(m_value); }
@@ -61,14 +60,6 @@ protected:
 	template<typename U> void validate(const U& v) const {}
 
 	decltype(auto) get() const { return(m_value); }
-	decltype(auto) get() { return(m_value); }
-
-	template<typename U> void set(const U& nv)
-	{
-		validate(nv);
-		m_value = nv;
-		fire_update_event();
-	}
 
 	template<typename U> void set(U&& nv)
 	{
@@ -84,7 +75,7 @@ private:
 			event((basic_property<T, basic_property_policy>*)this);
 	}
 
-	T m_value = T{};
+	mutable T m_value = T{};
 	update_event_list_t m_update_events;
 };
 
@@ -100,19 +91,35 @@ private:
 template<typename T, typename P>
 struct storage_property_policy
 {
-	storage_property_policy() { validate(m_value); }
-	~storage_property_policy() = default;
-
-	storage_property_policy(storage_property_policy&&) = delete;
-	storage_property_policy& operator = (storage_property_policy&&) = delete;
-
-	explicit storage_property_policy(const T& v, P p) : m_value(v), m_storage_provider(std::move(p))
+	explicit storage_property_policy(P p) : m_storage_provider(p)
 	{
 		validate(m_value);
 		m_storage_provider.save(m_value);
 	}
 
-	explicit storage_property_policy(T&& v, P p) : m_value(std::move(v)), m_storage_provider(std::move(p))
+	storage_property_policy(P p, const T& v) : m_value(v), m_storage_provider(p)
+	{
+		validate(m_value);
+		m_storage_provider.save(m_value);
+	}
+
+	storage_property_policy(P p, T&& v) : m_value(std::move(v)), m_storage_provider(p)
+	{
+		validate(m_value);
+		m_storage_provider.save(m_value);
+	}
+
+	template<typename... A, std::enable_if_t<
+		std::is_constructible_v<T, A...>>* = nullptr>
+	storage_property_policy(P p, A&&... a) : m_value(std::forward<A>(a)...), m_storage_provider(p)
+	{
+		validate(m_value);
+		m_storage_provider.save(m_value);
+	}
+
+	template<typename V, std::enable_if_t<
+		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
+	storage_property_policy(P p, std::initializer_list<V> l) : m_value(l), m_storage_provider(p)
 	{
 		validate(m_value);
 		m_storage_provider.save(m_value);
@@ -132,24 +139,10 @@ protected:
 		return(m_value);
 	}
 
-	decltype(auto) get()
-	{
-		m_storage_provider.load(m_value);
-		return(m_value);
-	}
-
-	void set(const T& nv)
+	template<typename U> void set(U&& nv)
 	{
 		validate(nv);
-		m_value = nv;
-		m_storage_provider.save(m_value);
-		fire_update_event();
-	}
-
-	void set(T&& nv)
-	{
-		validate(nv);
-		m_value = std::move(nv);
+		m_value = std::forward<U>(nv);
 		m_storage_provider.save(m_value);
 		fire_update_event();
 	}
@@ -177,16 +170,9 @@ private:
 struct file_storage_provider
 {
 	explicit file_storage_provider(const char* path) : m_path(path) {}
-	~file_storage_provider() = default;
-
-	file_storage_provider(const file_storage_provider&) = delete;
-	file_storage_provider(file_storage_provider&&) = default;
-
-	file_storage_provider& operator = (const file_storage_provider&) = delete;
-	file_storage_provider& operator = (file_storage_provider&&) = default;
 
 	template<typename T>
-	std::enable_if_t<std::is_trivial_v<T> && std::is_standard_layout_v<T>, void>
+		std::enable_if_t<std::is_trivial_v<T> && std::is_standard_layout_v<T>, void>
 	save(const T& v) const
 	{
 		using out_char_t = typename std::ofstream::char_type;
@@ -200,7 +186,7 @@ struct file_storage_provider
 	}
 
 	template<typename T>
-	std::enable_if_t<std::is_trivial_v<T> && std::is_standard_layout_v<T>, void>
+		std::enable_if_t<std::is_trivial_v<T> && std::is_standard_layout_v<T>, void>
 	load(T& v) const
 	{
 		using in_char_t = typename std::ifstream::char_type;
@@ -282,50 +268,27 @@ template<typename T, typename P>
 class basic_property : public P
 {
 public:
-	using PT = P;
-
 	basic_property() = default;
-	~basic_property() = default;
 
-	basic_property(const T& v) : PT(v) {}
-	basic_property(T&& v) :  PT(std::move(v)) {}
+	basic_property(const T& v) : P(v) {}
+	basic_property(T&& v) :  P(std::move(v)) {}
 
-	basic_property(const basic_property& p) : PT(p.get()) {}
-	basic_property(basic_property&& p) : PT(std::move(p.get())) {}
+	basic_property(const basic_property& p) : P(p.get()) {}
+	basic_property(basic_property&& p) : P(std::move(p.get())) {}
 
-	template<typename U, typename P2> basic_property(const basic_property<U, P2>& p) : PT(p.get()) {}
-	template<typename U, typename P2> basic_property(basic_property<U, P2>&& p) : PT(std::move(p.get())) {}
+	template<typename U, typename P2> basic_property(const basic_property<U, P2>& p) : P(p.get()) {}
+	template<typename U, typename P2> basic_property(basic_property<U, P2>&& p) : P(std::move(p.get())) {}
 
 	template<typename... A, std::enable_if_t<
-		std::is_constructible_v<PT, A...>>* = nullptr>
-	basic_property(A&&... a) : PT(std::forward<A>(a)...) {}
+		std::is_constructible_v<P, A...>>* = nullptr>
+	basic_property(A&&... a) : P(std::forward<A>(a)...) {}
 
 	template<typename V, std::enable_if_t<
-		std::is_constructible_v<PT, std::initializer_list<V>>>* = nullptr>
-	basic_property(std::initializer_list<V> l) : PT(std::move(l)) {}
-
-	basic_property& operator = (const T& v)
-	{
-		set(v);
-		return *this;
-	}
-
-	basic_property& operator = (T&& v)
-	{
-		set(std::move(v));
-		return *this;
-	}
+		std::is_constructible_v<P, std::initializer_list<V>>>* = nullptr>
+	basic_property(std::initializer_list<V> l) : P(std::move(l)) {}
 
 	template<typename U>
-	std::enable_if_t<!is_property_v<U>, basic_property&>
-	operator = (const U& v)
-	{
-		set(v);
-		return *this;
-	}
-
-	template<typename U>
-	std::enable_if_t<!is_property_v<U>, basic_property&>
+		std::enable_if_t<!is_property_v<U>, basic_property&>
 	operator = (U&& v)
 	{
 		set(std::forward<U>(v));
@@ -342,22 +305,6 @@ public:
 	basic_property& operator = (basic_property&& p)
 	{
 		if(this != &p)
-			set(std::move(p.get()));
-		return *this;
-	}
-
-	template<typename U>
-	basic_property& operator = (const basic_property<U, P>& p)
-	{
-		if(this != (decltype(this))&p)
-			set(p.get());
-		return *this;
-	}
-
-	template<typename U>
-	basic_property& operator = (basic_property<U, P>&& p)
-	{
-		if(this != (decltype(this))&p)
 			set(std::move(p.get()));
 		return *this;
 	}
@@ -411,22 +358,16 @@ public:
 		return *this; \
 	} \
 	template<typename U> \
-	basic_property& operator op (const U& v) \
+		std::enable_if_t<!is_property_v<U>, basic_property&> \
+	operator op (const U& v) \
 	{ \
 		auto temp(get()); \
 		temp op v; \
 		set(std::move(temp)); \
 		return *this; \
 	} \
-	basic_property& operator op (const basic_property& p) \
-	{ \
-		auto temp(get()); \
-		temp op p.get(); \
-		set(std::move(temp)); \
-		return *this; \
-	} \
-	template<typename U> \
-	basic_property& operator op (const basic_property<U, P>& p) \
+	template<typename U, typename V> \
+	basic_property& operator op (const basic_property<U, V>& p) \
 	{ \
 		auto temp(get()); \
 		temp op p.get(); \
@@ -445,11 +386,11 @@ public:
 	PROPERTY_OPERATOR(<<=)
 	#undef PROPERTY_OPERATOR
 
-	decltype(auto) get() { return(PT::get()); }
-	decltype(auto) get() const { return(PT::get()); }
+	decltype(auto) get() { return(P::get()); }
+	decltype(auto) get() const { return(P::get()); }
 
-	void set(const T& v) { PT::set(v); }
-	void set(T&& v) { PT::set(std::move(v)); }
+	void set(const T& v) { P::set(v); }
+	void set(T&& v) { P::set(std::move(v)); }
 
 	explicit operator T& () { return get(); }
 	operator const T& () const { return get(); }
@@ -477,13 +418,15 @@ public:
 #error "PROPERTY_OPERATOR should not be defined!"
 #endif
 #define PROPERTY_OPERATOR(op) \
-template<typename T2, typename P2, typename V, std::enable_if_t<!is_property_v<V>, int> = 0> \
+template<typename T2, typename P2, typename V, \
+	std::enable_if_t<!is_property_v<V>, int> = 0> \
 auto operator op (const basic_property<T2, P2>& lhs, const V& rhs) \
 	-> basic_property<decltype(std::declval<T2>() op std::declval<V>()), P2> \
 { \
 	return basic_property(lhs.get() op rhs); \
 } \
-template<typename V, typename T2, typename P2, std::enable_if_t<!is_property_v<V>, int> = 0> \
+template<typename V, typename T2, typename P2, \
+	std::enable_if_t<!is_property_v<V>, int> = 0> \
 auto operator op (const V& lhs, const basic_property<T2, P2>& rhs) \
 	-> basic_property<decltype(std::declval<V>() op std::declval<T2>()), P2> \
 { \

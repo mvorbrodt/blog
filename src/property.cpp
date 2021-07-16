@@ -13,15 +13,15 @@ int main()
 {
 	using namespace std;
 
-	// W/ STORAGE BEING FILE ON DISK OR RAM (RAM == DEFAULT PROPERTY)
-	file_property<std::string>  disk_p1( "initial value 1", file_storage_provider("/Users/martin/disk_p1.txt"));
-	file_property<std::string>  disk_p2( "initial value 2", file_storage_provider("/Users/martin/disk_p2.txt"));
-	file_property<std::wstring> disk_p3(L"initial value 3", file_storage_provider("/Users/martin/disk_p3.txt"));
-	file_property<std::wstring> disk_p4(L"initial value 4", file_storage_provider("/Users/martin/disk_p4.txt"));
-	file_property<char>         disk_p5('C',                file_storage_provider("/Users/martin/disk_p5.txt"));
-	file_property<int>          disk_p6(17,                 file_storage_provider("/Users/martin/disk_p6.txt"));
-	file_property<short>        disk_p7(11,                 file_storage_provider("/Users/martin/disk_p7.txt"));
-	file_property<long long>    disk_p8(0xDEADBEEF,         file_storage_provider("/Users/martin/disk_p8.txt"));
+	// W/ STORAGE BEING FILE ON DISK
+	file_property<std::string>  disk_p1(file_storage_provider("/Users/martin/disk_p1.txt"), "initial value 1");
+	file_property<std::string>  disk_p2(file_storage_provider("/Users/martin/disk_p2.txt"), "initial value 2");
+	file_property<std::wstring> disk_p3(file_storage_provider("/Users/martin/disk_p3.txt"), L"initial value 3");
+	file_property<std::wstring> disk_p4(file_storage_provider("/Users/martin/disk_p4.txt"), L"initial value 4");
+	file_property<char>         disk_p5(file_storage_provider("/Users/martin/disk_p5.txt"), 'C');
+	file_property<int>          disk_p6(file_storage_provider("/Users/martin/disk_p6.txt"), 17);
+	file_property<short>        disk_p7(file_storage_provider("/Users/martin/disk_p7.txt"), -1);
+	file_property<long long>    disk_p8(file_storage_provider("/Users/martin/disk_p8.txt"), 0xDEADBEEF8BADF00D);
 
 	disk_p1.add_update_event([](file_property<std::string>* p) { cout << "~~~ disk_p1 updated with value: " << (*p) << endl; });
 	disk_p2.add_update_event([](decltype(disk_p2)* p) { cout << "~~~ disk_p2 updated with value: " << (*p) << endl; });
@@ -32,13 +32,12 @@ int main()
 	disk_p1 = std::move(disk_p2);
 	disk_p2 = "foo"s;
 	disk_p2 = disk_p1;
+	disk_p6 = disk_p7;
 
 	cout << disk_p1 << endl;
 	cout << disk_p2 << endl;
-	cout.flush();
 	wcout << disk_p3 << endl;
 	wcout << disk_p4 << endl;
-	wcout.flush();
 	cout << disk_p5 << endl;
 	cout << disk_p6 << endl << endl;
 
@@ -51,14 +50,12 @@ int main()
 
 	cout << disk_p1 << endl;
 	cout << disk_p2 << endl;
-	cout.flush();
 	wcout << disk_p3 << endl;
 	wcout << disk_p4 << endl;
-	wcout.flush();
 	cout << disk_p5 << endl;
 	cout << disk_p6 << endl;
 
-	return 0;
+	//return 0;
 
 
 
