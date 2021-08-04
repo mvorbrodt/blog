@@ -1,23 +1,13 @@
 #pragma once
 
-#ifndef __cplusplus
-#error C++ compiler is required!"
-#endif
-
-#if __cplusplus < 201703L
-#error C++17 compiler is required!
-#endif
-
-static_assert(__cplusplus >= 201703L, "C++17 compiler is required!");
-
-#ifdef new
-#undef new
+#if not defined(__cplusplus) or __cplusplus < 201703L
+#error C++17 compiler is required!"
 #endif
 
 #include <new>
+#include <mutex>
 #include <memory>
 #include <vector>
-#include <utility>
 #include <functional>
 #include <unordered_set>
 #include <iostream>
@@ -39,20 +29,18 @@ namespace ndt::detail
 		void deallocate(T* ptr, std::size_t) { std::free(ptr); }
 	};
 
-	using string_t = const char*;
-
 	struct new_entry_t
 	{
 		new_entry_t(void* p = nullptr, bool a = false, std::size_t b = 0,
-			string_t f = "N/A", int l = -1, string_t fn = "N/A")
+			const char* f = "N/A", int l = -1, const char* fn = "N/A")
 		: ptr{ p }, is_array{ a }, bytes{ b }, file{ f }, line{ l }, func{ fn } {}
 
 		void*       ptr;
 		bool        is_array;
 		std::size_t bytes;
-		string_t    file;
+		const char* file;
 		int         line;
-		string_t    func;
+		const char* func;
 	};
 
 	inline std::ostream& operator << (std::ostream& os, const new_entry_t& entry)
@@ -72,7 +60,7 @@ namespace ndt::detail
 
 	using new_entry_set_t = std::unordered_set<new_entry_t, new_entry_hash_t, std::equal_to<new_entry_t>, malloc_allocator_t<new_entry_t>>;
 
-	using new_entry_list_t = std::vector<new_entry_t, malloc_allocator_t<new_entry_t>>;
+	using new_mismatch_list_t = std::vector<new_entry_t, malloc_allocator_t<new_entry_t>>;
 
 	inline auto get_new_entry_set()
 	{
@@ -85,19 +73,21 @@ namespace ndt::detail
 		return new_entry_set;
 	}
 
-	inline auto get_mismatch_list()
+	inline auto get_new_mismatch_list()
 	{
-		static new_entry_list_t* mismatch_list = []()
+		static new_mismatch_list_t* new_mismatch_list = []()
 		{
-			void* raw = std::malloc(sizeof(new_entry_list_t));
+			void* raw = std::malloc(sizeof(new_mismatch_list_t));
 			if(!raw) throw std::bad_alloc();
-			return new (raw) new_entry_list_t;
+			return new (raw) new_mismatch_list_t;
 		}();
-		return mismatch_list;
+		return new_mismatch_list;
 	}
 
 	inline void operator_delete(void* ptr, bool array_delete) noexcept
 	{
+		static std::recursive_mutex operator_delete_lock;
+		std::scoped_lock guard{ operator_delete_lock };
 		auto it = get_new_entry_set()->find(ptr);
 		if(it != get_new_entry_set()->end())
 		{
@@ -107,7 +97,7 @@ namespace ndt::detail
 			}
 			else
 			{
-				try { get_mismatch_list()->push_back(*it); }
+				try { get_new_mismatch_list()->push_back(*it); }
 				catch(...) {}
 				get_new_entry_set()->erase(it);
 			}
@@ -135,7 +125,7 @@ namespace ndt
 
 	inline void dump_mismatch()
 	{
-		if(auto mismatches = detail::get_mismatch_list(); !mismatches->empty())
+		if(auto mismatches = detail::get_new_mismatch_list(); !mismatches->empty())
 		{
 			std::cerr << "***************************\n";
 			std::cerr << "*** NEW/DELETE MISMATCH ***\n";
@@ -166,21 +156,26 @@ void* operator new (std::size_t n)
 	return ptr;
 }
 
-void* operator new (std::size_t n, ndt::detail::new_entry_t&& entry)
+void* operator new (std::size_t n, ndt::detail::new_entry_t entry)
 {
 	void* ptr = ::operator new(n);
 	entry.ptr = ptr;
-	try { ndt::detail::get_new_entry_set()->insert(std::forward<decltype(entry)>(entry)); }
+	try
+	{
+		static std::recursive_mutex operator_new_lock;
+		std::scoped_lock guard{ operator_new_lock };
+		ndt::detail::get_new_entry_set()->insert(entry);
+	}
 	catch(...) {}
 	return ptr;
 }
 
-void* operator new (std::size_t n, ndt::detail::string_t file, int line, ndt::detail::string_t func)
+void* operator new (std::size_t n, const char* file, int line, const char* func)
 {
 	return ::operator new(n, ndt::detail::new_entry_t{ nullptr, false, n, file, line, func });
 }
 
-void* operator new [] (std::size_t n, ndt::detail::string_t file, int line, ndt::detail::string_t func)
+void* operator new [] (std::size_t n, const char* file, int line, const char* func)
 {
 	return ::operator new(n, ndt::detail::new_entry_t{ nullptr, true, n, file, line, func });
 }
@@ -195,12 +190,12 @@ void operator delete [] (void* ptr) noexcept
 	ndt::detail::operator_delete(ptr, true);
 }
 
-void operator delete (void* ptr, ndt::detail::string_t, int, ndt::detail::string_t) noexcept
+void operator delete (void* ptr, const char*, int, const char*) noexcept
 {
 	ndt::detail::operator_delete(ptr, false);
 }
 
-void operator delete [] (void* ptr, ndt::detail::string_t, int, ndt::detail::string_t) noexcept
+void operator delete [] (void* ptr, const char*, int, const char*) noexcept
 {
 	ndt::detail::operator_delete(ptr, true);
 }
@@ -209,6 +204,8 @@ void operator delete [] (void* ptr, ndt::detail::string_t, int, ndt::detail::str
 Otherwise comment these warnings out and hope we get 'std::source_location' soon! \
 https://en.cppreference.com/w/cpp/utility/source_location/
 
-#ifndef new
+#if defined(new)
+#error Macro 'new' is already defined!
+#else
 #define new new(__FILE__, __LINE__, __PRETTY_FUNCTION__)
 #endif

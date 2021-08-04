@@ -2,6 +2,7 @@
 
 #include <new>
 #include <map>
+#include <mutex>
 #include <vector>
 #include <string>
 #include <utility>
@@ -64,6 +65,8 @@ void* operator new (std::size_t n, const char* file, const char* func, int line)
 	try {
 		namespace st = boost::stacktrace;
 		auto stack = st::to_string(st::stacktrace());
+		static std::recursive_mutex operator_new_lock;
+		std::scoped_lock guard{ operator_new_lock };
 		get_ptr_map().emplace(ptr, new_entry_t{ n, file, func, line, std::move(stack) });
 	} catch(...) { }
 	return ptr;
@@ -76,10 +79,16 @@ void* operator new [] (std::size_t n, const char* file, const char* func, int li
 
 void operator delete (void* ptr) noexcept
 {
+	static std::recursive_mutex operator_delete_lock;
+	std::scoped_lock guard{ operator_delete_lock };
 	auto it = get_ptr_map().find(ptr);
 	if(it != get_ptr_map().end())
 		get_ptr_map().erase(it);
 	std::free(ptr);
 }
 
+#if defined(new)
+#error Macro 'new' is already defined!
+#else
 #define new new(__FILE_NAME__, __FUNCTION__, __LINE__)
+#endif
