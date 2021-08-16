@@ -143,6 +143,8 @@ add_executable(sso sso.cpp)
 add_executable(stacktrace stacktrace.cpp)
 target_link_libraries(stacktrace ${CMAKE_DL_LIBS} ${Boost_STACKTRACE_BASIC_LIBRARY})
 
+add_executable(synchronized synchronized.hpp synchronized.cpp)
+
 add_executable(templates templates.cpp)
 
 add_custom_command(
