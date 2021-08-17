@@ -1,4 +1,3 @@
-#include <iostream>
 #include <thread>
 #include <vector>
 #include <cstdlib>
@@ -9,6 +8,7 @@ int main()
 	using namespace std;
 
 	srand(time(NULL));
+
 	synchronized<vector<int>> sv;
 	//auto sv = new vector<int>;
 
