@@ -40,14 +40,8 @@ public:
 		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
 	synchronized(std::initializer_list<V> l) : m_value(l) {}
 
-	synchronized(const synchronized& other) : m_value(other.m_value) {}
-	synchronized(synchronized&& other) : m_value(std::move(other.m_value)) {}
-
-	synchronized& operator = (synchronized other) noexcept
-	{
-		std::swap(m_value, other.m_value);
-		return *this;
-	}
+	synchronized(const synchronized&) = delete;
+	synchronized& operator = (const synchronized&) = delete;
 
 	detail::locker<T> operator -> () noexcept
 	{
@@ -56,5 +50,5 @@ public:
 
 private:
 	T m_value;
-	mutable std::recursive_mutex m_lock;
+	std::recursive_mutex m_lock;
 };
