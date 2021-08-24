@@ -26,6 +26,7 @@ add_executable(colors ansi_escape_code.hpp colors.cpp)
 add_executable(compression compression.cpp)
 target_link_libraries(compression ${LZ4_LIBRARY})
 
+add_executable(concepts concepts.cpp)
 add_executable(constructors constructors.cpp)
 
 add_executable(cpu_timer cpu_timer.cpp)
