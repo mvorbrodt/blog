@@ -36,7 +36,7 @@ add_executable(property property.cpp)
 add_executable(queue queue.hpp queue.cpp)
 add_executable(random random_test.cpp)
 add_executable(ranges ranges.cpp)
-set_source_files_properties(ranges.cpp PROPERTIES COMPILE_FLAGS "/permissive- /experimental:preprocessor")
+set_source_files_properties(ranges.cpp PROPERTIES COMPILE_FLAGS "/experimental:preprocessor") # /permissive-
 add_executable(sorting sorting.cpp)
 add_executable(sso sso.cpp)
 add_executable(synchronized synchronized.hpp synchronized.cpp)
@@ -49,6 +49,7 @@ add_executable(unordered unordered.cpp)
 
 
 add_executable(fmt fmt.cpp)
+set_source_files_properties(fmt.cpp PROPERTIES COMPILE_FLAGS "/std:c++14")
 target_link_libraries(fmt PRIVATE fmt::fmt fmt::fmt-header-only)
 
 add_executable(pstl pstl_test.cpp)
@@ -96,6 +97,7 @@ add_executable(benchmark-google benchmark-google.cpp)
 target_link_libraries(benchmark-google PRIVATE benchmark::benchmark benchmark::benchmark_main shlwapi)
 
 add_executable(benchmark-nonius benchmark-nonius.cpp)
+set_source_files_properties(benchmark-nonius.cpp PROPERTIES COMPILE_FLAGS "/std:c++14")
 target_link_libraries(benchmark-nonius PRIVATE Nonius::nonius)
 
 
