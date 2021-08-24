@@ -25,5 +25,5 @@ cd ..
 mkdir llvm 2> /dev/null
 cd llvm
 rm CMakeCache.txt 2> /dev/null
-cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake ..
 cd ..

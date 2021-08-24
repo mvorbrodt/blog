@@ -63,11 +63,20 @@ T sub_add(T x, T y, T z) noexcept { return x - y + z; }
 
 
 
-template<typename T> requires std::integral<T> // ACCEPT any integral type
-void foo(T t) { std::cout << "1st overload called with t = " << t << std::endl; }
+template<typename T> requires(std::integral<T> and sizeof(T) >= 4) // ACCEPT any integral type 32-bit or larger
+void foo(T t) { std::cout << "1st foo overload called with t = " << t << std::endl; }
 
-template<std::integral T> requires(std::same_as<T, short> or sizeof(T) == 2) // ACCEPT only 'short' or 'sizeof eq 2'
-void foo(T t) { std::cout << "2nd overload called with t = " << t << std::endl; }
+template<std::integral T> requires std::same_as<T, short> // ACCEPT only 'short'
+void foo(T t) { std::cout << "2nd foo overload called with t = " << t << std::endl; }
+
+void foo(auto t) requires std::same_as<decltype(t), char> // ACCEPT only 'char'
+{ std::cout << "3rd foo overload called with t = " << (int)t << std::endl; }
+
+void bar(std::integral auto t) // ACCEPT any integral type
+{ std::cout << "1st bar overload called with t = " << t << std::endl; }
+
+void bar(std::floating_point auto t) // ACCEPT any floating point type
+{ std::cout << "2nd bar overload called with t = " << t << std::endl; }
 
 
 
@@ -86,6 +95,17 @@ int main()
 	add_sub<long long>(5, 6, 7);
 	sub_add<long long>(5, 6, 7);
 
-	foo(17); // calls 1st overload
-	foo(short{20}); // calls 2nd overload
+	foo(11); // calls 1st overload
+	foo(short{14}); // calls 2nd overload
+	foo(char{17}); // calls 3rd overload
+
+	bar(20); // calls 1st overload
+	bar(23.f); // calls 2nd overload
+
+	// RESTRICT local variable types to integral and floating point
+	[[maybe_unused]] std::integral auto i = 11; // int
+	[[maybe_unused]] std::floating_point auto f = 11.f; // float
+	[[maybe_unused]] std::floating_point auto d = 11.; // double
+	// std::integral auto i2 = 11.f; // ERROR because 'int' is expected
+	// std::floating_point auto f2 = 11; // ERROR because 'float' is expected
 }
