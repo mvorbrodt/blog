@@ -2,19 +2,19 @@
 #include <concepts>
 #include <type_traits>
 
-template<typename T> concept always_good = true;
-template<typename T> concept always_good_2 = requires { requires true; };
+template<typename T> concept always_true = true;
+template<typename T> concept always_true_2 = requires { requires true; };
 
-template<typename T> requires always_good<T> void good(T) {} // ALWAYS compiles
-template<typename T> requires always_good_2<T> void good_2(T) {} // ALWAYS compiles
+template<typename T> requires always_true<T> void good(T) {} // ALWAYS compiles
+template<typename T> requires always_true_2<T> void good_2(T) {} // ALWAYS compiles
 
 
 
-template<typename T> concept always_bad = false;
-template<typename T> concept always_bad_2 = requires { requires false; };
+template<typename T> concept always_false = false;
+template<typename T> concept always_false_2 = requires { requires false; };
 
-template<typename T> requires always_bad<T> void bad(T) {} // NEVER compiles
-template<typename T> requires always_bad_2<T> void bad_2(T) {} // NEVER compiles
+template<typename T> requires always_false<T> void bad(T) {} // NEVER compiles
+template<typename T> requires always_false_2<T> void bad_2(T) {} // NEVER compiles
 
 
 
@@ -79,14 +79,18 @@ void bar(std::floating_point auto t) // ACCEPT any floating point type
 { std::cout << "2nd bar overload called with t = " << t << std::endl; }
 
 
+#include <string>
+template<typename T> auto xxx(T a, T b) { return a + b; }
 
 int main()
 {
-	good(11); // ALWAYS GOOD because 'always_good' concept used
-	good_2(11); // ALWAYS GOOD because 'always_good_2' concept used
+	std::string s1("s1"), s2("s2");
+	auto s3 = xxx(s1, s2);
+	good(11); // ALWAYS GOOD because 'always_true' concept used
+	good_2(11); // ALWAYS GOOD because 'always_true_2' concept used
 
-	// bad(14); // ALWAYS ERROR because 'always_bad' concept used
-	// bad_2(14); // ALWAYS ERROR because 'always_bad_2' concept used
+	// bad(14); // ALWAYS ERROR because 'always_false' concept used
+	// bad_2(14); // ALWAYS ERROR because 'always_false_2' concept used
 
 	add(1, 2);
 	// add<short>(1, 2); // ERROR because of 'requires sizeof(T) >= sizeof(int);' in 'can_add'
