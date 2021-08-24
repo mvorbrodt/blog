@@ -79,13 +79,9 @@ void bar(std::floating_point auto t) // ACCEPT any floating point type
 { std::cout << "2nd bar overload called with t = " << t << std::endl; }
 
 
-#include <string>
-template<typename T> auto xxx(T a, T b) { return a + b; }
 
 int main()
 {
-	std::string s1("s1"), s2("s2");
-	auto s3 = xxx(s1, s2);
 	good(11); // ALWAYS GOOD because 'always_true' concept used
 	good_2(11); // ALWAYS GOOD because 'always_true_2' concept used
 
