@@ -17,6 +17,8 @@ add_executable(benchmark-hayai benchmark-hayai.cpp)
 target_link_libraries(benchmark-hayai ${HAYAI_LIBRARIES})
 
 add_executable(benchmark-nonius benchmark-nonius.cpp)
+set_source_files_properties(benchmark-nonius.cpp PROPERTIES COMPILE_FLAGS "-std=c++14")
+
 add_executable(bloom bloom.hpp hash.hpp bloom.cpp)
 add_executable(c_api_lambda c_api_lambda.cpp)
 add_executable(cache cache.cpp)
