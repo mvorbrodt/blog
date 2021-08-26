@@ -80,6 +80,24 @@ void bar(std::floating_point auto t) // ACCEPT any floating point type
 
 
 
+template<typename T> requires std::integral<T>
+struct S // ACCEPT only integral types
+{
+	S(T) {}
+
+	template<typename U> requires std::floating_point<U>
+	void func(U) {} // ACCEPT only floating point types
+};
+
+
+
+template<typename T> auto qaz(T t) { return t; } // RETURN the type/value passed in
+// RESTRICT global variable types to integral and floating point
+[[maybe_unused]] std::integral       auto g_i = qaz(3); // ACCEPT only integral types
+[[maybe_unused]] std::floating_point auto g_f = qaz(3.14159); // ACCEPT only floating point types
+
+
+
 int main()
 {
 	good(11); // ALWAYS GOOD because 'always_true' concept used
@@ -103,9 +121,12 @@ int main()
 	bar(23.f); // calls 2nd overload
 
 	// RESTRICT local variable types to integral and floating point
-	[[maybe_unused]] std::integral auto i = 11; // int
+	[[maybe_unused]] std::integral       auto i = 11; // int
 	[[maybe_unused]] std::floating_point auto f = 11.f; // float
 	[[maybe_unused]] std::floating_point auto d = 11.; // double
-	// std::integral auto i2 = 11.f; // ERROR because 'int' is expected
+	// std::integral       auto i2 = 11.f; // ERROR because 'int' is expected
 	// std::floating_point auto f2 = 11; // ERROR because 'float' is expected
+
+	S s{ 123 }; // ACCEPT only integral types
+	s.func(1.0); // ACCEPT only floating point types
 }
