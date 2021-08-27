@@ -58,7 +58,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 
 function(add_module name)
 	add_custom_target(
-		${name}.pcm
+		${name}
 		COMMAND
 			${CMAKE_CXX_COMPILER}
 			${CMAKE_CXX_FLAGS}
@@ -72,7 +72,7 @@ function(add_module name)
 	)
 	# TBB and ParallelSTL dependency is needed when building with
 	# LLVM 13 compiled with PSTL support enabled... don't ask me why :(
-	# add_dependencies(${name}.pcm TBB::tbb pstl::ParallelSTL)
+	add_dependencies(${name} TBB::tbb pstl::ParallelSTL)
 endfunction()
 
 add_subdirectory(src)

@@ -1,5 +1,4 @@
-#include <iostream>
-
+import <iostream>;
 import module_1;
 import module_2;
 

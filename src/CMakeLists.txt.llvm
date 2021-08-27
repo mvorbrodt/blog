@@ -106,10 +106,10 @@ add_executable(memory_pool memory_pool.hpp memory_pool.cpp)
 add_module(module_1 module_1.cpp)
 add_module(module_2 module_2.cpp)
 add_executable(modules modules.cpp module_1.cpp module_2.cpp)
-add_dependencies(modules module_1.pcm module_2.pcm)
+add_dependencies(modules module_1 module_2)
 # TBB and ParallelSTL dependency is needed when building with
-# LLVM 13 compiled with PSTL support enabled... don't ask me why :(
-# add_dependencies(modules TBB::tbb pstl::ParallelSTL)
+# LLVM 13 compiled with PSTL support enabled...
+add_dependencies(modules TBB::tbb pstl::ParallelSTL)
 set_source_files_properties(
 	modules.cpp
 	PROPERTIES COMPILE_FLAGS
