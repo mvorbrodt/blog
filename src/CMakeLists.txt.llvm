@@ -107,7 +107,14 @@ add_module(module_1 module_1.cpp)
 add_module(module_2 module_2.cpp)
 add_executable(modules modules.cpp module_1.cpp module_2.cpp)
 add_dependencies(modules module_1.pcm module_2.pcm)
-set_source_files_properties(modules.cpp PROPERTIES COMPILE_FLAGS "-std=c++20 -fmodules -fbuiltin-module-map -fprebuilt-module-path=${MODULE_OUTPUT_PATH}")
+# TBB and ParallelSTL dependency is needed when building with
+# LLVM 13 compiled with PSTL support enabled... don't ask me why :(
+# add_dependencies(modules TBB::tbb pstl::ParallelSTL)
+set_source_files_properties(
+	modules.cpp
+	PROPERTIES COMPILE_FLAGS
+		"${CMAKE_CXX_FLAGS} -std=c++20 -fmodules -fbuiltin-module-map -fprebuilt-module-path=${MODULE_OUTPUT_PATH}"
+)
 
 add_executable(multi_hash hash.hpp multi_hash.cpp)
 add_executable(new new.cpp)

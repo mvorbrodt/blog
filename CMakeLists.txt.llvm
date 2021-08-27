@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19.2)
+cmake_minimum_required(VERSION 3.21.1)
 
 set(CMAKE_TOOLCHAIN_FILE "/usr/local/Cellar/vcpkg/2021.05.12/libexec/scripts/buildsystems/vcpkg.cmake")
 
@@ -70,6 +70,9 @@ function(add_module name)
 			-Xclang -emit-module-interface
 			-o ${MODULE_OUTPUT_PATH}/${name}.pcm
 	)
+	# TBB and ParallelSTL dependency is needed when building with
+	# LLVM 13 compiled with PSTL support enabled... don't ask me why :(
+	# add_dependencies(${name}.pcm TBB::tbb pstl::ParallelSTL)
 endfunction()
 
 add_subdirectory(src)
