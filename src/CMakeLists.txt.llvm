@@ -102,6 +102,13 @@ add_executable(lrpc_s lsf.hpp socket.hpp lrpc_proto.hpp lrpc_s.cpp)
 add_executable(lsf lsf.hpp lsf.cpp)
 add_executable(membars membars.cpp)
 add_executable(memory_pool memory_pool.hpp memory_pool.cpp)
+
+add_module(module_1 module_1.cpp)
+add_module(module_2 module_2.cpp)
+add_executable(modules modules.cpp module_1.cpp module_2.cpp)
+set_source_files_properties(modules.cpp PROPERTIES COMPILE_FLAGS "-std=c++20 -fmodules -fbuiltin-module-map -fimplicit-module-maps -fprebuilt-module-path=${MODULE_OUTPUT_PATH}")
+add_dependencies(modules module_1.pcm module_2.pcm)
+
 add_executable(multi_hash hash.hpp multi_hash.cpp)
 add_executable(new new.cpp)
 add_executable(newtrace newtrace.hpp newtrace.cpp)
@@ -154,6 +161,7 @@ add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService.h
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService.cpp
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service_types.h
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService_server.skeleton.cpp
 	COMMAND ${THRIFT_COMPILER} -out ${CMAKE_CURRENT_SOURCE_DIR}
 	-gen cpp ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service.thrift)
 add_executable(thrift_c thrift_service_c.cpp ThriftService.cpp)

@@ -48,14 +48,37 @@ find_package(benchmark   MODULE REQUIRED)
 include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
 
-set(CMAKE_CXX_FLAGS "-Wall -pedantic ${CMAKE_CXX_FLAGS}")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
+set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
+set(MODULE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+
+function(add_module name)
+	add_custom_target(${name}.pcm
+		COMMAND
+			${CMAKE_CXX_COMPILER}
+			${CMAKE_CXX_FLAGS}
+			-fmodules
+			-std=c++20
+			-stdlib=libc++
+			-Wall
+			-Wpedantic
+			-c ${CMAKE_CURRENT_SOURCE_DIR}/${ARGN}
+			-Xclang -emit-module-interface
+			-o ${MODULE_OUTPUT_PATH}/${name}.pcm
+	)
+endfunction()
+
+add_compile_options(-Wall)
+add_compile_options(-Wpedantic)
+# add_compile_options(-fmodules)
+# add_compile_options(-fbuiltin-module-map)
+# add_compile_options(-fimplicit-module-maps)
+# add_compile_options(-fprebuilt-module-path=${MODULE_OUTPUT_PATH})
+
 set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native -O3 -mllvm -polly -mllvm -polly-parallel -mllvm -polly-vectorizer=stripmine")
 # set(CMAKE_EXE_LINKER_FLAGS "-lgomp ${CMAKE_EXE_LINKER_FLAGS}")
-
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
-set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
 add_subdirectory(src)
 
