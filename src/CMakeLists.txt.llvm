@@ -113,7 +113,7 @@ add_dependencies(modules TBB::tbb pstl::ParallelSTL)
 set_source_files_properties(
 	modules.cpp
 	PROPERTIES COMPILE_FLAGS
-		"${CMAKE_CXX_FLAGS} -std=c++20 -fmodules -fbuiltin-module-map -fprebuilt-module-path=${MODULE_OUTPUT_PATH}"
+		"-std=c++20 -fmodules -fbuiltin-module-map -fprebuilt-module-path=${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
 add_executable(multi_hash hash.hpp multi_hash.cpp)

@@ -65,10 +65,12 @@ function(add_module name)
 			-std=c++20
 			-fmodules
 			-fbuiltin-module-map
-			-fprebuilt-module-path=${MODULE_OUTPUT_PATH}
+			-fprebuilt-module-path=${CMAKE_CURRENT_SOURCE_DIR}
 			-c ${CMAKE_CURRENT_SOURCE_DIR}/${ARGN}
 			-Xclang -emit-module-interface
-			-o ${MODULE_OUTPUT_PATH}/${name}.pcm
+			-o ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pcm
+		BYPRODUCTS
+			${CMAKE_CURRENT_SOURCE_DIR}/${name}.pcm
 	)
 	# TBB and ParallelSTL dependency is needed when building with
 	# LLVM 13 compiled with PSTL support enabled... don't ask me why :(
