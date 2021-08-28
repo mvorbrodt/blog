@@ -22,6 +22,7 @@ cd src
 ln -sf CMakeLists.txt.llvm CMakeLists.txt
 cd ..
 
+rm -rf llvm 2> /dev/null
 mkdir llvm 2> /dev/null
 cd llvm
 rm CMakeCache.txt 2> /dev/null
