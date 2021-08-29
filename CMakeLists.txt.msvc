@@ -44,7 +44,6 @@ find_package(unofficial-curlpp CONFIG REQUIRED)
 include_directories("C:\\Code\\vcpkg\\installed\\x64-windows\\include")
 link_directories("C:\\Code\\vcpkg\\installed\\x64-windows\\lib")
 
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20 /permissive-")
 set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
@@ -52,8 +51,8 @@ set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
 add_subdirectory(src)
 
-#get_cmake_property(_variableNames VARIABLES)
-#list (SORT _variableNames)
-#foreach (_variableName ${_variableNames})
+# get_cmake_property(_variableNames VARIABLES)
+# list (SORT _variableNames)
+# foreach (_variableName ${_variableNames})
 #	message(STATUS "${_variableName}=${${_variableName}}")
-#endforeach()
+# endforeach()

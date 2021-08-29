@@ -36,7 +36,7 @@ add_executable(property property.cpp)
 add_executable(queue queue.hpp queue.cpp)
 add_executable(random random_test.cpp)
 add_executable(ranges ranges.cpp)
-set_source_files_properties(ranges.cpp PROPERTIES COMPILE_FLAGS "/experimental:preprocessor") # /permissive-
+set_source_files_properties(ranges.cpp PROPERTIES COMPILE_FLAGS "/experimental:preprocessor")
 add_executable(sorting sorting.cpp)
 add_executable(sso sso.cpp)
 add_executable(synchronized synchronized.hpp synchronized.cpp)

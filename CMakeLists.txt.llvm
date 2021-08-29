@@ -12,14 +12,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_OSX_ARCHITECTURES "x86_64")
 
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake;/usr/local/lib/cmake;/usr/local/lib/cmake/llvm;/usr/local/share/cmake/Modules")
+
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Default build type: Debug" FORCE)
 endif()
-
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-list(APPEND CMAKE_MODULE_PATH "/usr/local/lib/cmake")
-list(APPEND CMAKE_MODULE_PATH "/usr/local/lib/cmake/llvm")
-list(APPEND CMAKE_MODULE_PATH "/usr/local/share/cmake/Modules")
 
 find_package(TBB         CONFIG REQUIRED)
 find_package(ParallelSTL CONFIG REQUIRED)
@@ -53,7 +50,7 @@ set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 set(MODULE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
 add_compile_options(-Wall -Wpedantic)
-# set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -Wpedantic")
+
 set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 
