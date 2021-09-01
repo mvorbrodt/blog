@@ -1,7 +1,7 @@
 #pragma once
 
 #if not defined(__cplusplus) or __cplusplus < 201703L
-#error C++17 compiler is required!"
+#error "C++17 compiler is required!"
 #endif
 
 #include <new>

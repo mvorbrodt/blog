@@ -25,6 +25,5 @@ cd ..
 rm -rf llvm 2> /dev/null
 mkdir llvm 2> /dev/null
 cd llvm
-rm CMakeCache.txt 2> /dev/null
 cmake ..
 cd ..
