@@ -6,6 +6,7 @@
 #include <thread>
 #include <barrier>
 #include <latch>
+#include <memory>
 
 template<typename Proc>
 class out_of_line
@@ -52,14 +53,41 @@ struct E
 		co_yield v++;
 }*/
 
+#include <iostream>
+#include <memory>
+#include <type_traits>
 
+using HANDLE = std::byte*;
 
+HANDLE make_HANDLE() { static auto k_h = HANDLE{}; return ++k_h; } // AKA Win32's CreateFile etc
+void close_HANDLE(HANDLE h) { std::cout << "HANDLE_close(" << h << ")" << std::endl; } // AKA Win32's CloseHandle etc
+
+#if __cplusplus >= 202002 // C++20; using lambda in unevaluated context
+using HANDLE_ptr = std::unique_ptr<
+	std::remove_pointer_t<HANDLE>,
+	decltype([](HANDLE h) { close_HANDLE(h); })>;
+#else
+[[maybe_unused]] inline static auto HANDLE_deleter = [](HANDLE h) { close_HANDLE(h); };
+using HANDLE_ptr = std::unique_ptr<std::remove_pointer_t<HANDLE>, decltype(HANDLE_deleter)>;
+#endif
+
+int main()
+{
+	auto h1 = HANDLE_ptr(make_HANDLE());
+	auto h2 = HANDLE_ptr(make_HANDLE());
+	auto h3 = HANDLE_ptr(make_HANDLE());
+	std::cout << h1 << std::endl;
+	std::cout << h2 << std::endl;
+	std::cout << h3 << std::endl;
+}
+
+/*
 int main()
 {
 	using namespace std;
 	std::counting_semaphore cs = { 5 };
 	std::binary_semaphore bs = { 1 };
-	/*osyncstream(cout)*/ cout << cs.max() << endl << bs.max() << endl << endl;
+	osyncstream(cout) cout << cs.max() << endl << bs.max() << endl << endl;
 
 	E<E1, E2> e1;
 	cout << "sizeof(E) with 2 [[no_unique_address]] = " << sizeof(e1) << endl;
@@ -81,3 +109,4 @@ int main()
 	l.arrive_and_wait();
 	cout << "latch hit!" << endl;
 }
+*/
