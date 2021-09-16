@@ -13,6 +13,9 @@ void void_only(auto*) = delete; // C++20 and newer...
 template<typename T> void void_only(T*) = delete; // prior to C++20...
 #endif
 
+// ALL other overloads, not just 1 pointer parameter signatures...
+template<typename ...Ts> void void_only(Ts&&...) = delete;
+
 int main()
 {
     any_type(new char);
@@ -22,7 +25,8 @@ int main()
     void_only(nullptr);      // 1st overload
     void_only((void*)0xABC); // 2nd overload, type must be void*
 
-    // void_only(0);         // ERROR, ambiguous
-    // void_only(NULL);      // ERROR, ambiguous
-    // void_only((long*)0);  // ERROR, explicitly deleted
+    // void_only(0); // ERROR, ambiguous
+    // void_only(NULL); // ERROR, ambiguous
+    // void_only((long*)0); // ERROR, explicitly deleted
+    // void_only((int*)1, (int*)2); // ERROR, also explicitly deleted
 }
