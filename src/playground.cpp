@@ -45,6 +45,20 @@ struct E
 	[[no_unique_address]] T2 m_e2;
 };
 
+template<typename T, typename PD>
+requires(not std::is_pointer_v<T> and not std::is_array_v<T>)
+struct P
+{
+	P(T v, PD p = PD()) : m_v{v}, m_p{p} {}
+	~P() { m_p(m_v); }
+
+private:
+	T m_v;
+	[[no_unique_address]] PD m_p;
+};
+
+P<int, decltype([](int v) { std::cout << "deleting " << v << std::endl; })> p1{20};
+
 
 
 /*auto gen(int v = 0)
