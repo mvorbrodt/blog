@@ -1,4 +1,5 @@
 #!/bin/zsh
+set -e
 
 # pull in environment variables like $PATH etc..
 #
