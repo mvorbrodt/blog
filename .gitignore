@@ -18,6 +18,8 @@ blog.code-workspace
 build/
 cmake-build-debug/
 cmake-build-release/
+cmake-build-minsizerel/
+cmake-build-relwithdebinfo/
 cmake_install.cmake
 llvm/
 msvc/
