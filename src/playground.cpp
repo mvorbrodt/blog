@@ -1,5 +1,9 @@
 #include <iostream>
 #include <string>
+#include <thread>
+#include <mutex>
+#include <latch>
+#include <barrier>
 #include <unordered_set>
 using namespace std;
 
@@ -15,6 +19,9 @@ using obj_set = unordered_set
 	decltype([](const auto& it) { return hash<size_t>()(it.ID); }), // hash
 	decltype([](const auto& lhs, const auto& rhs) { return lhs.ID == rhs.ID; }) // equality
 >;
+
+auto l = std::latch(3);
+auto b = std::barrier(3);
 
 int main()
 {
