@@ -15,7 +15,7 @@ set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake;/usr/local/lib/cmake;/usr/local/lib/cmake/llvm;/usr/local/share/cmake/Modules")
 
 if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Default build type: Debug" FORCE)
+	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type: Release" FORCE)
 endif()
 
 find_package(Threads            REQUIRED)
