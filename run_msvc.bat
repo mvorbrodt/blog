@@ -17,4 +17,5 @@ REM msbuild -m blog.sln -t:Rebuild -p:Configuration=Debug
 REM msbuild -m blog.sln -t:Clean -p:Configuration=Release
 REM msbuild -m blog.sln -t:Rebuild -p:Configuration=Release
 
+cd ..
 pause
