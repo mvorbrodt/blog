@@ -2,15 +2,19 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 
+#if defined(_LIBCPP_HAS_PARALLEL_ALGORITHMS) or (defined(_WIN64) and defined(_HAS_CXX17))
 #include <algorithm>
 #include <execution>
+#else
+#include <pstl/algorithm>
+#include <pstl/execution>
+#endif
 #include <random>
 #include <vector>
 #include <cstdint>
 
 TEST_CASE("STL vs PSTL", "[benchmark]")
 {
-#if defined(_LIBCPP_HAS_PARALLEL_ALGORITHMS) or (defined(_WIN64) and defined(_HAS_CXX17))
 	using namespace std;
 	using namespace std::execution;
 
@@ -36,7 +40,4 @@ TEST_CASE("STL vs PSTL", "[benchmark]")
 		sort(par_unseq, begin(data), end(data));
 		[[maybe_unused]] auto is = is_sorted(par_unseq, begin(data), end(data));
 	};
-#else
-	CATCH_ERROR("Parallel STL missing!");
-#endif
 }
