@@ -18,33 +18,20 @@ TEST_CASE("STL vs PSTL", "[benchmark]")
 	using namespace std;
 	using namespace std::execution;
 
-	auto I = 100;
-	auto N = 10'000'000ull;
-	auto seed = random_device{}();
-
-	using vec_of_64_bit_ints_t = vector<uint64_t>;
+	auto gen = mt19937_64{ random_device()() };
+	auto data = vector<uint64_t>(1'000'000);
 
 	BENCHMARK("STL")
 	{
-		auto gen = mt19937_64{ seed };
-		auto data = vec_of_64_bit_ints_t(N);
-		for(auto i = 0; i < I; ++i)
-		{
-			generate(begin(data), end(data), gen);
-			sort(begin(data), end(data));
-			[[maybe_unused]] auto is = is_sorted(begin(data), end(data));
-		}
+		generate(begin(data), end(data), gen);
+		sort(begin(data), end(data));
+		[[maybe_unused]] auto is = is_sorted(begin(data), end(data));
 	};
 
 	BENCHMARK("PSTL")
 	{
-		auto gen = mt19937_64{ seed };
-		auto data = vec_of_64_bit_ints_t(N);
-		for(auto i = 0; i < I; ++i)
-		{
-			generate(par_unseq, begin(data), end(data), gen);
-			sort(par_unseq, begin(data), end(data));
-			[[maybe_unused]] auto is = is_sorted(par_unseq, begin(data), end(data));
-		}
+		generate(par_unseq, begin(data), end(data), gen);
+		sort(par_unseq, begin(data), end(data));
+		[[maybe_unused]] auto is = is_sorted(par_unseq, begin(data), end(data));
 	};
 }
