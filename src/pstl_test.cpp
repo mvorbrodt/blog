@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <execution>
 #else
-#include <pstl/algorithm>
-#include <pstl/execution>
+#include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/execution>
 #endif
 #include <random>
 #include <vector>
