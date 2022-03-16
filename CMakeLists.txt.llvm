@@ -18,6 +18,8 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type: Release" FORCE)
 endif()
 
+set(OPENSSL_ROOT_DIR "/usr/local/Cellar/openssl@3/3.0.1")
+
 find_package(Threads            REQUIRED)
 find_package(TBB         CONFIG REQUIRED)
 find_package(oneDPL      CONFIG REQUIRED)
@@ -51,6 +53,7 @@ set(MODULE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
 add_compile_options(-Wall -Wpedantic)
 
+set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${CXXFLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 
