@@ -5,7 +5,7 @@ set(CMAKE_TOOLCHAIN_FILE "/Users/martin/Code/vcpkg/scripts/buildsystems/vcpkg.cm
 project(blog VERSION 1.0
 	DESCRIPTION "Vorbrodt's C++ Blog - Code Samples"
 	HOMEPAGE_URL "https://vorbrodt.blog"
-	LANGUAGES C CXX ASM)
+	LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
