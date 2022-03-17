@@ -17,8 +17,30 @@ void bar(const T1& t) { std::cout << "bar T1: " << t.x << std::endl; }
 void bar(const T2& t) { std::cout << "bar T2: " << t.y << std::endl; }
 void bar(const T3& t) { std::cout << "bar T3: " << t.z << std::endl; }
 
-namespace // IMPLEMENTATION DETAIL...
+class TypeErased
 {
+public:
+	template<typename T> using ByValue = std::remove_cvref_t<T>;
+
+	template<typename T> requires(not std::same_as<TypeErased, ByValue<T>>)
+	TypeErased(T&& v) : value_ptr(std::make_unique<Model<ByValue<T>>>(std::forward<T>(v))) {}
+
+	TypeErased(const TypeErased& other) : value_ptr(other.value_ptr->Clone()) {}
+	TypeErased(TypeErased&&) = default;
+
+	TypeErased& operator = (TypeErased other) noexcept
+	{
+		swap(other);
+		return *this;
+	}
+
+	void swap(TypeErased& other) noexcept { std::swap(value_ptr, other.value_ptr); }
+	friend void swap(TypeErased& first, TypeErased& second) noexcept { first.swap(second); }
+
+	friend void foo(const TypeErased& erased) { erased.value_ptr->foo(); }
+	friend void bar(const TypeErased& erased) { erased.value_ptr->bar(); }
+
+private:
 	class Concept;
 	using ConceptPtr = std::unique_ptr<Concept>;
 
@@ -47,32 +69,7 @@ namespace // IMPLEMENTATION DETAIL...
 	private:
 		T my_value;
 	};
-} // ...END OF IMPLEMENTATION DETAIL
 
-class TypeErased
-{
-public:
-	template<typename T> using ByValue = std::remove_cvref_t<T>;
-
-	template<typename T> requires(not std::same_as<TypeErased, ByValue<T>>)
-	TypeErased(T&& v) : value_ptr(std::make_unique<Model<ByValue<T>>>(std::forward<T>(v))) {}
-
-	TypeErased(const TypeErased& other) : value_ptr(other.value_ptr->Clone()) {}
-	TypeErased(TypeErased&&) = default;
-
-	TypeErased& operator = (TypeErased other) noexcept
-	{
-		swap(other);
-		return *this;
-	}
-
-	void swap(TypeErased& other) noexcept { std::swap(value_ptr, other.value_ptr); }
-	friend void swap(TypeErased& first, TypeErased& second) noexcept { first.swap(second); }
-
-	friend void foo(const TypeErased& erased) { erased.value_ptr->foo(); }
-	friend void bar(const TypeErased& erased) { erased.value_ptr->bar(); }
-
-private:
 	ConceptPtr value_ptr;
 };
 
@@ -102,6 +99,7 @@ int main()
 	e3 = T3{3};
 
 	auto l = TypeErasedList{ e1, e2, e3 };
+
 	l.emplace_back(T1{});
 	l.emplace_back(T2{});
 	l.emplace_back(T3{});
