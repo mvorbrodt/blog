@@ -52,6 +52,7 @@ add_executable(echo_c event.hpp socket.hpp echo_c.cpp)
 add_executable(echo_s socket.hpp echo_s.cpp)
 add_executable(enum enum.cpp)
 add_executable(enum2 enum2.cpp)
+add_executable(erased erased.cpp)
 add_executable(exceptions exceptions.cpp)
 
 add_executable(file_hash file_hash.cpp)

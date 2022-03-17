@@ -52,7 +52,7 @@ public:
 		struct Q : T
 		{
 			using T::T;
-			void __abstract_singleton__() override {}
+			virtual void pure_virtual() const final override {}
 		};
 
 		if(!s_instance) s_instance.reset(new Q(std::forward<Args>(args)...));
@@ -73,7 +73,7 @@ private:
 	using storage_t = std::unique_ptr<T>;
 	inline static storage_t s_instance = nullptr;
 
-	virtual void __abstract_singleton__() = 0;
+	virtual void pure_virtual() const = 0;
 };
 
 #define ABSTRACT_SINGLETON(T) : public abstract_singleton<T>
