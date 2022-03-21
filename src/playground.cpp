@@ -1,9 +1,9 @@
 #include <iostream>
-#include <bitset>
+#include <cstdint>
 
 #include <stdexcept>
-#include <cstddef>
-#include <cstdint>
+#include <ostream>
+#include <bitset>
 
 template<std::size_t Pos>
 class Bit
@@ -25,11 +25,10 @@ class BitMask
 public:
 	inline static constexpr std::size_t Bits = sizeof(MaskT) * 8;
 
-	BitMask(MaskT val = 0) noexcept : value(val) {}
+	explicit BitMask(MaskT val = 0) noexcept : value(val) {}
 
 	template<std::size_t Pos, typename... Bits>
-	BitMask(Bit<Pos> first, Bits&&... next) noexcept
-	{ SetBit(first); (SetBit(next),...); }
+	explicit BitMask(const Bit<Pos>& first, Bits&&... next) noexcept { SetBit(first); (SetBit(next),...); }
 
 	template<std::size_t Pos>
 	bool Get() const noexcept
@@ -39,9 +38,9 @@ public:
 	}
 
 	template<std::size_t Pos>
-	bool Set(bool val) noexcept
+	bool Set(bool val = 1) noexcept
 	{
-		auto old_val = Get<Pos>();
+		bool old_val = Get<Pos>();
 		SetBit(Bit<Pos>(val));
 		return old_val;
 	}
@@ -50,22 +49,24 @@ public:
 	bool Flip() noexcept
 	{
 		static_assert(Pos < Bits, "Bit out of range!");
-		auto old_val = Get<Pos>();
+		bool old_val = Get<Pos>();
 		value ^= MaskT(1) << Pos;
 		return old_val;
 	}
 
-	void ClearAll() noexcept { SetAll(0); }
+	auto Get() const noexcept { return value; }
 
-	void SetAll(bool val) noexcept { value = val ? ~MaskT(0) : MaskT(0); }
+	void Set(bool val = 1) noexcept { value = val ? ~MaskT(0) : MaskT(0); }
 
-	void FlipAll() noexcept { value ^= ~MaskT(0); }
+	void Flip() noexcept { value = ~value; }
+
+	void Clear() noexcept { Set(0); }
 
 	auto At(std::size_t pos)
 	{
 		if(pos >= Bits)
 			throw std::out_of_range("Bit out of range!");
-		return Proxy{ *this, pos };
+		return StackProxy(*this, pos);
 	}
 
 	bool At(std::size_t pos) const
@@ -75,11 +76,46 @@ public:
 		return (value >> pos) & 1;
 	}
 
-	auto operator [] (std::size_t pos) noexcept { return Proxy{ *this, pos }; }
+	explicit operator MaskT () const noexcept { return value; }
 
+	bool operator ! () const noexcept { return !value; }
+	explicit operator bool () const noexcept { return value; }
+
+	auto operator [] (std::size_t pos) noexcept { return StackProxy(*this, pos); }
 	bool operator [] (std::size_t pos) const noexcept { return (value >> pos) & 1; }
 
-	operator MaskT () const noexcept { return value; }
+	auto operator ~ () const noexcept { return BitMask(~value); }
+
+	auto& operator &= (const BitMask& rhs) noexcept { value &= rhs.value; return *this; }
+	auto& operator |= (const BitMask& rhs) noexcept { value |= rhs.value; return *this; }
+	auto& operator ^= (const BitMask& rhs) noexcept { value ^= rhs.value; return *this; }
+
+	auto& operator <<= (std::size_t n) noexcept { value <<= n; return *this; }
+	auto& operator >>= (std::size_t n) noexcept { value >>= n; return *this; }
+
+	friend auto operator & (const BitMask& lhs, const BitMask& rhs) noexcept { return BitMask(lhs.value & rhs.value); }
+	friend auto operator | (const BitMask& lhs, const BitMask& rhs) noexcept { return BitMask(lhs.value | rhs.value); }
+	friend auto operator ^ (const BitMask& lhs, const BitMask& rhs) noexcept { return BitMask(lhs.value ^ rhs.value); }
+
+	friend auto operator << (const BitMask& lhs, std::size_t n) noexcept { return BitMask(lhs.value << n); }
+	friend auto operator >> (const BitMask& lhs, std::size_t n) noexcept { return BitMask(lhs.value >> n); }
+
+	friend bool operator == (const BitMask& lhs, const BitMask& rhs) noexcept { return lhs.value == rhs.value; }
+	friend bool operator != (const BitMask& lhs, const BitMask& rhs) noexcept { return lhs.value != rhs.value; }
+
+	template<std::size_t Pos> auto& operator &= (const Bit<Pos>& rhs) noexcept { SetBit(Bit<Pos>(Get<Pos>() & rhs)); return *this; }
+	template<std::size_t Pos> auto& operator |= (const Bit<Pos>& rhs) noexcept { SetBit(Bit<Pos>(Get<Pos>() | rhs)); return *this; }
+	template<std::size_t Pos> auto& operator ^= (const Bit<Pos>& rhs) noexcept { SetBit(Bit<Pos>(Get<Pos>() ^ rhs)); return *this; }
+
+	template<std::size_t Pos> friend auto operator & (const BitMask& lhs, const Bit<Pos>& rhs) noexcept { return BitMask(lhs) &= rhs; }
+	template<std::size_t Pos> friend auto operator | (const BitMask& lhs, const Bit<Pos>& rhs) noexcept { return BitMask(lhs) |= rhs; }
+	template<std::size_t Pos> friend auto operator ^ (const BitMask& lhs, const Bit<Pos>& rhs) noexcept { return BitMask(lhs) ^= rhs; }
+
+	friend std::ostream& operator << (std::ostream& os, const BitMask& rhs)
+	{
+		os << std::bitset<Bits>(rhs.value);
+		return os;
+	}
 
 private:
 	template<std::size_t Pos>
@@ -87,22 +123,44 @@ private:
 	{
 		static_assert(Pos < Bits, "Bit out of range!");
 		value &= ~(MaskT(1) << Pos);
-		value |= (MaskT(bit) << Pos);
+		value |= (MaskT(bool(bit)) << Pos);
 	}
 
-	struct Proxy
+	class StackProxy
 	{
-		BitMask& mask;
-		std::size_t pos;
+	public:
+		StackProxy(BitMask& m, std::size_t p) noexcept : mask(m), pos(p) {}
+		StackProxy(const StackProxy&) = delete;
+		StackProxy(StackProxy&&) = delete;
 
-		operator bool () const noexcept { return (mask.value >> pos) & 1; }
+		StackProxy& operator = (const StackProxy& rhs) noexcept
+		{
+			if(mask != rhs.mask or pos != rhs.pos)
+			{
+				mask.value &= ~(MaskT(1) << pos);
+				mask.value |= (MaskT(bool(rhs)) << pos);
+			}
+			return *this;
+		}
 
-		Proxy& operator = (bool val) noexcept
+		StackProxy& operator = (bool val) noexcept
 		{
 			mask.value &= ~(MaskT(1) << pos);
 			mask.value |= (MaskT(val) << pos);
 			return *this;
 		}
+
+		explicit operator bool () const noexcept { return (mask.value >> pos) & 1; }
+
+		friend std::ostream& operator << (std::ostream& os, const StackProxy& rhs)
+		{
+			os << bool(rhs);
+			return os;
+		}
+
+	private:
+		BitMask& mask;
+		std::size_t pos;
 	};
 
 	MaskT value = 0;
@@ -112,55 +170,48 @@ int main()
 {
 	using namespace std;
 
-	auto m8  = BitMask<uint8_t>(Bit<0>(1), Bit<7>(1));
-	auto m16 = BitMask<uint16_t>(Bit<0>(1), Bit<2>(1), Bit<4>(1), Bit<5>(1), Bit<14>(1), Bit<15>(1));
-	auto m32 = BitMask<uint32_t>(Bit<0>(1), Bit<4>(1), Bit<8>(1), Bit<15>(1), Bit<29>(1), Bit<30>(1));
-	auto m64 = BitMask<uint64_t>(Bit<0>(1), Bit<63>(1));
+	auto m1 = BitMask<uint8_t>(0b11110000);
+	auto m2 = BitMask<uint8_t>(Bit<0>(1), Bit<1>(1), Bit<2>(1), Bit<3>(1));
+	cout << m1 << endl;
+	cout << m2 << endl << endl;
 
-	cout << bitset<decltype(m8)::Bits>(m8) << endl;
-	cout << bitset<decltype(m16)::Bits>(m16) << endl;
-	cout << bitset<decltype(m32)::Bits>(m32) << endl;
-	cout << bitset<decltype(m64)::Bits>(m64) << endl << endl;
+	m1.Flip<0>();
+	m2.Flip<0>();
+	cout << m1 << endl;
+	cout << m2 << endl << endl;
 
-	m64.Flip<0>();
-	m64.Flip<1>();
-	cout << bitset<decltype(m64)::Bits>(m64) << endl;
-	m64.FlipAll();
-	cout << bitset<decltype(m64)::Bits>(m64) << endl;
-	m64.SetAll(0);
-	cout << bitset<decltype(m64)::Bits>(m64) << endl;
-	m64.SetAll(1);
-	cout << bitset<decltype(m64)::Bits>(m64) << endl;
-	m64.ClearAll();
-	cout << bitset<decltype(m64)::Bits>(m64) << endl << endl;
+	m1.Flip();
+	m2.Flip();
+	cout << m1[7] << m1[6] << m1[5] << m1[4] << m1[3] << m1[2] << m1[1] << m1[0] << endl;
+	cout << m2.Get<7>() << m2.Get<6>() << m2.Get<5>() << m2.Get<4>() << m2.Get<3>() << m2.Get<2>() << m2.Get<1>() << m2.Get<0>() << endl << endl;
 
-	auto m = BitMask<uint8_t>(0b10101010);
-	m.Set<0>(1);
-	m.Set<1>(1);
-	m.Set<7>(1);
-	cout << m.Get<7>() << " " << m.Get<6>() << " " << m.Get<5>() << " " << m.Get<4>() << " " << m.Get<3>() << " " << m.Get<2>() << " " << m.Get<1>() << " " << m.Get<0>() << endl;
-	cout << m[7] << " " << m[6] << " " << m[5] << " " << m[4] << " " << m[3] << " " << m[2] << " " << m[1] << " " << m[0] << endl << endl;
+	m1.Clear();
+	m2.Set(0);
+	m1[0] = m1[1] = m1[2] = m1[3] = m1[4] = m1[5] = m1[6] = m1[7] = 1;
+	m1[0] = m1[0] = m1[1] = m1[1] = m1[2] = m1[2] = m1[3] = m1[3] = m1[4] = m1[4] = m1[5] = m1[5] = m1[6] = m1[6] = m1[7] = m1[7] = 1;
+	if(!m2) cout << "if(!m2)..." << endl;
+	m2 = m1;
+	if(m2) cout << "if(m2)..." << endl;
+	m2[0] = 0;
+	m2.At(1) = 0;
+	m2.Set<2>(0);
 
-	m = 0b11111111;
-	cout << m.At(7) << " " << m[6] << " " << m[5] << " " << m[4] << " " << m[3] << " " << m[2] << " " << m[1] << " " << m[0] << endl;
-	m.At(7) = 0;
-	cout << m.At(7) << " " << m[6] << " " << m[5] << " " << m[4] << " " << m[3] << " " << m[2] << " " << m[1] << " " << m[0] << endl << endl;
+	cout << m1 << endl;
+	cout << m2 << endl << endl;
 
-	const auto n = m;
-	m = n;
-	[[maybe_unused]] auto bbb = n[0];
-	[[maybe_unused]] auto ccc = n.At(0);
-	(m[0] = 1) = 0;
-	cout << bitset<decltype(m)::Bits>(m) << endl;
-	cout << bitset<decltype(n)::Bits>(n) << endl;
+	auto m3 = ~m2;
+	cout << m3 << endl;
+	m3.Flip();
+	cout << m3 << endl;
+	m3.Clear();
+	if(!m3[1]) cout << "if(!m3[1])" << endl;
+	cout << m3 << endl;
+	m3.Set();
+	if(m3[1]) cout << "if(m3[1])" << endl;
+	cout << m3 << endl << endl;
 
-	auto b1 = Bit<123>(0);
-	auto b2 = Bit<321>(1);
-	[[maybe_unused]] auto x = b1 && b2;
-	[[maybe_unused]] auto eq = b1 == b2;
-	[[maybe_unused]] auto ne = b1 != b2;
-
-	b1 = 0;
-	if(!b1) cout << "!b1" << endl;
-	if(b2) cout << "b2" << endl;
+	auto b1 = Bit<123>(1);
+	auto b2 = Bit<321>(0);
+	if(b1) cout << "if(b1)" << endl;
+	if(!b2) cout << "if(!b2)" << endl;
 }
