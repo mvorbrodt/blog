@@ -1,24 +1,24 @@
 #include <iostream>
 #include <ostream>
 #include <string>
-using namespace std;
+#include <type_traits>
 
 class IDocument
 {
 public:
-	virtual void Save(ostream& os) const = 0;
+	virtual void Save(std::ostream& os) const = 0;
 };
 
 class PdfDocument : public IDocument
 {
 public:
-	virtual void Save(ostream& os) const override { os << "Saving Pdf..." << endl; }
+	virtual void Save(std::ostream& os) const override { os << "Saving Pdf..." << std::endl; }
 };
 
 class DocDocument : public IDocument
 {
 public:
-	virtual void Save(ostream& os) const override { os << "Saving Doc..." << endl; }
+	virtual void Save(std::ostream& os) const override { os << "Saving Doc..." << std::endl; }
 };
 
 class IDocumentDecorator : public IDocument
@@ -33,27 +33,27 @@ private:
 class CompressedDocumentDecorator : public IDocumentDecorator
 {
 public:
-	CompressedDocumentDecorator(IDocument* d, const string& c) : IDocumentDecorator(d), comp{ c } {}
-	virtual void Save(ostream& os) const override
+	CompressedDocumentDecorator(IDocument* d, const std::string& c) : IDocumentDecorator(d), comp{ c } {}
+	virtual void Save(std::ostream& os) const override
 	{
-		os << "Creating '" << comp << "' compression output stream..." << endl;
+		os << "Creating '" << comp << "' compression output stream..." << std::endl;
 		GetDecorated()->Save(os);
 	}
 private:
-	string comp;
+	std::string comp;
 };
 
 class EncryptedDocumentDecorator : public IDocumentDecorator
 {
 public:
-	EncryptedDocumentDecorator(IDocument* d, const string& e) : IDocumentDecorator(d), enc{ e } {}
-	virtual void Save(ostream& os) const override
+	EncryptedDocumentDecorator(IDocument* d, const std::string& e) : IDocumentDecorator(d), enc{ e } {}
+	virtual void Save(std::ostream& os) const override
 	{
-		os << "Creating '" << enc << "' encryption output stream..." << endl;
+		os << "Creating '" << enc << "' encryption output stream..." << std::endl;
 		GetDecorated()->Save(os);
 	}
 private:
-	string enc;
+	std::string enc;
 };
 
 
@@ -61,29 +61,29 @@ private:
 class ISocket
 {
 public:
-	virtual void Send(byte* data, size_t size) const = 0;
-	virtual void Recv(byte* data, size_t size) const = 0;
+	virtual void Send(std::byte* data, size_t size) const = 0;
+	virtual void Recv(std::byte* data, size_t size) const = 0;
 };
 
 class TCPSocket : public ISocket
 {
 public:
-	TCPSocket(const string& a, unsigned short p) : addr{ a }, port{ p } {}
-	virtual void Send(byte* data, size_t size) const override { cout << "Sending " << size << " bytes over TCP to " << addr << ":" << port << endl; }
-	virtual void Recv(byte* data, size_t size) const override { cout << "Receiving " << size << " bytes over TCP from " << addr << ":" << port << endl; }
+	TCPSocket(const std::string& a, unsigned short p) : addr{ a }, port{ p } {}
+	virtual void Send(std::byte* data, size_t size) const override { std::cout << "Sending " << size << " bytes over TCP to " << addr << ":" << port << std::endl; }
+	virtual void Recv(std::byte* data, size_t size) const override { std::cout << "Receiving " << size << " bytes over TCP from " << addr << ":" << port << std::endl; }
 private:
-	string addr;
+	std::string addr;
 	unsigned short port;
 };
 
 class UDPSocket : public ISocket
 {
 public:
-	UDPSocket(const string& a, unsigned short p) : addr{ a }, port{ p } {}
-	virtual void Send(byte* data, size_t size) const override { cout << "Sending " << size << " bytes over UDP to " << addr << ":" << port << endl; }
-	virtual void Recv(byte* data, size_t size) const override { cout << "Receiving " << size << " bytes over UDP from " << addr << ":" << port << endl; }
+	UDPSocket(const std::string& a, unsigned short p) : addr{ a }, port{ p } {}
+	virtual void Send(std::byte* data, size_t size) const override { std::cout << "Sending " << size << " bytes over UDP to " << addr << ":" << port << std::endl; }
+	virtual void Recv(std::byte* data, size_t size) const override { std::cout << "Receiving " << size << " bytes over UDP from " << addr << ":" << port << std::endl; }
 private:
-	string addr;
+	std::string addr;
 	unsigned short port;
 };
 
@@ -99,43 +99,74 @@ private:
 class CompressedSocketDecorator : public ISocketDecorator
 {
 public:
-	CompressedSocketDecorator(ISocket* s, const string& c) : ISocketDecorator(s), comp{ c } {}
-	virtual void Send(byte* data, size_t size) const override
+	CompressedSocketDecorator(ISocket* s, const std::string& c) : ISocketDecorator(s), comp{ c } {}
+	virtual void Send(std::byte* data, size_t size) const override
 	{
-		cout << "Compressing " << size << " bytes using '" << comp << "'..." << endl;
+		std::cout << "Compressing " << size << " bytes using '" << comp << "'..." << std::endl;
 		GetDecorated()->Send(data, size / 2);
 	}
-	virtual void Recv(byte* data, size_t size) const override
+	virtual void Recv(std::byte* data, size_t size) const override
 	{
 		GetDecorated()->Recv(data, size);
-		cout << "Decompressing " << size << " bytes using '" << comp << "'..." << endl;
+		std::cout << "Decompressing " << size << " bytes using '" << comp << "'..." << std::endl;
 	}
 private:
-	string comp;
+	std::string comp;
 };
 
 class EncryptedSocketDecorator : public ISocketDecorator
 {
 public:
-	EncryptedSocketDecorator(ISocket* s, const string& e) : ISocketDecorator(s), enc{ e } {}
-	virtual void Send(byte* data, size_t size) const override
+	EncryptedSocketDecorator(ISocket* s, const std::string& e) : ISocketDecorator(s), enc{ e } {}
+	virtual void Send(std::byte* data, size_t size) const override
 	{
-		cout << "Encrypting " << size << " bytes using '" << enc << "'..." << endl;
+		std::cout << "Encrypting " << size << " bytes using '" << enc << "'..." << std::endl;
 		GetDecorated()->Send(data, size);
 	}
-	virtual void Recv(byte* data, size_t size) const override
+	virtual void Recv(std::byte* data, size_t size) const override
 	{
 		GetDecorated()->Recv(data, size);
-		cout << "Decrypting " << size << " bytes using '" << enc << "'..." << endl;
+		std::cout << "Decrypting " << size << " bytes using '" << enc << "'..." << std::endl;
 	}
 private:
-	string enc;
+	std::string enc;
 };
+
+
+
+template<typename Callable>
+class DebugDecorator
+{
+public:
+	DebugDecorator(const Callable& c, const std::string& m) : callable{ c }, message{ m } {}
+
+	template<typename... Args>
+	auto operator () (Args&&... args) const -> std::invoke_result_t<Callable, Args...>
+	{
+		std::cout << "Invoking: " << message << std::endl;
+
+		auto constexpr returns = not std::is_same_v<void, std::invoke_result_t<Callable, Args...>>;
+		if constexpr (returns) return callable(std::forward<Args>(args)...);
+		else callable(std::forward<Args>(args)...);
+	}
+
+private:
+	const Callable& callable;
+	const std::string message;
+};
+
+template<typename Callable>
+auto DecorateDebug(const Callable& callable, const std::string& message)
+{
+	return DebugDecorator(callable, message);
+}
 
 
 
 int main()
 {
+	using namespace std;
+
 	IDocument* pdf = new PdfDocument;
 	IDocument* doc = new DocDocument;
 	pdf->Save(cout);
@@ -184,5 +215,19 @@ int main()
 	ISocket* cmp_enc_udp = new CompressedSocketDecorator(new EncryptedSocketDecorator(udp, "DES"), "LZ4");
 	cmp_enc_udp->Send(nullptr, 4096);
 	cmp_enc_udp->Recv(nullptr, 4096 / 2);
+	cout << endl;
+
+
+
+	auto debug1 = DecorateDebug([] () { cout << "Hi!" << endl; }, "Hello!");
+	debug1();
+	debug1();
+	cout << endl;
+
+	auto debug2 = DecorateDebug([] (int x, int y) { return x * y; }, "X * Y");
+	auto result = debug2(2, 2);
+	cout << result << endl;
+	result = debug2(8, 8);
+	cout << result << endl;
 	cout << endl;
 }
