@@ -141,13 +141,15 @@ public:
 	DebugDecorator(const Callable& c, const std::string& m) : callable{ c }, message{ m } {}
 
 	template<typename... Args>
-	auto operator () (Args&&... args) const -> std::invoke_result_t<Callable, Args...>
+	decltype(auto) operator () (Args&&... args) const
 	{
 		std::cout << "Invoking: " << message << std::endl;
-
-		auto constexpr returns = not std::is_same_v<void, std::invoke_result_t<Callable, Args...>>;
-		if constexpr (returns) return callable(std::forward<Args>(args)...);
-		else callable(std::forward<Args>(args)...);
+		return callable(std::forward<Args>(args)...);
+		// Alternative implementation:
+		// using ReturnType = std::invoke_result_t<Callable, Args...>;
+		// auto constexpr no_ret = std::is_same_v<void, ReturnType>;
+		// if constexpr (no_ret) callable(std::forward<Args>(args)...);
+		// else return callable(std::forward<Args>(args)...);
 	}
 
 private:
@@ -162,6 +164,18 @@ auto DecorateDebug(const Callable& callable, const std::string& message)
 }
 
 
+
+decltype(auto) get_ref1()
+{
+	static const int& cpp = 11;
+	return cpp;
+}
+
+decltype(auto) get_val1()
+{
+	static int cpp = 17;
+	return cpp;
+}
 
 int main()
 {
@@ -220,14 +234,34 @@ int main()
 
 
 	auto debug1 = DecorateDebug([] () { cout << "Hi!" << endl; }, "Hello!");
+	auto debug2 = DecorateDebug([] (int x, int y) { return x * y; }, "X * Y");
 	debug1();
-	debug1();
+	debug2(2, 2);
 	cout << endl;
 
-	auto debug2 = DecorateDebug([] (int x, int y) { return x * y; }, "X * Y");
-	auto result = debug2(2, 2);
-	cout << result << endl;
-	result = debug2(8, 8);
-	cout << result << endl;
+
+
+	auto dec1 = DecorateDebug(get_ref1, "Return reference 1");
+	[[maybe_unused]] decltype(auto) result1 = dec1();
+
+	auto get_ref2 = []() -> decltype(auto) { static const int& cpp = 14; return cpp; };
+	auto dec2 = DecorateDebug(get_ref2, "Return reference 2");
+	[[maybe_unused]] decltype(auto) result2 = dec2();
+
+	auto get_ref3 = []() -> decltype(auto) { static const struct R {} r; return(r); };
+	auto dec3 = DecorateDebug(get_ref3, "Return reference 3");
+	[[maybe_unused]] decltype(auto) result3 = dec3();
+
+	auto dec4 = DecorateDebug(get_val1, "Return value 1");
+	[[maybe_unused]] decltype(auto) result4 = dec4();
+
+	auto get_val2 = []() -> decltype(auto) { static int cpp = 20; return cpp; };
+	auto dec5 = DecorateDebug(get_val2, "Return value 2");
+	[[maybe_unused]] decltype(auto) result5 = dec5();
+
+	auto get_val3 = []() -> decltype(auto) { static struct V {} v; return v; };
+	auto dec6 = DecorateDebug(get_val3, "Return value 2");
+	[[maybe_unused]] decltype(auto) result6 = dec6();
+
 	cout << endl;
 }
