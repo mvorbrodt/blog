@@ -1,3 +1,4 @@
+add_executable(adapter adapter.cpp)
 add_executable(alignas alignas.cpp)
 add_executable(aos_soa aos_soa.cpp)
 add_executable(assignment assignment.cpp)
