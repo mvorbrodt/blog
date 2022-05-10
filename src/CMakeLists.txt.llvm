@@ -184,6 +184,7 @@ add_executable(unique unique.cpp)
 add_executable(unordered unordered.cpp)
 add_executable(utils I.hpp T.hpp utils.hpp utils.cpp)
 add_executable(uuid uuid.cpp)
+add_executable(visitor visitor.cpp)
 
 add_executable(xml xml.cpp)
 target_link_libraries(xml ${Boost_SERIALIZATION_LIBRARY})

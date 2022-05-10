@@ -50,6 +50,7 @@ add_executable(timer timer_test.cpp)
 add_executable(try_block try_block.cpp)
 add_executable(unique unique.cpp)
 add_executable(unordered unordered.cpp)
+add_executable(visitor visitor.cpp)
 
 
 
