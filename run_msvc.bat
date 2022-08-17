@@ -9,13 +9,14 @@ del /F /Q msvc
 mkdir msvc
 cd msvc
 
-cmake -DCMAKE_TOOLCHAIN_FILE=C:\Code\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
-
-REM msbuild -m blog.sln -t:Clean -p:Configuration=Debug
-REM msbuild -m blog.sln -t:Rebuild -p:Configuration=Debug
-
-REM msbuild -m blog.sln -t:Clean -p:Configuration=Release
-REM msbuild -m blog.sln -t:Rebuild -p:Configuration=Release
+cmake -DCMAKE_TOOLCHAIN_FILE=C:/Code/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
 
 cd ..
+echo. & echo. & echo.
+pause
+
+msbuild -m msvc/blog.sln -t:Rebuild -p:Configuration=Debug
+REM msbuild -m msvc/blog.sln -t:Rebuild -p:Configuration=Release
+
+echo. & echo. & echo.
 pause
