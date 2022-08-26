@@ -1,5 +1,10 @@
 @echo off
 
+vcpkg install tbb parallelstl boost range-v3 benchmark catch2 hayai nonius celero fmt cryptopp libmysql thrift protobuf grpc lz4 openssl curl curlpp
+
+echo. & echo. & echo.
+pause
+
 copy /Y CMakeLists.txt.msvc CMakeLists.txt
 copy /Y src\CMakeLists.txt.msvc src\CMakeLists.txt
 
