@@ -1,6 +1,10 @@
 #define CATCH_CONFIG_MAIN
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
+#if defined(_WIN64)
+#include <catch2/catch_all.hpp>
+#else
 #include <catch2/catch.hpp>
+#endif
 #include <random>
 
 using namespace std;

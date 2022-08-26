@@ -35,10 +35,10 @@ find_package(lz4               CONFIG REQUIRED)
 find_package(OpenSSL           MODULE REQUIRED)
 find_package(CURL              MODULE REQUIRED)
 find_package(unofficial-curlpp CONFIG REQUIRED)
+find_package(WolfSSL           CONFIG REQUIRED)
 # find_package(BOTAN             CONFIG REQUIRED)
 # find_package(MYSQL                    REQUIRED) # no cmake
 # find_package(SOCI              CONFIG REQUIRED)
-# find_package(WolfSSL                  REQUIRED)
 # find_package(XMLRPC                   REQUIRED)
 
 include_directories("C:\\Code\\vcpkg\\installed\\x64-windows\\include")

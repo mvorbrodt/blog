@@ -1,6 +1,7 @@
 @echo off
 
-vcpkg install tbb parallelstl boost range-v3 benchmark catch2 hayai nonius celero fmt cryptopp libmysql thrift protobuf grpc lz4 openssl curl curlpp
+set VCPKG_TARGET_TRIPLET=x64-windows
+vcpkg install tbb parallelstl boost botan range-v3 benchmark catch2 hayai nonius celero fmt cryptopp wolfssl libmysql thrift protobuf grpc lz4 openssl curl curlpp
 
 echo. & echo. & echo.
 pause
