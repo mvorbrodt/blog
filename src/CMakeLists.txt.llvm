@@ -42,10 +42,10 @@ add_executable(crypto crypto.cpp)
 target_include_directories(crypto PUBLIC "${BOTAN_INCLUDE_DIRS}")
 target_link_libraries(crypto PRIVATE cryptopp-static ${WOLFSSL_LIBRARY} ${BOTAN_LIBRARIES})
 
-add_executable(database database.cpp)
-set_source_files_properties(database.cpp PROPERTIES COMPILE_FLAGS "--std=c++11")
-target_include_directories(database PUBLIC ${SOCI_INCLUDE_DIRS})
-target_link_libraries(database ${SOCI_LIBRARY} ${SOCI_mysql_PLUGIN} ${MYSQL_CLIENT_LIBS})
+# add_executable(database database.cpp)
+# set_source_files_properties(database.cpp PROPERTIES COMPILE_FLAGS "--std=c++11")
+# target_include_directories(database PUBLIC ${SOCI_INCLUDE_DIRS})
+# target_link_libraries(database ${SOCI_LIBRARY} ${SOCI_mysql_PLUGIN} ${MYSQL_CLIENT_LIBS})
 
 add_executable(deadlock deadlock.cpp)
 add_executable(decorator decorator.cpp)
@@ -64,11 +64,11 @@ add_executable(file_hash file_hash.cpp)
 target_include_directories(file_hash PUBLIC "${BOTAN_INCLUDE_DIRS}")
 target_link_libraries(file_hash ${BOTAN_LIBRARIES})
 
-add_executable(fmt fmt.cpp)
-target_link_libraries(fmt -lfmt)
+# add_executable(fmt fmt.cpp)
+# target_link_libraries(fmt -lfmt)
 
-add_executable(geoip geoip.cpp)
-target_link_libraries(geoip ${CURL_LIBRARY} ${CURLPP_LIBRARY})
+# add_executable(geoip geoip.cpp)
+# target_link_libraries(geoip ${CURL_LIBRARY} ${CURLPP_LIBRARY})
 
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.pb.h
@@ -99,8 +99,13 @@ add_executable(istring istring.hpp istring.cpp)
 
 add_executable(lesson_memory_pool_how_to lesson_memory_pool_how_to.cpp)
 add_executable(lesson_thread_pool_how_to lesson_thread_pool_how_to.cpp)
+
 add_executable(lesson_pool_allocator_benchmark lesson_pool_allocator_benchmark.cpp)
+target_link_libraries(lesson_pool_allocator_benchmark PRIVATE Catch2::Catch2 Catch2::Catch2WithMain)
+
 add_executable(lesson_pool_allocator lesson_pool_allocator.cpp)
+target_link_libraries(lesson_pool_allocator PRIVATE Catch2::Catch2 Catch2::Catch2WithMain)
+
 add_executable(lesson_spinlock_event_semaphore_how_to lesson_spinlock_event_semaphore_how_to.cpp)
 add_executable(lesson_queue_how_to lesson_queue_how_to.cpp)
 
@@ -110,33 +115,33 @@ add_executable(lsf lsf.hpp lsf.cpp)
 add_executable(membars membars.cpp)
 add_executable(memory_pool memory_pool.hpp memory_pool.cpp)
 
-add_module(module_1 module_1.cpp)
-add_module(module_2 module_2.cpp)
-add_executable(modules modules.cpp module_1.cpp module_2.cpp)
-add_dependencies(modules module_1 module_2)
-add_dependencies(modules TBB::tbb oneDPL)
-set_source_files_properties(
-	modules.cpp
-	PROPERTIES COMPILE_FLAGS
-		"-std=c++20 -fmodules -fbuiltin-module-map -fprebuilt-module-path=${CMAKE_CURRENT_SOURCE_DIR}"
-)
+# add_module(module_1 module_1.cpp)
+# add_module(module_2 module_2.cpp)
+# add_executable(modules modules.cpp module_1.cpp module_2.cpp)
+# add_dependencies(modules module_1 module_2)
+# add_dependencies(modules TBB::tbb oneDPL)
+# set_source_files_properties(
+# 	modules.cpp
+# 	PROPERTIES COMPILE_FLAGS
+# 		"-std=c++20 -fmodules -fbuiltin-module-map -fprebuilt-module-path=${CMAKE_CURRENT_SOURCE_DIR}"
+# )
 
 add_executable(multi_hash hash.hpp multi_hash.cpp)
 add_executable(new new.cpp)
 add_executable(newtrace newtrace.hpp newtrace.cpp)
 add_executable(newtrace.st newtrace.st.hpp newtrace.st.cpp)
 
-add_executable(options options.cpp)
-target_link_libraries(options ${Boost_PROGRAM_OPTIONS_LIBRARY})
+# add_executable(options options.cpp)
+# target_link_libraries(options ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-add_executable(otp otp.cpp)
-target_link_libraries(otp -loath)
+# add_executable(otp otp.cpp)
+# target_link_libraries(otp -loath)
 
 add_executable(playground I.hpp T.hpp playground.cpp)
 
-add_executable(plugin_load plugin_load.cpp)
-target_link_libraries(plugin_load ${CMAKE_DL_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
-add_library(plugin SHARED plugin_lib.cpp)
+# add_executable(plugin_load plugin_load.cpp)
+# target_link_libraries(plugin_load ${CMAKE_DL_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+# add_library(plugin SHARED plugin_lib.cpp)
 
 add_executable(pool pool.hpp pool.cpp)
 add_executable(pragma pragma.cpp)
