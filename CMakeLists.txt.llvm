@@ -33,7 +33,7 @@ find_package(cryptopp    CONFIG REQUIRED)
 
 find_package(OpenSSL     MODULE REQUIRED)
 find_package(MySQL       MODULE REQUIRED)
-find_package(Soci        MODULE REQUIRED)
+# find_package(Soci        MODULE REQUIRED)
 find_package(Protobuf    MODULE REQUIRED)
 find_package(THRIFT      MODULE REQUIRED)
 find_package(GRPC        MODULE REQUIRED)

@@ -43,10 +43,11 @@ int main(int argc, char** argv)
 
 		cout << bold << "OTP: " << reset
 			<< bright_red << otp << reset
-			<< slow_blink << " (" << left << ") \r" << reset;
+			<< slow_blink << " (" << left << ")" << reset;
 		cout.flush();
 
 		this_thread::sleep_for(1s);
+		cout << "\r";
 	}
 
 	oath_done();

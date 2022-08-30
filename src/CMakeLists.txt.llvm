@@ -134,8 +134,8 @@ add_executable(newtrace.st newtrace.st.hpp newtrace.st.cpp)
 # add_executable(options options.cpp)
 # target_link_libraries(options ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-# add_executable(otp otp.cpp)
-# target_link_libraries(otp -loath)
+add_executable(otp otp.cpp)
+target_link_libraries(otp -loath)
 
 add_executable(playground I.hpp T.hpp playground.cpp)
 
@@ -164,7 +164,7 @@ add_executable(queue queue.hpp queue.cpp)
 add_executable(random random_test.cpp)
 target_link_libraries(random Catch2::Catch2 Catch2::Catch2WithMain)
 
-# add_executable(ranges ranges.cpp)
+add_executable(ranges ranges.cpp)
 add_executable(round round.hpp round.cpp)
 add_executable(singleton singleton.hpp singleton.cpp)
 add_executable(sorting sorting.cpp)
