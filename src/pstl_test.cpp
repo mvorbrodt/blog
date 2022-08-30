@@ -1,13 +1,12 @@
 #define CATCH_CONFIG_MAIN
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
+#include <catch2/catch_all.hpp>
 #if defined(_LIBCPP_HAS_PARALLEL_ALGORITHMS) or defined(_WIN64)
 #include <algorithm>
 #include <execution>
-#include <catch2/catch_all.hpp>
 #else
 #include <oneapi/dpl/algorithm>
 #include <oneapi/dpl/execution>
-#include <catch2/catch.hpp>
 #endif
 #include <random>
 #include <vector>

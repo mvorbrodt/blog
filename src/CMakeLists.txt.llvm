@@ -6,7 +6,9 @@ add_executable(atomics atomics.cpp)
 add_executable(attributes attributes.cpp)
 add_executable(bad_pointer bad_pointer.cpp)
 add_executable(base64 base64.cpp)
+
 add_executable(benchmark-catch benchmark-catch.cpp)
+target_link_libraries(benchmark-catch PRIVATE Catch2::Catch2 Catch2::Catch2WithMain)
 
 add_executable(benchmark-celero benchmark-celero.cpp)
 target_link_libraries(benchmark-celero -lcelero)
@@ -19,6 +21,7 @@ target_link_libraries(benchmark-hayai ${HAYAI_LIBRARIES})
 
 add_executable(benchmark-nonius benchmark-nonius.cpp)
 set_source_files_properties(benchmark-nonius.cpp PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(benchmark-nonius PRIVATE Nonius::nonius)
 
 add_executable(bloom bloom.hpp hash.hpp bloom.cpp)
 add_executable(c_api_lambda c_api_lambda.cpp)
@@ -149,10 +152,13 @@ add_executable(proto_buf protobuf.cpp protobuf.pb.h protobuf.pb.cc protobuf.prot
 target_link_libraries(proto_buf ${Protobuf_LIBRARIES})
 
 add_executable(pstl pstl_test.cpp)
-target_link_libraries(pstl PRIVATE TBB::tbb oneDPL)
+target_link_libraries(pstl PRIVATE TBB::tbb oneDPL Catch2::Catch2 Catch2::Catch2WithMain)
 
 add_executable(queue queue.hpp queue.cpp)
+
 add_executable(random random_test.cpp)
+target_link_libraries(random Catch2::Catch2 Catch2::Catch2WithMain)
+
 # add_executable(ranges ranges.cpp)
 add_executable(round round.hpp round.cpp)
 add_executable(singleton singleton.hpp singleton.cpp)
