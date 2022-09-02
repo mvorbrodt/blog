@@ -45,13 +45,25 @@ private:
 
 int main()
 {
+	try { S::Instance(); }
+	catch (exception& e) { cerr << e.what() << endl; }
+
 	S::Create(17);
 	//S s(17); // Compile-time error, can't create instances...
+
 	try { S::Create(17); }
 	catch(exception& e) { cout << e.what() << endl; }
+
 	//*S::Instance() = *S::Instance(); // Compile-time error, can't copy/move singletons...
 	S::Instance()->foo();
 	S::Instance()->bar();
+	S::Destroy();
+
+	try { S::Destroy(); }
+	catch (exception& e) { cerr << e.what() << endl; }
+
+	try { AS::Instance(); }
+	catch (exception& e) { cerr << e.what() << endl; }
 
 	AS::Create(20);
 	//AS s(20); // Compile-time error, can't create instances...
@@ -60,6 +72,10 @@ int main()
 	//*AS::Instance() = *AS::Instance(); // Compile-time error, can't copy/move singletons...
 	AS::Instance()->foo();
 	AS::Instance()->bar();
+	AS::Destroy();
+
+	try { AS::Destroy(); }
+	catch (exception& e) { cerr << e.what() << endl; }
 
 	cout << "Done!" << endl;
 }

@@ -19,6 +19,12 @@ public:
 		else throw std::logic_error("This singleton has already been created!");
 	}
 
+	static void Destroy()
+	{
+		if (s_instance) s_instance.reset();
+		else throw std::logic_error("This singleton has not been created!");
+	}
+
 	static T* Instance() noexcept { return s_instance.get(); }
 
 protected:
@@ -57,6 +63,12 @@ public:
 
 		if(!s_instance) s_instance.reset(new Q(std::forward<Args>(args)...));
 		else throw std::logic_error("This abstract singleton has already been created!");
+	}
+
+	static void Destroy()
+	{
+		if (s_instance) s_instance.reset();
+		else throw std::logic_error("This abstract singleton has not been created!");
 	}
 
 	static T* Instance() noexcept { return s_instance.get(); }
