@@ -1,5 +1,5 @@
-#define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_ENABLE_BENCHMARKING
+// #define CATCH_CONFIG_MAIN
+// #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch_all.hpp>
 #if defined(_LIBCPP_HAS_PARALLEL_ALGORITHMS) or defined(_WIN64)
 #include <algorithm>
