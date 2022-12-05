@@ -18,7 +18,7 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type: Release" FORCE)
 endif()
 
-set(OPENSSL_ROOT_DIR "/usr/local/Cellar/openssl@3/3.0.5")
+set(OPENSSL_ROOT_DIR "/usr/local/Cellar/openssl@3/3.0.7")
 
 find_package(Threads            REQUIRED)
 find_package(TBB         CONFIG REQUIRED)
