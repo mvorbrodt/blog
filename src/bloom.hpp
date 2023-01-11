@@ -8,57 +8,57 @@
 #include <cstddef>
 #include "hash.hpp"
 
-template <typename Key, std::size_t HashN, typename Hash = std::hash<Key>>
+template <typename Key>
 class bloom_filter
 {
 public:
-	static_assert(HashN > 0, "HashN must be greater than zero!");
-
-	bloom_filter(std::size_t size)
-	: m_bits(size)
+	explicit bloom_filter(std::size_t size, std::size_t hash_count = 3)
+	: m_bits(size), m_hash_count(hash_count)
 	{
-		if(!size)
-			throw std::invalid_argument("Size must be greater than zero!");
+		if(!size) throw std::invalid_argument("Size must be greater than zero!");
+		if(!hash_count) throw std::invalid_argument("Hash count must be greater than zero!");
 	}
 
-	void add(const Key& key)
+	void add(const Key& key) noexcept
 	{
-		auto hv = hashNT<HashN, std::size_t>(key);
-		for(std::size_t i = 0; i < HashN; ++i)
-			m_bits[hv[i] % m_bits.size()] = true;
+		auto hs = hashN(key, m_hash_count);
+		for(auto h : hs)
+			m_bits[h % m_bits.size()] = true;
 	}
 
-	bool contains(const Key& key) const
+	bool contains(const Key& key) const noexcept
 	{
-		auto hv = hashNT<HashN, std::size_t>(key);
-		for(std::size_t i = 0; i < HashN; ++i)
-			if(!m_bits[hv[i] % m_bits.size()])
+		auto hs = hashN(key, m_hash_count);
+		for(auto h : hs)
+			if(!m_bits[h % m_bits.size()])
 				return false;
 		return true;
 	}
 
 private:
 	std::vector<bool> m_bits;
+	std::size_t m_hash_count;
 };
 
-template <typename Key, std::size_t Size, std::size_t HashN, typename Hash = std::hash<Key>>
+template <typename Key, std::size_t Size, std::size_t HashCount = 3>
 class fixed_bloom_filter
 {
 public:
 	static_assert(Size > 0, "Size must be greater than zero!");
+	static_assert(HashCount > 0, "Hash count must be greater than zero!");
 
 	void add(const Key& key)
 	{
-		auto hv = hashNT<HashN, std::size_t>(key);
-		for(std::size_t i = 0; i < HashN; ++i)
-			m_bits[hv[i] % Size] = true;
+		auto hs = hashN<HashCount>(key);
+		for(auto h : hs)
+			m_bits[h % Size] = true;
 	}
 
 	bool contains(const Key& key) const
 	{
-		auto hv = hashNT<HashN, std::size_t>(key);
-		for(std::size_t i = 0; i < HashN; ++i)
-			if(!m_bits[hv[i] % Size])
+		auto hs = hashN<HashCount>(key);
+		for(auto h : hs)
+			if(!m_bits[h % Size])
 				return false;
 		return true;
 	}

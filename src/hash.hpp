@@ -4,9 +4,10 @@
 #include <vector>
 #include <random>
 #include <algorithm>
+#include <stdexcept>
 #include <functional>
 #include <climits>
-#include <cstdint>
+#include <cstddef>
 
 static_assert(
 	((SIZE_MAX == 0xFFFFFFFF) || (SIZE_MAX == 0xFFFFFFFFFFFFFFFF)) &&
@@ -21,20 +22,22 @@ static_assert(
 	#error "std::size_t is neither 32 nor 64 bit"
 #endif
 
-template<typename V = std::size_t, typename K>
+template<typename K>
 inline auto hashN(const K& key, std::size_t N)
 {
+	if(!N) throw std::invalid_argument("Hash count must be greater than zero!");
 	random_generator_bits_t rng(std::hash<K>{}(key));
-	std::vector<V> hashes(N);
+	std::vector<std::size_t> hashes(N);
 	std::generate(std::begin(hashes), std::end(hashes), rng);
 	return hashes;
 }
 
-template<std::size_t N, typename V = std::size_t, typename K>
-inline auto hashNT(const K& key)
+template<std::size_t N, typename K>
+inline auto hashN(const K& key) noexcept
 {
+	static_assert(N > 0, "Hash count must be greater than zero!");
 	random_generator_bits_t rng(std::hash<K>{}(key));
-	std::array<V, N> hashes{};
+	std::array<std::size_t, N> hashes{};
 	std::generate(std::begin(hashes), std::end(hashes), rng);
 	return hashes;
 }
