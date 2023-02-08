@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <sstream>
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Easy.hpp>
@@ -9,27 +10,40 @@
 
 using namespace std;
 
-int main()
+int main(int argc, char** argv)
 {
+	if(argc < 2)
+	{
+		cerr << "USAGE: geoip [hostname/IP]..." << endl;
+		return 1;
+	}
+
 	try
 	{
-		curlpp::Cleanup cURLppStartStop;
+		for(int arg = 1; arg < argc; ++arg)
+		{
+			auto host = string(argv[arg]);
 
-		curlpp::Easy request;
-		std::stringstream response;
+			curlpp::Cleanup cURLppStartStop;
 
-		request.setOpt(curlpp::options::Verbose(true));
-		request.setOpt(curlpp::options::WriteStream(&response));
-		request.setOpt(curlpp::options::Url("http://ip-api.com/json/vorbrodt.blog"));
-		request.setOpt(curlpp::options::Port(80));
+			curlpp::Easy request;
+			std::stringstream response;
 
-		request.perform();
+			request.setOpt(curlpp::options::Verbose(false));
+			request.setOpt(curlpp::options::WriteStream(&response));
+			request.setOpt(curlpp::options::Url("http://ip-api.com/json/"s + host));
+			request.setOpt(curlpp::options::Port(80));
 
-		boost::property_tree::ptree data;
-		boost::property_tree::read_json(response, data);
+			request.perform();
 
-		for(auto& it : data)
-			cout << it.first << " = " << it.second.data() << endl;
+			boost::property_tree::ptree data;
+			boost::property_tree::read_json(response, data);
+
+			cout << "host = " << host << endl;
+			for(auto& it : data)
+				cout << it.first << " = " << it.second.data() << endl;
+			if(arg < argc - 1) cout << endl;
+		}
 	}
 	catch(exception& e)
 	{

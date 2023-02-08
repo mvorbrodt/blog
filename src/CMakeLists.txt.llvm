@@ -67,8 +67,8 @@ target_link_libraries(file_hash ${BOTAN_LIBRARIES})
 # add_executable(fmt fmt.cpp)
 # target_link_libraries(fmt -lfmt)
 
-# add_executable(geoip geoip.cpp)
-# target_link_libraries(geoip ${CURL_LIBRARY} ${CURLPP_LIBRARY})
+add_executable(geoip geoip.cpp)
+target_link_libraries(geoip ${CURL_LIBRARY} ${CURLPP_LIBRARY})
 
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.pb.h
