@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 			cout << "host = " << host << endl;
 			for(auto& it : data)
 				cout << it.first << " = " << it.second.data() << endl;
-			if(arg < argc - 1) cout << endl;
+			cout << endl;
 		}
 	}
 	catch(exception& e)
