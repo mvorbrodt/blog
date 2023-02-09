@@ -20,11 +20,11 @@ int main(int argc, char** argv)
 
 	try
 	{
+		curlpp::Cleanup cURLppStartStop;
+
 		for(int arg = 1; arg < argc; ++arg)
 		{
 			auto host = string(argv[arg]);
-
-			curlpp::Cleanup cURLppStartStop;
 
 			curlpp::Easy request;
 			std::stringstream response;
