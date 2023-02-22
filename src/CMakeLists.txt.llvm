@@ -189,6 +189,7 @@ target_link_libraries(thrift_c ${THRIFT_LIBRARIES})
 add_executable(thrift_s thrift_service_s.cpp ThriftService.cpp)
 target_link_libraries(thrift_s ${THRIFT_LIBRARIES})
 
+add_executable(throttle token_bucket.hpp throttle.cpp)
 add_executable(timer timer_test.cpp timer.hpp event.hpp)
 add_executable(try_block try_block.cpp)
 add_executable(unique unique.cpp)
