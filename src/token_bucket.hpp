@@ -12,11 +12,9 @@ public:
 
 	template<typename Rep, typename Period>
 	token_bucket(const std::chrono::duration<Rep, Period>& time_per_token, std::uint64_t token_capacity)
-	: m_time_per_token{ static_cast<std::uint64_t>(std::chrono::duration_cast<Resolution>(time_per_token).count()) },
-		m_token_capacity{ m_time_per_token * token_capacity }
+	: m_time_per_token{ static_cast<std::uint64_t>(std::chrono::duration_cast<Resolution>(time_per_token).count()) }, m_token_capacity{ m_time_per_token * token_capacity }
 	{
-		if(std::chrono::duration_cast<std::chrono::nanoseconds>(time_per_token).count()
-			< std::chrono::duration_cast<std::chrono::nanoseconds>(Resolution(1)).count())
+		if(std::chrono::duration_cast<std::chrono::nanoseconds>(time_per_token).count() < std::chrono::duration_cast<std::chrono::nanoseconds>(Resolution(1)).count())
 			throw std::invalid_argument("Invalid resolution!");
 		if(!time_per_token.count() || !token_capacity)
 			throw std::invalid_argument("Invalid rate or capacity!");
@@ -55,7 +53,7 @@ public:
 			{
 				if (time_needed != nullptr)
 					*time_needed = Resolution(new_time - now);
-	
+
 				return false;
 			}
 
@@ -82,7 +80,7 @@ public:
 	}
 
 private:
-	std::atomic_uint64_t m_time = 0;
+	std::atomic_uint64_t m_time {};
 	std::uint64_t m_time_per_token;
 	std::uint64_t m_token_capacity;
 };
