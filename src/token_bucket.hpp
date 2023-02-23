@@ -1,32 +1,33 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
+#include <cstddef>
 #include <stdexcept>
 
-template<typename Resolution = std::chrono::nanoseconds>
 class token_bucket
 {
 public:
-	token_bucket(std::uint64_t tokens_per_second, std::uint64_t token_capacity)
-	: token_bucket(std::chrono::duration_cast<Resolution>(std::chrono::seconds(1)) / tokens_per_second, token_capacity) {}
+	using clock = std::chrono::steady_clock;
+	using duration = clock::duration;
+	using time_point = clock::time_point;
+	using atomic_time = std::atomic<time_point>;
 
-	template<typename Rep, typename Period>
-	token_bucket(const std::chrono::duration<Rep, Period>& time_per_token, std::uint64_t token_capacity)
-	: m_time_per_token{ static_cast<std::uint64_t>(std::chrono::duration_cast<Resolution>(time_per_token).count()) }, m_token_capacity{ m_time_per_token * token_capacity }
+	token_bucket(std::size_t tokens_per_second, std::size_t token_capacity)
+	: token_bucket(std::chrono::duration_cast<duration>(std::chrono::seconds(1)) / tokens_per_second, token_capacity) {}
+
+	token_bucket(duration time_per_token, std::size_t token_capacity)
+	: m_time_per_token{ std::chrono::duration_cast<duration>(time_per_token) }, m_token_capacity{ m_time_per_token * token_capacity }
 	{
-		if(std::chrono::duration_cast<std::chrono::nanoseconds>(time_per_token).count() < std::chrono::duration_cast<std::chrono::nanoseconds>(Resolution(1)).count())
-			throw std::invalid_argument("Invalid resolution!");
-		if(!time_per_token.count() || !token_capacity)
-			throw std::invalid_argument("Invalid rate or capacity!");
+		if(!m_time_per_token.count()) throw std::invalid_argument("Invalid token rate!");
+		if(!m_token_capacity.count()) throw std::invalid_argument("Invalid token capacity!");
 	}
 
 	token_bucket(const token_bucket& other)
 	: m_time{ other.m_time.load(std::memory_order_relaxed) }, m_time_per_token{ other.m_time_per_token }, m_token_capacity{ other.m_token_capacity } {}
 
-	token_bucket(token_bucket&& other)
-	: m_time{ other.m_time.load(std::memory_order_relaxed) }, m_time_per_token{ other.m_time_per_token }, m_token_capacity{ other.m_token_capacity } {}
+	// token_bucket(token_bucket&& other) = delete;
 
-	token_bucket& operator = (token_bucket other)
+	token_bucket& operator = (const token_bucket& other)
 	{
 		m_time = other.m_time.load(std::memory_order_relaxed);
 		m_time_per_token = other.m_time_per_token;
@@ -34,9 +35,11 @@ public:
 		return *this;
 	}
 
-	[[nodiscard]] bool try_consume(std::uint64_t tokens = 1, Resolution* time_needed = nullptr)
+	// token_bucket& operator = (token_bucket&& other) = delete;
+
+	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr)
 	{
-		auto now = static_cast<std::uint64_t>(std::chrono::duration_cast<Resolution>(std::chrono::steady_clock::now().time_since_epoch()).count());
+		auto now = clock::now();
 		auto delay = tokens * m_time_per_token;
 		auto min_time = now - m_token_capacity;
 		auto old_time = m_time.load(std::memory_order_relaxed);
@@ -52,7 +55,7 @@ public:
 			if (new_time > now)
 			{
 				if (time_needed != nullptr)
-					*time_needed = Resolution(new_time - now);
+					*time_needed = new_time - now;
 
 				return false;
 			}
@@ -66,21 +69,21 @@ public:
 		[[unlikely]] return false;
 	}
 
-	void consume(std::uint64_t tokens = 1)
+	void consume(std::size_t tokens = 1)
 	{
 		while (!try_consume(tokens))
 			std::this_thread::yield();
 	}
 
-	void wait(std::uint64_t tokens = 1)
+	void wait(std::size_t tokens = 1)
 	{
-		Resolution time_needed{};
+		duration time_needed{};
 		while (!try_consume(tokens, &time_needed))
 			std::this_thread::sleep_for(time_needed);
 	}
 
 private:
-	std::atomic_uint64_t m_time {};
-	std::uint64_t m_time_per_token;
-	std::uint64_t m_token_capacity;
+	atomic_time m_time = {};
+	duration m_time_per_token;
+	duration m_token_capacity;
 };
