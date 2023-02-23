@@ -5,6 +5,8 @@
 #include <barrier>
 #include "token_bucket.hpp"
 
+#define all(c) for(auto& it : c) it
+
 int main()
 {
 	using namespace std;
@@ -27,7 +29,7 @@ int main()
 			while (run)
 			{
 				// fair_play.arrive_and_wait();
-				bucket.consume(N);
+				bucket.wait(N);
 				/* ++total */ total.fetch_add(N, memory_order_relaxed);
 				/* ++counts[x] */ counts[x].fetch_add(N, memory_order_relaxed);
 			}
@@ -53,8 +55,9 @@ int main()
 		cin.get();
 		run = false;
 		stats.join();
-		for(auto& t : threads)
-			t.join();
+		all(threads).join();
+		//for(auto& t : threads)
+		//	t.join();
 	}
 	catch (exception& ex)
 	{
