@@ -1,12 +1,9 @@
 #include <iostream>
 #include <iomanip>
-#include <syncstream>
 #include <vector>
 #include <latch>
 #include <barrier>
 #include "token_bucket.hpp"
-
-#define ss std::osyncstream(std::cout)
 
 int main()
 {
@@ -22,7 +19,7 @@ int main()
 		auto counts = vector<atomic_uint64_t>(count);
 		auto fair_start = latch(count);
 		auto fair_play = barrier(count);
-		auto threads = vector<jthread>(count);
+		auto threads = vector<thread>(count);
 
 		auto worker = [&](auto x)
 		{
@@ -38,17 +35,17 @@ int main()
 		};
 
 		for (auto& t : threads)
-			t = jthread(worker, --count);
+			t = thread(worker, --count);
 
 		auto stats = thread([&]
 		{
 			while (run)
 			{
 				for (auto& count : counts)
-					ss << fixed << setprecision(5) << left << "Count:\t"
+					cout << fixed << setprecision(5) << left << "Count:\t"
 					<< count.load(memory_order_relaxed) << "\t/\t"
 					<< (100.0 * count.load(memory_order_relaxed) / total.load(memory_order_relaxed)) << " %" << endl;
-				ss << "Total:\t" << total.load(memory_order_relaxed) << endl << endl;
+				cout << "Total:\t" << total.load(memory_order_relaxed) << endl << endl;
 				this_thread::sleep_for(1s);
 			}
 		});
@@ -56,6 +53,8 @@ int main()
 		cin.get();
 		run = false;
 		stats.join();
+		for(auto& t : threads)
+			t.join();
 	}
 	catch (exception& ex)
 	{
