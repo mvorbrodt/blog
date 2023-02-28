@@ -29,24 +29,21 @@ int main()
 			while (run)
 			{
 				// fair_play.arrive_and_wait();
-				bucket.wait(N);
-				/* ++total */ total.fetch_add(N, memory_order_relaxed);
-				/* ++counts[x] */ counts[x].fetch_add(N, memory_order_relaxed);
+				bucket.consume(N);
+				++total;
+				++counts[x];
 			}
 			fair_play.arrive_and_drop();
 		};
 
-		for (auto& t : threads)
-			t = thread(worker, --count);
+		all(threads) = thread(worker, --count);
 
 		auto stats = thread([&]
 		{
 			while (run)
 			{
 				for (auto& count : counts)
-					cout << fixed << setprecision(5) << left << "Count:\t"
-					<< count.load(memory_order_relaxed) << "\t/\t"
-					<< (100.0 * count.load(memory_order_relaxed) / total.load(memory_order_relaxed)) << " %" << endl;
+					cout << fixed << setprecision(5) << left << "Count:\t" << count << "\t/\t" << (100.0 * count / total) << " %" << endl;
 				cout << "Total:\t" << total.load(memory_order_relaxed) << endl << endl;
 				this_thread::sleep_for(1s);
 			}
@@ -56,8 +53,6 @@ int main()
 		run = false;
 		stats.join();
 		all(threads).join();
-		//for(auto& t : threads)
-		//	t.join();
 	}
 	catch (exception& ex)
 	{
