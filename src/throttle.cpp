@@ -2,7 +2,6 @@
 #include <iomanip>
 #include <vector>
 #include <latch>
-#include <barrier>
 #include "token_bucket.hpp"
 
 #define all(c) for(auto& it : c) it
@@ -19,32 +18,37 @@ int main()
 		auto run = atomic_bool{ true };
 		auto total = atomic_uint64_t{};
 		auto counts = vector<atomic_uint64_t>(count);
-		auto fair_start = latch(count);
-		auto fair_play = barrier(count);
+		auto fair_start = latch(count + 1);
 		auto threads = vector<thread>(count);
 
 		auto stats = thread([&]
 		{
+			fair_start.arrive_and_wait();
+
+			auto start = chrono::steady_clock::now();
+			auto sec = 0;
+
 			while (run)
 			{
 				for (auto& count : counts)
-					cout << fixed << setprecision(5) << left << "Count:\t" << count << "\t/\t" << (100.0 * count / total) << " %" << endl;
-				cout << "Total:\t" << total.load(memory_order_relaxed) << endl << endl;
-				this_thread::sleep_for(1s);
+					cout << fixed << "Count:\t" << count << "\t/\t" << (100.0 * count / total) << " %" << endl;
+
+				cout << "Total:\t" << total << endl << endl;
+
+				this_thread::sleep_until(start + chrono::seconds(++sec));
 			}
 		});
 
 		auto worker = [&](auto x)
 		{
 			fair_start.arrive_and_wait();
+
 			while (run)
 			{
-				//fair_play.arrive_and_wait();
 				bucket.consume(N);
-				++total;
-				++counts[x];
+				total += N;
+				counts[x] += N;
 			}
-			fair_play.arrive_and_drop();
 		};
 
 		all(threads) = thread(worker, --count);
