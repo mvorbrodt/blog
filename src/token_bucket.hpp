@@ -10,13 +10,13 @@ public:
 	using clock = std::chrono::steady_clock;
 	using duration = clock::duration;
 	using time_point = clock::time_point;
-	using atomic_time = std::atomic<time_point>;
+	using atomic_time_point = std::atomic<time_point>;
 
-	token_bucket(std::size_t tokens_per_second, std::size_t token_capacity)
-	: token_bucket(std::chrono::duration_cast<duration>(std::chrono::seconds(1)) / tokens_per_second, token_capacity) {}
+	token_bucket(std::size_t tokens_per_second, std::size_t token_capacity, bool full = true)
+	: token_bucket(std::chrono::duration_cast<duration>(std::chrono::seconds(1)) / tokens_per_second, token_capacity, full) {}
 
-	token_bucket(duration time_per_token, std::size_t token_capacity)
-	: m_time_per_token{ time_per_token }, m_time_per_burst{ m_time_per_token * token_capacity }
+	token_bucket(duration time_per_token, std::size_t token_capacity, bool full = true)
+	: m_time{ full ? time_point{} : clock::now() }, m_time_per_token{ time_per_token }, m_time_per_burst{ time_per_token * token_capacity }
 	{
 		if(!m_time_per_token.count()) throw std::invalid_argument("Invalid token rate!");
 		if(!m_time_per_burst.count()) throw std::invalid_argument("Invalid token capacity!");
@@ -25,8 +25,6 @@ public:
 	token_bucket(const token_bucket& other)
 	: m_time{ other.m_time.load(std::memory_order_relaxed) }, m_time_per_token{ other.m_time_per_token }, m_time_per_burst{ other.m_time_per_burst } {}
 
-	// token_bucket(token_bucket&& other) = delete;
-
 	token_bucket& operator = (const token_bucket& other)
 	{
 		m_time = other.m_time.load(std::memory_order_relaxed);
@@ -34,8 +32,6 @@ public:
 		m_time_per_burst = other.m_time_per_burst;
 		return *this;
 	}
-
-	// token_bucket& operator = (token_bucket&& other) = delete;
 
 	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr)
 	{
@@ -83,7 +79,7 @@ public:
 	}
 
 private:
-	atomic_time m_time = {};
+	atomic_time_point m_time;
 	duration m_time_per_token;
 	duration m_time_per_burst;
 };

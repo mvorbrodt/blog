@@ -14,7 +14,7 @@ int main()
 	try
 	{
 		auto N = 1;
-		auto bucket = token_bucket(1ms, 1'000);
+		auto bucket = token_bucket(1ms, 1'000'000, false);
 		auto count = thread::hardware_concurrency();
 		auto run = atomic_bool{ true };
 		auto total = atomic_uint64_t{};
@@ -22,21 +22,6 @@ int main()
 		auto fair_start = latch(count);
 		auto fair_play = barrier(count);
 		auto threads = vector<thread>(count);
-
-		auto worker = [&](auto x)
-		{
-			fair_start.arrive_and_wait();
-			while (run)
-			{
-				// fair_play.arrive_and_wait();
-				bucket.consume(N);
-				++total;
-				++counts[x];
-			}
-			fair_play.arrive_and_drop();
-		};
-
-		all(threads) = thread(worker, --count);
 
 		auto stats = thread([&]
 		{
@@ -48,6 +33,21 @@ int main()
 				this_thread::sleep_for(1s);
 			}
 		});
+
+		auto worker = [&](auto x)
+		{
+			fair_start.arrive_and_wait();
+			while (run)
+			{
+				//fair_play.arrive_and_wait();
+				bucket.consume(N);
+				++total;
+				++counts[x];
+			}
+			fair_play.arrive_and_drop();
+		};
+
+		all(threads) = thread(worker, --count);
 
 		cin.get();
 		run = false;
