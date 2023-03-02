@@ -9,6 +9,7 @@
 int main()
 {
 	using namespace std;
+	using namespace std::chrono;
 
 	try
 	{
@@ -21,23 +22,23 @@ int main()
 		auto fair_start = latch(count + 1);
 		auto threads = vector<thread>(count);
 
-		auto stats = thread([&]
+		thread([&]
 		{
 			fair_start.arrive_and_wait();
 
-			auto start = chrono::steady_clock::now();
+			auto start = steady_clock::now();
 			auto sec = 0;
 
 			while (run)
 			{
 				for (auto& count : counts)
-					cout << fixed << "Count:\t" << count << "\t/\t" << (100.0 * count / total) << " %" << endl;
+					cout << fixed << "Count:\t" << count << "\t/\t" << (100.0 * count / total) << " %\n";
 
-				cout << "Total:\t" << total << endl << endl;
+				cout << "Total:\t" << total << "\nTime:\t" << duration_cast<seconds>(steady_clock::now() - start) << "\n" << endl;
 
-				this_thread::sleep_until(start + chrono::seconds(++sec));
+				this_thread::sleep_until(start + seconds(++sec));
 			}
-		});
+		}).detach();
 
 		auto worker = [&](auto x)
 		{
@@ -55,7 +56,6 @@ int main()
 
 		cin.get();
 		run = false;
-		stats.join();
 		all(threads).join();
 	}
 	catch (exception& ex)
