@@ -94,7 +94,7 @@ add_executable(file_hash file_hash.cpp)
 target_link_libraries(file_hash botan)
 
 add_executable(crypto crypto.cpp)
-target_link_libraries(crypto PRIVATE cryptopp-static botan wolfssl)
+target_link_libraries(crypto PRIVATE cryptopp::cryptopp botan wolfssl)
 
 add_executable(benchmark-celero benchmark-celero.cpp)
 target_link_libraries(benchmark-celero PRIVATE celero)
