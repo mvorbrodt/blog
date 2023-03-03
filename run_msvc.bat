@@ -9,8 +9,8 @@ pause
 copy /Y CMakeLists.txt.msvc CMakeLists.txt
 copy /Y src\CMakeLists.txt.msvc src\CMakeLists.txt
 
-del /F /S /Q msvc
-del /F /Q msvc
+REM del /F /S /Q msvc
+REM del /F /Q msvc
 
 mkdir msvc
 cd msvc
