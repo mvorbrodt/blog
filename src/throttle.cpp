@@ -15,7 +15,7 @@ int main()
 	{
 		auto N = 1;
 		auto bucket = token_bucket(1ms, 1'000'000, false);
-		auto count = thread::hardware_concurrency();
+		auto count = thread::hardware_concurrency() - 1;
 		auto run = atomic_bool{ true };
 		auto total = atomic_uint64_t{};
 		auto counts = vector<atomic_uint64_t>(count);
@@ -31,8 +31,9 @@ int main()
 
 			while (run)
 			{
+				auto cnt = 1;
 				for (auto& count : counts)
-					cout << fixed << "Count:\t" << count << "\t/\t" << (100.0 * count / total) << " %\n";
+					cout << fixed << "Cnt " << cnt++ << ":\t" << count << "\t / \t" << (100.0 * count / total) << " % \n";
 
 				cout << "Total:\t" << total << "\nTime:\t" << duration_cast<seconds>(steady_clock::now() - start) << "\n" << endl;
 

@@ -119,8 +119,6 @@ public:
 
 			new_time = old_time;
 		}
-
-		[[unlikely]] return false;
 	}
 
 	void consume(std::size_t tokens = 1)
