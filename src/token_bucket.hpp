@@ -50,7 +50,7 @@ public:
 
 	void wait(std::size_t tokens = 1)
 	{
-		duration time_needed{};
+		duration time_needed;
 		while (!try_consume(tokens, &time_needed))
 			std::this_thread::sleep_for(time_needed);
 	}
@@ -97,10 +97,7 @@ public:
 		auto delay = tokens * m_time_per_token;
 		auto min_time = now - m_time_per_burst;
 		auto old_time = m_time.load(std::memory_order_relaxed);
-		auto new_time = old_time;
-
-		if (min_time > old_time)
-			new_time = min_time;
+		auto new_time = min_time > old_time ? min_time : old_time;
 
 		while (true)
 		{
@@ -129,7 +126,7 @@ public:
 
 	void wait(std::size_t tokens = 1)
 	{
-		duration time_needed{};
+		duration time_needed;
 		while (!try_consume(tokens, &time_needed))
 			std::this_thread::sleep_for(time_needed);
 	}
