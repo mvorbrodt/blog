@@ -14,7 +14,7 @@ int main()
 	try
 	{
 		auto N = 1;
-		auto bucket = token_bucket(1ms, 1'000'000, false);
+		auto bucket = token_bucket(1ms, 1'000, false);
 		auto count = thread::hardware_concurrency() - 1;
 		auto run = atomic_bool{ true };
 		auto total = atomic_uint64_t{};

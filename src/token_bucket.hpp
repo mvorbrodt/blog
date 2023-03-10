@@ -18,8 +18,8 @@ public:
 	token_bucket_st(duration time_per_token, std::size_t token_capacity, bool full = true)
 	: m_time{ full ? time_point{} : clock::now() }, m_time_per_token{ time_per_token }, m_time_per_burst{ time_per_token * token_capacity }
 	{
-		if (!m_time_per_token.count()) throw std::invalid_argument("Invalid token rate!");
-		if (!m_time_per_burst.count()) throw std::invalid_argument("Invalid token capacity!");
+		if (m_time_per_token.count() <= 0) throw std::invalid_argument("Invalid token rate!");
+		if (m_time_per_burst.count() <= 0) throw std::invalid_argument("Invalid token capacity!");
 	}
 
 	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr)
@@ -76,8 +76,8 @@ public:
 	token_bucket_mt(duration time_per_token, std::size_t token_capacity, bool full = true)
 	: m_time{ full ? time_point{} : clock::now() }, m_time_per_token{ time_per_token }, m_time_per_burst{ time_per_token * token_capacity }
 	{
-		if(!m_time_per_token.count()) throw std::invalid_argument("Invalid token rate!");
-		if(!m_time_per_burst.count()) throw std::invalid_argument("Invalid token capacity!");
+		if (m_time_per_token.count() <= 0) throw std::invalid_argument("Invalid token rate!");
+		if (m_time_per_burst.count() <= 0) throw std::invalid_argument("Invalid token capacity!");
 	}
 
 	token_bucket_mt(const token_bucket_mt& other)
