@@ -35,7 +35,7 @@ int main()
 				for (auto& count : counts)
 					cout << fixed << "Cnt " << cnt++ << ":\t" << count << "\t / \t" << (100.0 * count / total) << " % \n";
 
-				cout << "Total:\t" << total << "\nTime:\t" << duration_cast<seconds>(steady_clock::now() - start) << "\n" << endl;
+				cout << "Total:\t" << total << "\nTime:\t" << duration_cast<seconds>(steady_clock::now() - start).count() << "s\n" << endl;
 
 				this_thread::sleep_until(start + seconds(++sec));
 			}
