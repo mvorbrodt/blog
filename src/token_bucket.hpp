@@ -1,7 +1,6 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
-#include <cstddef>
 #include <stdexcept>
 
 // Single-Threaded Version of Token Bucket
