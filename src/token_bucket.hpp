@@ -21,7 +21,7 @@ public:
 		if (m_time_per_burst.count() <= 0) throw std::invalid_argument("Invalid token capacity!");
 	}
 
-	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr)
+	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr) noexcept
 	{
 		auto now = clock::now();
 		auto delay = tokens * m_time_per_token;
@@ -41,13 +41,13 @@ public:
 		return true;
 	}
 
-	void consume(std::size_t tokens = 1)
+	void consume(std::size_t tokens = 1) noexcept
 	{
 		while (!try_consume(tokens))
 			std::this_thread::yield();
 	}
 
-	void wait(std::size_t tokens = 1)
+	void wait(std::size_t tokens = 1) noexcept
 	{
 		duration time_needed;
 		while (!try_consume(tokens, &time_needed))
@@ -79,10 +79,10 @@ public:
 		if (m_time_per_burst.count() <= 0) throw std::invalid_argument("Invalid token capacity!");
 	}
 
-	token_bucket_mt(const token_bucket_mt& other)
+	token_bucket_mt(const token_bucket_mt& other) noexcept
 	: m_time{ other.m_time.load(std::memory_order_relaxed) }, m_time_per_token{ other.m_time_per_token }, m_time_per_burst{ other.m_time_per_burst } {}
 
-	token_bucket_mt& operator = (const token_bucket_mt& other)
+	token_bucket_mt& operator = (const token_bucket_mt& other) noexcept
 	{
 		m_time = other.m_time.load(std::memory_order_relaxed);
 		m_time_per_token = other.m_time_per_token;
@@ -90,7 +90,7 @@ public:
 		return *this;
 	}
 
-	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr)
+	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr) noexcept
 	{
 		auto now = clock::now();
 		auto delay = tokens * m_time_per_token;
@@ -117,13 +117,13 @@ public:
 		}
 	}
 
-	void consume(std::size_t tokens = 1)
+	void consume(std::size_t tokens = 1) noexcept
 	{
 		while (!try_consume(tokens))
 			std::this_thread::yield();
 	}
 
-	void wait(std::size_t tokens = 1)
+	void wait(std::size_t tokens = 1) noexcept
 	{
 		duration time_needed;
 		while (!try_consume(tokens, &time_needed))
