@@ -9,8 +9,8 @@ pause
 copy /Y CMakeLists.txt.msvc CMakeLists.txt
 copy /Y src\CMakeLists.txt.msvc src\CMakeLists.txt
 
-REM del /F /S /Q msvc
-REM del /F /Q msvc
+del /F /S /Q msvc
+del /F /Q msvc
 
 mkdir msvc
 cd msvc
@@ -22,7 +22,7 @@ echo. & echo. & echo.
 pause
 
 msbuild -m msvc/blog.sln -t:Rebuild -p:Configuration=Debug
-REM msbuild -m msvc/blog.sln -t:Rebuild -p:Configuration=Release
+msbuild -m msvc/blog.sln -t:Rebuild -p:Configuration=Release
 
 echo. & echo. & echo.
 pause
