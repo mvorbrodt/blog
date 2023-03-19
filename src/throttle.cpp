@@ -14,12 +14,12 @@ int main()
 	try
 	{
 		auto N = 1;
-		auto bucket = token_bucket(1ms, 1'000, false);
+		auto bucket = token_bucket(1ms, 1'000, true);
 		auto count = thread::hardware_concurrency() - 1;
 		auto run = atomic_bool{ true };
 		auto total = atomic_uint64_t{};
 		auto counts = vector<atomic_uint64_t>(count);
-		auto fair_start = latch(count + 1);
+		auto fair_start = latch(count + 2);
 		auto threads = vector<thread>(count);
 
 		thread([&]
@@ -52,6 +52,22 @@ int main()
 				counts[x] += N;
 			}
 		};
+
+		thread([&]
+		{
+			bucket.drain();
+
+			fair_start.arrive_and_wait();
+
+			this_thread::sleep_for(3s);
+
+			bucket.set_rate(1s);
+			bucket.set_capacity(1'000'000);
+
+			this_thread::sleep_for(3s);
+
+			bucket.refill();
+		}).detach();
 
 		all(threads) = thread(worker, --count);
 

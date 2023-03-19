@@ -21,6 +21,34 @@ public:
 		if (m_time_per_burst.count() <= 0) throw std::invalid_argument("Invalid token capacity!");
 	}
 
+	void set_rate(std::size_t tokens_per_second)
+	{
+		set_rate(std::chrono::duration_cast<duration>(std::chrono::seconds(1)) / tokens_per_second);
+	}
+
+	void set_rate(duration time_per_token)
+	{
+		if (time_per_token.count() <= 0) throw std::invalid_argument("Invalid token rate!");
+		m_time_per_token = time_per_token;
+	}
+
+	void set_capacity(std::size_t token_capacity)
+	{
+		if (!token_capacity) throw std::invalid_argument("Invalid token capacity!");
+		m_time_per_burst = m_time_per_token * token_capacity;
+	}
+
+	void drain() noexcept
+	{
+		m_time = clock::now();
+	}
+
+	void refill() noexcept
+	{
+		auto now = clock::now();
+		m_time = now - m_time_per_burst;
+	}
+
 	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr) noexcept
 	{
 		auto now = clock::now();
@@ -67,6 +95,8 @@ public:
 	using clock = std::chrono::steady_clock;
 	using duration = clock::duration;
 	using time_point = clock::time_point;
+
+	using atomic_duration = std::atomic<duration>;
 	using atomic_time_point = std::atomic<time_point>;
 
 	token_bucket_mt(std::size_t tokens_per_second, std::size_t token_capacity, bool full = true)
@@ -75,26 +105,56 @@ public:
 	token_bucket_mt(duration time_per_token, std::size_t token_capacity, bool full = true)
 	: m_time{ full ? time_point{} : clock::now() }, m_time_per_token{ time_per_token }, m_time_per_burst{ time_per_token * token_capacity }
 	{
-		if (m_time_per_token.count() <= 0) throw std::invalid_argument("Invalid token rate!");
-		if (m_time_per_burst.count() <= 0) throw std::invalid_argument("Invalid token capacity!");
+		if (time_per_token.count() <= 0) throw std::invalid_argument("Invalid token rate!");
+		if (!token_capacity) throw std::invalid_argument("Invalid token capacity!");
 	}
 
 	token_bucket_mt(const token_bucket_mt& other) noexcept
-	: m_time{ other.m_time.load(std::memory_order_relaxed) }, m_time_per_token{ other.m_time_per_token }, m_time_per_burst{ other.m_time_per_burst } {}
+	: m_time{ other.m_time.load(std::memory_order_relaxed) },
+	m_time_per_token{ other.m_time_per_token.load(std::memory_order_relaxed) },
+	m_time_per_burst{ other.m_time_per_burst.load(std::memory_order_relaxed) } {}
 
 	token_bucket_mt& operator = (const token_bucket_mt& other) noexcept
 	{
 		m_time = other.m_time.load(std::memory_order_relaxed);
-		m_time_per_token = other.m_time_per_token;
-		m_time_per_burst = other.m_time_per_burst;
+		m_time_per_token = other.m_time_per_token.load(std::memory_order_relaxed);
+		m_time_per_burst = other.m_time_per_burst.load(std::memory_order_relaxed);
 		return *this;
+	}
+
+	void set_rate(std::size_t tokens_per_second)
+	{
+		set_rate(std::chrono::duration_cast<duration>(std::chrono::seconds(1)) / tokens_per_second);
+	}
+
+	void set_rate(duration time_per_token)
+	{
+		if (time_per_token.count() <= 0) throw std::invalid_argument("Invalid token rate!");
+		m_time_per_token = time_per_token;
+	}
+
+	void set_capacity(std::size_t token_capacity)
+	{
+		if (!token_capacity) throw std::invalid_argument("Invalid token capacity!");
+		m_time_per_burst = m_time_per_token.load(std::memory_order_relaxed) * token_capacity;
+	}
+
+	void drain() noexcept
+	{
+		m_time = clock::now();
+	}
+
+	void refill() noexcept
+	{
+		auto now = clock::now();
+		m_time = now - m_time_per_burst.load(std::memory_order_relaxed);
 	}
 
 	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr) noexcept
 	{
 		auto now = clock::now();
-		auto delay = tokens * m_time_per_token;
-		auto min_time = now - m_time_per_burst;
+		auto delay = tokens * m_time_per_token.load(std::memory_order_relaxed);
+		auto min_time = now - m_time_per_burst.load(std::memory_order_relaxed);
 		auto old_time = m_time.load(std::memory_order_relaxed);
 		auto new_time = min_time > old_time ? min_time : old_time;
 
@@ -132,8 +192,8 @@ public:
 
 private:
 	atomic_time_point m_time;
-	duration m_time_per_token;
-	duration m_time_per_burst;
+	atomic_duration m_time_per_token;
+	atomic_duration m_time_per_burst;
 };
 
 // Default Token Bucket
