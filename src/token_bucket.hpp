@@ -110,15 +110,15 @@ public:
 	}
 
 	token_bucket_mt(const token_bucket_mt& other) noexcept
-	: m_time{ other.m_time.load(std::memory_order_relaxed) },
-	m_time_per_token{ other.m_time_per_token.load(std::memory_order_relaxed) },
-	m_time_per_burst{ other.m_time_per_burst.load(std::memory_order_relaxed) } {}
+	: m_time{ other.m_time.load() },
+	m_time_per_token{ other.m_time_per_token.load() },
+	m_time_per_burst{ other.m_time_per_burst.load() } {}
 
 	token_bucket_mt& operator = (const token_bucket_mt& other) noexcept
 	{
-		m_time = other.m_time.load(std::memory_order_relaxed);
-		m_time_per_token = other.m_time_per_token.load(std::memory_order_relaxed);
-		m_time_per_burst = other.m_time_per_burst.load(std::memory_order_relaxed);
+		m_time = other.m_time.load();
+		m_time_per_token = other.m_time_per_token.load();
+		m_time_per_burst = other.m_time_per_burst.load();
 		return *this;
 	}
 
@@ -136,7 +136,7 @@ public:
 	void set_capacity(std::size_t token_capacity)
 	{
 		if (!token_capacity) throw std::invalid_argument("Invalid token capacity!");
-		m_time_per_burst = m_time_per_token.load(std::memory_order_relaxed) * token_capacity;
+		m_time_per_burst = m_time_per_token.load() * token_capacity;
 	}
 
 	void drain() noexcept
@@ -147,7 +147,7 @@ public:
 	void refill() noexcept
 	{
 		auto now = clock::now();
-		m_time = now - m_time_per_burst.load(std::memory_order_relaxed);
+		m_time = now - m_time_per_burst.load();
 	}
 
 	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr) noexcept
