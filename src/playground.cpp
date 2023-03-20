@@ -65,33 +65,33 @@ public:
 
 	std::size_t count() const noexcept { return m_count; }
 
-	[[nodiscard]] bool try_pour(std::size_t tokens = 1, std::size_t* overflow = nullptr) noexcept
+	[[nodiscard]] bool try_pour(std::size_t drops = 1, std::size_t* overflow = nullptr) noexcept
 	{
 		std::unique_lock guard(m_bucket_lock);
 
-		if (count() + tokens > capacity())
+		if (count() + drops > capacity())
 		{
 			if (overflow != nullptr)
-				*overflow = count() + tokens - capacity();
+				*overflow = count() + drops - capacity();
 
 			return false;
 		}
 
-		m_count += tokens;
+		m_count += drops;
 
 		return true;
 	}
 
-	void pour(std::size_t tokens = 1) noexcept
+	void pour(std::size_t drops = 1) noexcept
 	{
-		while(!try_pour(tokens))
+		while(!try_pour(drops))
 			std::this_thread::yield();
 	}
 
-	void wait(std::size_t tokens = 1) noexcept
+	void wait(std::size_t drops = 1) noexcept
 	{
 		std::size_t overflow;
-		while (!try_pour(tokens, &overflow))
+		while (!try_pour(drops, &overflow))
 			std::this_thread::sleep_for(rate() * overflow);
 	}
 
@@ -121,7 +121,7 @@ int main()
 
 	leaky_bucket bucket(1s, 5, [](leaky_bucket& lb)
 	{
-		cout << "leaked! tokens remaining = " << lb.count() << endl;
+		cout << "leaked! drops remaining = " << lb.count() << endl;
 	});
 
 	for(auto i = 1; i <= 10; ++i)
