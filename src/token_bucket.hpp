@@ -17,8 +17,11 @@ public:
 	token_bucket_st(duration time_per_token, std::size_t token_capacity, bool full = true)
 	: m_time{ full ? time_point{} : clock::now() }, m_time_per_token{ time_per_token }, m_time_per_burst{ time_per_token * token_capacity }
 	{
-		if (m_time_per_token.count() <= 0) throw std::invalid_argument("Invalid token rate!");
-		if (m_time_per_burst.count() <= 0) throw std::invalid_argument("Invalid token capacity!");
+		if (m_time_per_token.count() <= 0)
+			throw std::invalid_argument("Invalid token rate!");
+
+		if (m_time_per_burst.count() <= 0)
+			throw std::invalid_argument("Invalid token capacity!");
 	}
 
 	duration rate() const noexcept { return m_time_per_token; }
@@ -27,12 +30,16 @@ public:
 
 	std::size_t capacity() const noexcept { return burst() / rate(); }
 
-	std::size_t available() const noexcept
+	std::size_t count() const noexcept
 	{
 		auto window = clock::now() - m_time;
 
 		return window > burst() ? capacity() : window / rate();
 	}
+
+	bool empty() const noexcept { return count() == 0; }
+
+	bool full() const noexcept { return count() == capacity(); }
 
 	void set_rate(std::size_t tokens_per_second)
 	{
@@ -41,29 +48,29 @@ public:
 
 	void set_rate(duration time_per_token)
 	{
-		if (time_per_token.count() <= 0) throw std::invalid_argument("Invalid token rate!");
+		if (time_per_token.count() <= 0)
+			throw std::invalid_argument("Invalid token rate!");
+
 		m_time_per_token = time_per_token;
 	}
 
 	void set_capacity(std::size_t token_capacity)
 	{
-		if (!token_capacity) throw std::invalid_argument("Invalid token capacity!");
+		if (!token_capacity)
+			throw std::invalid_argument("Invalid token capacity!");
+
 		m_time_per_burst = rate() * token_capacity;
 	}
 
-	void drain() noexcept
-	{
-		m_time = clock::now();
-	}
+	void drain() noexcept { m_time = clock::now(); }
 
-	void refill() noexcept
-	{
-		auto now = clock::now();
-		m_time = now - burst();
-	}
+	void refill() noexcept { m_time = clock::now() - burst(); }
 
-	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr) noexcept
+	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr)
 	{
+		if (tokens > capacity())
+			throw std::logic_error("Invalid token count!");
+
 		auto now = clock::now();
 		auto delay = tokens * rate();
 		auto min_time = now - burst();
@@ -82,13 +89,13 @@ public:
 		return true;
 	}
 
-	void consume(std::size_t tokens = 1) noexcept
+	void consume(std::size_t tokens = 1)
 	{
 		while (!try_consume(tokens))
 			std::this_thread::yield();
 	}
 
-	void wait(std::size_t tokens = 1) noexcept
+	void consume_or_wait(std::size_t tokens = 1)
 	{
 		duration time_needed;
 		while (!try_consume(tokens, &time_needed))
@@ -118,8 +125,11 @@ public:
 	token_bucket_mt(duration time_per_token, std::size_t token_capacity, bool full = true)
 	: m_time{ full ? time_point{} : clock::now() }, m_time_per_token{ time_per_token }, m_time_per_burst{ time_per_token * token_capacity }
 	{
-		if (time_per_token.count() <= 0) throw std::invalid_argument("Invalid token rate!");
-		if (!token_capacity) throw std::invalid_argument("Invalid token capacity!");
+		if (time_per_token.count() <= 0)
+			throw std::invalid_argument("Invalid token rate!");
+
+		if (!token_capacity)
+			throw std::invalid_argument("Invalid token capacity!");
 	}
 
 	token_bucket_mt(const token_bucket_mt& other) noexcept
@@ -142,12 +152,16 @@ public:
 
 	std::size_t capacity() const noexcept { return burst() / rate(); }
 
-	std::size_t available() const noexcept
+	std::size_t count() const noexcept
 	{
 		auto window = clock::now() - m_time.load();
 
 		return window > burst() ? capacity() : window / rate();
 	}
+
+	bool empty() const noexcept { return count() == 0; }
+
+	bool full() const noexcept { return count() == capacity(); }
 
 	void set_rate(std::size_t tokens_per_second)
 	{
@@ -156,29 +170,29 @@ public:
 
 	void set_rate(duration time_per_token)
 	{
-		if (time_per_token.count() <= 0) throw std::invalid_argument("Invalid token rate!");
+		if (time_per_token.count() <= 0)
+			throw std::invalid_argument("Invalid token rate!");
+
 		m_time_per_token = time_per_token;
 	}
 
 	void set_capacity(std::size_t token_capacity)
 	{
-		if (!token_capacity) throw std::invalid_argument("Invalid token capacity!");
+		if (!token_capacity)
+			throw std::invalid_argument("Invalid token capacity!");
+
 		m_time_per_burst = rate() * token_capacity;
 	}
 
-	void drain() noexcept
-	{
-		m_time = clock::now();
-	}
+	void drain() noexcept { m_time = clock::now(); }
 
-	void refill() noexcept
-	{
-		auto now = clock::now();
-		m_time = now - burst();
-	}
+	void refill() noexcept { m_time = clock::now() - burst(); }
 
-	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr) noexcept
+	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr)
 	{
+		if (tokens > capacity())
+			throw std::logic_error("Invalid token count!");
+
 		auto now = clock::now();
 		auto delay = tokens * m_time_per_token.load(std::memory_order_relaxed);
 		auto min_time = now - m_time_per_burst.load(std::memory_order_relaxed);
@@ -204,13 +218,13 @@ public:
 		}
 	}
 
-	void consume(std::size_t tokens = 1) noexcept
+	void consume(std::size_t tokens = 1)
 	{
 		while (!try_consume(tokens))
 			std::this_thread::yield();
 	}
 
-	void wait(std::size_t tokens = 1) noexcept
+	void consume_or_wait(std::size_t tokens = 1)
 	{
 		duration time_needed;
 		while (!try_consume(tokens, &time_needed))
