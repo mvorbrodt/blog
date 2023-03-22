@@ -66,11 +66,8 @@ public:
 
 	void refill() noexcept { m_time = clock::now() - burst(); }
 
-	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr)
+	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr) noexcept
 	{
-		if (tokens > capacity())
-			throw std::logic_error("Invalid token count!");
-
 		auto now = clock::now();
 		auto delay = tokens * rate();
 		auto min_time = now - burst();
@@ -89,13 +86,13 @@ public:
 		return true;
 	}
 
-	void consume(std::size_t tokens = 1)
+	void consume(std::size_t tokens = 1) noexcept
 	{
 		while (!try_consume(tokens))
 			std::this_thread::yield();
 	}
 
-	void consume_or_wait(std::size_t tokens = 1)
+	void consume_or_wait(std::size_t tokens = 1) noexcept
 	{
 		duration time_needed;
 		while (!try_consume(tokens, &time_needed))
@@ -133,28 +130,28 @@ public:
 	}
 
 	token_bucket_mt(const token_bucket_mt& other) noexcept
-	: m_time{ other.m_time.load() },
+	: m_time{ other.m_time.load(std::memory_order_relaxed) },
 	m_time_per_token{ other.rate() },
 	m_time_per_burst{ other.burst() } {}
 
 	token_bucket_mt& operator = (const token_bucket_mt& other) noexcept
 	{
-		m_time = other.m_time.load();
+		m_time = other.m_time.load(std::memory_order_relaxed);
 		m_time_per_token = other.rate();
 		m_time_per_burst = other.burst();
 
 		return *this;
 	}
 
-	duration rate() const noexcept { return m_time_per_token.load(); }
+	duration rate() const noexcept { return m_time_per_token.load(std::memory_order_relaxed); }
 
-	duration burst() const noexcept { return m_time_per_burst.load(); }
+	duration burst() const noexcept { return m_time_per_burst.load(std::memory_order_relaxed); }
 
 	std::size_t capacity() const noexcept { return burst() / rate(); }
 
 	std::size_t count() const noexcept
 	{
-		auto window = clock::now() - m_time.load();
+		auto window = clock::now() - m_time.load(std::memory_order_relaxed);
 
 		return window > burst() ? capacity() : window / rate();
 	}
@@ -188,14 +185,11 @@ public:
 
 	void refill() noexcept { m_time = clock::now() - burst(); }
 
-	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr)
+	[[nodiscard]] bool try_consume(std::size_t tokens = 1, duration* time_needed = nullptr) noexcept
 	{
-		if (tokens > capacity())
-			throw std::logic_error("Invalid token count!");
-
 		auto now = clock::now();
-		auto delay = tokens * m_time_per_token.load(std::memory_order_relaxed);
-		auto min_time = now - m_time_per_burst.load(std::memory_order_relaxed);
+		auto delay = tokens * rate();
+		auto min_time = now - burst();
 		auto old_time = m_time.load(std::memory_order_relaxed);
 		auto new_time = min_time > old_time ? min_time : old_time;
 
@@ -218,13 +212,13 @@ public:
 		}
 	}
 
-	void consume(std::size_t tokens = 1)
+	void consume(std::size_t tokens = 1) noexcept
 	{
 		while (!try_consume(tokens))
 			std::this_thread::yield();
 	}
 
-	void consume_or_wait(std::size_t tokens = 1)
+	void consume_or_wait(std::size_t tokens = 1) noexcept
 	{
 		duration time_needed;
 		while (!try_consume(tokens, &time_needed))
