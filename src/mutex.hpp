@@ -50,7 +50,8 @@ public:
 			if(!m_lock.exchange(true, std::memory_order_acquire))
 				break;
 			while(m_lock.load(std::memory_order_relaxed))
-				asm volatile("pause");
+				std::this_thread::yield();
+				//asm volatile("pause");
 		}
 	}
 
