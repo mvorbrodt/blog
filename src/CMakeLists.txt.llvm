@@ -166,6 +166,7 @@ target_link_libraries(random Catch2::Catch2 Catch2::Catch2WithMain)
 
 add_executable(ranges ranges.cpp)
 add_executable(round round.hpp round.cpp)
+add_executable(scratchpad scratchpad.cpp)
 add_executable(singleton singleton.hpp singleton.cpp)
 add_executable(sorting sorting.cpp)
 add_executable(sso sso.cpp)
