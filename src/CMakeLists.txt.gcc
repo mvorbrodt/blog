@@ -157,6 +157,8 @@ add_executable(proto_buf protobuf.cpp protobuf.pb.h protobuf.pb.cc protobuf.prot
 target_link_libraries(proto_buf ${Protobuf_LIBRARIES})
 
 add_executable(pstl pstl_test_gcc.cpp)
+set_source_files_properties(pstl_test_gcc.cpp PROPERTIES COMPILE_FLAGS "-std=c++20")
+target_link_libraries(pstl PRIVATE pstl::ParallelSTL TBB::tbb)
 
 add_executable(queue queue.hpp queue.cpp)
 
