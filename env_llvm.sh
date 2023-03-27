@@ -2,7 +2,7 @@
 
 export CC="/usr/local/bin/clang"
 export CXX="/usr/local/bin/clang++"
-export LD="/usr/local/bin/ld.lld"
+export LD="/usr/local/bin/ld64.lld"
 export AR="/usr/local/bin/llvm-ar"
 export RANLIB="/usr/local/bin/llvm-ranlib"
 

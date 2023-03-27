@@ -6,7 +6,7 @@
 #include <latch>
 #include <random>
 
-template<typename T = int, std::size_t N = std::hardware_constructive_interference_size / sizeof(T)>
+template<typename T = int, std::size_t N = 64 /* std::hardware_constructive_interference_size */ / sizeof(T)>
 struct Numbers
 {
 	static constexpr auto Size  = sizeof(T);

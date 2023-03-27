@@ -1,0 +1,210 @@
+add_executable(adapter adapter.cpp)
+add_executable(alignas alignas.cpp)
+add_executable(aos_soa aos_soa.cpp)
+add_executable(assignment assignment.cpp)
+add_executable(atomics atomics.cpp)
+add_executable(attributes attributes.cpp)
+add_executable(bad_pointer bad_pointer.cpp)
+add_executable(base64 base64.cpp)
+
+add_executable(benchmark-catch benchmark-catch.cpp)
+target_link_libraries(benchmark-catch PRIVATE Catch2::Catch2 Catch2::Catch2WithMain)
+
+add_executable(benchmark-celero benchmark-celero.cpp)
+target_link_libraries(benchmark-celero -lcelero)
+
+add_executable(benchmark-google benchmark-google.cpp)
+target_link_libraries(benchmark-google ${benchmark_LIBRARY})
+
+add_executable(benchmark-hayai benchmark-hayai.cpp)
+target_link_libraries(benchmark-hayai ${HAYAI_LIBRARIES})
+
+add_executable(benchmark-nonius benchmark-nonius.cpp)
+set_source_files_properties(benchmark-nonius.cpp PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(benchmark-nonius PRIVATE Nonius::nonius)
+
+add_executable(bloom bloom.hpp hash.hpp bloom.cpp)
+add_executable(c_api_lambda c_api_lambda.cpp)
+add_executable(cache cache.cpp)
+add_executable(class class.cpp)
+add_executable(colors ansi_escape_code.hpp colors.cpp)
+
+add_executable(compression compression.cpp)
+target_link_libraries(compression ${LZ4_LIBRARY})
+
+add_executable(concepts concepts.cpp)
+add_executable(constructors constructors.cpp)
+
+add_executable(cpu_timer cpu_timer.cpp)
+target_link_libraries(cpu_timer ${Boost_TIMER_LIBRARY})
+
+# add_executable(crypto crypto.cpp)
+# target_include_directories(crypto PUBLIC "${BOTAN_INCLUDE_DIRS}")
+# target_link_libraries(crypto PRIVATE cryptopp-static ${WOLFSSL_LIBRARY} ${BOTAN_LIBRARIES})
+
+add_executable(database database.cpp)
+set_source_files_properties(database.cpp PROPERTIES COMPILE_FLAGS "--std=c++11")
+target_include_directories(database PUBLIC ${SOCI_INCLUDE_DIRS})
+target_link_libraries(database ${SOCI_LIBRARY} ${SOCI_mysql_PLUGIN} ${MYSQL_CLIENT_LIBS})
+
+add_executable(deadlock deadlock.cpp)
+add_executable(decorator decorator.cpp)
+add_executable(deep_ptr deep_ptr.hpp deep_ptr.cpp)
+add_executable(dekker dekker.cpp)
+add_executable(dekker_n dekker_n.cpp)
+add_executable(delete delete.cpp)
+add_executable(echo_c event.hpp socket.hpp echo_c.cpp)
+add_executable(echo_s socket.hpp echo_s.cpp)
+add_executable(enum enum.cpp)
+add_executable(enum2 enum2.cpp)
+add_executable(erased erased.cpp)
+add_executable(exceptions exceptions.cpp)
+
+add_executable(file_hash file_hash.cpp)
+target_include_directories(file_hash PUBLIC "${BOTAN_INCLUDE_DIRS}")
+target_link_libraries(file_hash ${BOTAN_LIBRARIES})
+
+# add_executable(fmt fmt.cpp)
+# target_link_libraries(fmt -lfmt)
+
+add_executable(geoip geoip.cpp)
+target_link_libraries(geoip ${CURL_LIBRARY} ${CURLPP_LIBRARY})
+
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.pb.h
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.pb.cc
+	COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}
+	--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.proto)
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.grpc.pb.h
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.grpc.pb.cc
+	COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}
+	--grpc_out=${CMAKE_CURRENT_SOURCE_DIR}
+	--plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN}
+	${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.proto)
+add_executable(grpc_c grpc_service_c.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
+target_link_libraries(grpc_c ${Protobuf_LIBRARIES} ${GRPC_LIBRARIES})
+add_executable(grpc_s grpc_service_s.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
+target_link_libraries(grpc_s ${Protobuf_LIBRARIES} ${GRPC_LIBRARIES})
+
+add_executable(hash hash.cpp)
+add_executable(interview_1 interview_1.cpp)
+add_executable(interview_2 interview_2.cpp)
+add_executable(interview_4 interview_4.cpp)
+add_executable(interview_5 interview_5.cpp)
+add_executable(interview_6 interview_6.cpp)
+add_executable(inverting inverting.cpp)
+add_executable(istring istring.hpp istring.cpp)
+
+add_executable(lesson_memory_pool_how_to lesson_memory_pool_how_to.cpp)
+add_executable(lesson_thread_pool_how_to lesson_thread_pool_how_to.cpp)
+
+add_executable(lesson_pool_allocator_benchmark lesson_pool_allocator_benchmark.cpp)
+target_link_libraries(lesson_pool_allocator_benchmark PRIVATE Catch2::Catch2 Catch2::Catch2WithMain)
+
+add_executable(lesson_pool_allocator lesson_pool_allocator.cpp)
+target_link_libraries(lesson_pool_allocator PRIVATE Catch2::Catch2 Catch2::Catch2WithMain)
+
+add_executable(lesson_spinlock_event_semaphore_how_to lesson_spinlock_event_semaphore_how_to.cpp)
+add_executable(lesson_queue_how_to lesson_queue_how_to.cpp)
+
+add_executable(lrpc_c lsf.hpp socket.hpp event.hpp lrpc_proto.hpp lrpc_c.cpp)
+add_executable(lrpc_s lsf.hpp socket.hpp lrpc_proto.hpp lrpc_s.cpp)
+add_executable(lsf lsf.hpp lsf.cpp)
+add_executable(membars membars.cpp)
+add_executable(memory_pool memory_pool.hpp memory_pool.cpp)
+
+# add_module(module_1 module_1.cpp)
+# add_module(module_2 module_2.cpp)
+# add_executable(modules modules.cpp module_1.cpp module_2.cpp)
+# add_dependencies(modules module_1 module_2)
+# add_dependencies(modules TBB::tbb oneDPL)
+# set_source_files_properties(
+# 	modules.cpp
+# 	PROPERTIES COMPILE_FLAGS
+# 		"-std=c++20 -fmodules -fbuiltin-module-map -fprebuilt-module-path=${CMAKE_CURRENT_SOURCE_DIR}"
+# )
+
+add_executable(multi_hash hash.hpp multi_hash.cpp)
+add_executable(new new.cpp)
+add_executable(newtrace newtrace.hpp newtrace.cpp)
+add_executable(newtrace.st newtrace.st.hpp newtrace.st.cpp)
+
+# add_executable(options options.cpp)
+# target_link_libraries(options ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+add_executable(otp otp.cpp)
+target_link_libraries(otp -loath)
+
+add_executable(playground I.hpp T.hpp playground.cpp)
+
+# add_executable(plugin_load plugin_load.cpp)
+# target_link_libraries(plugin_load ${CMAKE_DL_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+# add_library(plugin SHARED plugin_lib.cpp)
+
+add_executable(pool pool.hpp pool.cpp)
+add_executable(pragma pragma.cpp)
+add_executable(property T.hpp property.hpp property.cpp)
+
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/protobuf.pb.h
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/protobuf.pb.cc
+	COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} -I=${CMAKE_CURRENT_SOURCE_DIR}
+	--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/protobuf.proto)
+add_executable(proto_buf protobuf.cpp protobuf.pb.h protobuf.pb.cc protobuf.proto)
+target_link_libraries(proto_buf ${Protobuf_LIBRARIES})
+
+add_executable(pstl pstl_test.cpp)
+target_link_libraries(pstl PRIVATE TBB::tbb pstl::ParallelSTL Catch2::Catch2 Catch2::Catch2WithMain)
+
+add_executable(queue queue.hpp queue.cpp)
+
+add_executable(random random_test.cpp)
+target_link_libraries(random Catch2::Catch2 Catch2::Catch2WithMain)
+
+add_executable(ranges ranges.cpp)
+add_executable(round round.hpp round.cpp)
+add_executable(scratchpad scratchpad.cpp)
+add_executable(singleton singleton.hpp singleton.cpp)
+add_executable(sorting sorting.cpp)
+add_executable(sso sso.cpp)
+
+add_executable(stacktrace stacktrace.cpp)
+target_link_libraries(stacktrace ${CMAKE_DL_LIBS} ${Boost_STACKTRACE_BASIC_LIBRARY})
+
+add_executable(synchronized synchronized.hpp synchronized.cpp)
+
+add_executable(templates templates.cpp)
+
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService.h
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService.cpp
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service_types.h
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService_server.skeleton.cpp
+	COMMAND ${THRIFT_COMPILER} -out ${CMAKE_CURRENT_SOURCE_DIR}
+	-gen cpp ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service.thrift)
+add_executable(thrift_c thrift_service_c.cpp ThriftService.cpp)
+target_link_libraries(thrift_c ${THRIFT_LIBRARIES})
+add_executable(thrift_s thrift_service_s.cpp ThriftService.cpp)
+target_link_libraries(thrift_s ${THRIFT_LIBRARIES})
+
+add_executable(throttle token_bucket.hpp throttle.cpp)
+add_executable(timer timer_test.cpp timer.hpp event.hpp)
+add_executable(try_block try_block.cpp)
+add_executable(unique unique.cpp)
+add_executable(unordered unordered.cpp)
+add_executable(utils I.hpp T.hpp utils.hpp utils.cpp)
+add_executable(uuid uuid.cpp)
+add_executable(visitor visitor.cpp)
+
+add_executable(xml xml.cpp)
+target_link_libraries(xml ${Boost_SERIALIZATION_LIBRARY})
+
+add_executable(xmlrpc_c xmlrpc_c.cpp)
+set_source_files_properties(xmlrpc_c.cpp PROPERTIES COMPILE_FLAGS "--std=c++98 -Wno-c++11-long-long")
+target_link_libraries(xmlrpc_c -lxmlrpc++ -lxmlrpc_client++ -lxmlrpc_util++)
+add_executable(xmlrpc_s xmlrpc_s.cpp)
+set_source_files_properties(xmlrpc_s.cpp PROPERTIES COMPILE_FLAGS "--std=c++98 -Wno-c++11-long-long")
+target_link_libraries(xmlrpc_s -lxmlrpc++ -lxmlrpc_server++ -lxmlrpc_server_abyss++ -lxmlrpc_util++)

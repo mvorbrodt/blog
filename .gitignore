@@ -22,6 +22,7 @@ cmake-build-minsizerel/
 cmake-build-relwithdebinfo/
 cmake_install.cmake
 llvm/
+gcc/
 msvc/
 src/*.dir
 src/*.filters
