@@ -156,8 +156,7 @@ add_custom_command(
 add_executable(proto_buf protobuf.cpp protobuf.pb.h protobuf.pb.cc protobuf.proto)
 target_link_libraries(proto_buf ${Protobuf_LIBRARIES})
 
-add_executable(pstl pstl_test.cpp)
-target_link_libraries(pstl PRIVATE TBB::tbb pstl::ParallelSTL Catch2::Catch2 Catch2::Catch2WithMain)
+add_executable(pstl pstl_test_gcc.cpp)
 
 add_executable(queue queue.hpp queue.cpp)
 
