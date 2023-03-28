@@ -138,6 +138,7 @@ add_executable(otp otp.cpp)
 target_link_libraries(otp -loath)
 
 add_executable(playground I.hpp T.hpp playground.cpp)
+set_source_files_properties(playground.cpp PROPERTIES COMPILE_FLAGS "-std=c++2b")
 
 # add_executable(plugin_load plugin_load.cpp)
 # target_link_libraries(plugin_load ${CMAKE_DL_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})

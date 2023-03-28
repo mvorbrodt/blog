@@ -5,8 +5,17 @@
 #include <array>
 #include <latch>
 #include <random>
+#include <new>
 
-template<typename T = int, std::size_t N = 64 /* std::hardware_constructive_interference_size */ / sizeof(T)>
+#ifdef __cpp_lib_hardware_interference_size
+	using std::hardware_constructive_interference_size;
+	using std::hardware_destructive_interference_size;
+#else
+	constexpr std::size_t hardware_constructive_interference_size = 64;
+	constexpr std::size_t hardware_destructive_interference_size = 64;
+#endif
+
+template<typename T = int, std::size_t N = hardware_constructive_interference_size / sizeof(T)>
 struct Numbers
 {
 	static constexpr auto Size  = sizeof(T);
