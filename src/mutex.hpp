@@ -66,14 +66,11 @@ public:
 	}
 
 private:
-#if __cpp_lib_hardware_interference_size >= 201603
-	using std::hardware_constructive_interference_size;
-	using std::hardware_destructive_interference_size;
+#ifdef __cpp_lib_hardware_interference_size
+	alignas(std::hardware_destructive_interference_size) std::atomic_bool m_lock = false;
 #else
-	constexpr std::size_t hardware_constructive_interference_size = 2 * sizeof(std::max_align_t);
-	constexpr std::size_t hardware_destructive_interference_size = 2 * sizeof(std::max_align_t);
+	alignas(2 * sizeof(std::max_align_t)) std::atomic_bool m_lock = false;
 #endif
-	alignas(hardware_destructive_interference_size) std::atomic_bool m_lock = false;
 };
 
 
