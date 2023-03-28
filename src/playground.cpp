@@ -24,10 +24,10 @@ struct Numbers
 
 	void inc()
 	{
-		while (lock.test_and_set(std::memory_order_relaxed));
+		while (lock.test_and_set(std::memory_order_acquire));
 		for (auto& n : nums)
 			++n;
-		lock.clear(std::memory_order_relaxed);
+		lock.clear(std::memory_order_release);
 	}
 
 	auto sum()
