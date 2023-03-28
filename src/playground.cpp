@@ -6,6 +6,7 @@
 #include <latch>
 #include <random>
 #include <new>
+#include <condition_variable>
 
 #ifdef __cpp_lib_hardware_interference_size
 	using std::hardware_constructive_interference_size;
@@ -46,9 +47,23 @@ using Nums = Numbers<>;
 
 #define all(x) for(auto& i : x) i
 
+struct null_mutex
+{
+	void lock() {}
+	void unlock() {}
+};
+auto nm = null_mutex{};
+auto cv = std::condition_variable_any{};
+
 int main()
 {
 	using namespace std;
+
+	thread([&] { cout << "waiting..." << endl; cv.wait(nm); cout << "...done!" << endl; }).detach();
+	this_thread::sleep_for(5s);
+	cv.notify_one();
+	this_thread::sleep_for(1s);
+	return 1;
 
 	auto N = default_random_engine{ random_device{}() }() % 1'000'000;
 	auto Ts = thread::hardware_concurrency();
