@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <atomic>
 #include <thread>
 #include <vector>
@@ -58,6 +59,13 @@ auto cv = std::condition_variable_any{};
 int main()
 {
 	using namespace std;
+
+	auto str = "Hello C++"s;
+	auto proc = [] (string&& str) { cout << str << endl; };
+	cout << str << endl;
+	proc(std::move(str));
+	cout << str << endl;
+	return 1;
 
 	thread([&] { cout << "waiting..." << endl; cv.wait(nm); cout << "...done!" << endl; }).detach();
 	this_thread::sleep_for(5s);

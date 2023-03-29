@@ -65,6 +65,12 @@ public:
 		return result;
 	}
 
+	template<typename F, typename... Args>
+	[[nodiscard]] auto enqueue_shared_task(F&& f, Args&&... args) -> std::shared_future<std::invoke_result_t<F, Args...>>
+	{
+		return enqueue_task(std::forward<F>(f), std::forward<Args>(args)...).share();
+	}
+
 private:
 	using proc_t = std::function<void(void)>;
 	using queue_t = unbounded_queue<proc_t>;
@@ -119,7 +125,7 @@ public:
 		auto i = m_index++;
 
 		for(auto n = 0; n < m_count * K; ++n)
-			if(m_queues[(i + n) % m_count].try_push(work))
+			if(m_queues[(i + n) % m_count].try_push(std::move(work)))
 				return;
 
 		m_queues[i % m_count].push(std::move(work));
@@ -137,12 +143,18 @@ public:
 		auto i = m_index++;
 
 		for(auto n = 0; n < m_count * K; ++n)
-			if(m_queues[(i + n) % m_count].try_push(work))
+			if(m_queues[(i + n) % m_count].try_push(std::move(work)))
 				return result;
 
 		m_queues[i % m_count].push(std::move(work));
 
 		return result;
+	}
+
+	template<typename F, typename... Args>
+	[[nodiscard]] auto enqueue_shared_task(F&& f, Args&&... args) -> std::shared_future<std::invoke_result_t<F, Args...>>
+	{
+		return enqueue_task(std::forward<F>(f), std::forward<Args>(args)...).share();
 	}
 
 private:
