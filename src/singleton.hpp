@@ -12,17 +12,16 @@ public:
 	template<typename... Args>
 	static void Create(Args&&... args)
 	{
-		static std::mutex s_lock;
-		std::scoped_lock lock(s_lock);
-
-		if(!s_instance) s_instance.reset(new T(std::forward<Args>(args)...));
-		else throw std::logic_error("This singleton has already been created!");
+		static std::once_flag s_create_once;
+		std::call_once(s_create_once,
+			[...args = std::forward<Args>(args)] () mutable
+			{ s_instance.reset(new T(std::forward<Args>(args)...)); });
 	}
 
 	static void Destroy()
 	{
-		if (s_instance) s_instance.reset();
-		else throw std::logic_error("This singleton has not been created!");
+		static std::once_flag s_destroy_once;
+		std::call_once(s_destroy_once, [] { s_instance.reset(); });
 	}
 
 	static T* Instance() noexcept { return s_instance.get(); }
@@ -52,23 +51,22 @@ public:
 	template<typename... Args>
 	static void Create(Args&&... args)
 	{
-		static std::mutex s_lock;
-		std::scoped_lock lock(s_lock);
-
 		struct Q : T
 		{
 			using T::T;
 			virtual void pure_virtual() const final override {}
 		};
 
-		if(!s_instance) s_instance.reset(new Q(std::forward<Args>(args)...));
-		else throw std::logic_error("This abstract singleton has already been created!");
+		static std::once_flag s_create_once;
+		std::call_once(s_create_once,
+			[...args = std::forward<Args>(args)] () mutable
+			{ s_instance.reset(new Q(std::forward<Args>(args)...)); });
 	}
 
 	static void Destroy()
 	{
-		if (s_instance) s_instance.reset();
-		else throw std::logic_error("This abstract singleton has not been created!");
+		static std::once_flag s_destroy_once;
+		std::call_once(s_destroy_once, [] { s_instance.reset(); });
 	}
 
 	static T* Instance() noexcept { return s_instance.get(); }
