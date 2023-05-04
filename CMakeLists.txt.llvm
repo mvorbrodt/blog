@@ -41,7 +41,7 @@ find_package(LZ4         MODULE REQUIRED)
 find_package(XMLRPC      MODULE REQUIRED)
 find_package(CURL        MODULE REQUIRED)
 find_package(CURLpp      MODULE REQUIRED)
-find_package(BOTAN       MODULE REQUIRED)
+# find_package(BOTAN       MODULE REQUIRED)
 find_package(WOLFSSL     MODULE REQUIRED)
 find_package(benchmark   MODULE REQUIRED)
 

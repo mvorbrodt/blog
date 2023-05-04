@@ -39,10 +39,12 @@ int main(int argc, char** argv)
 			boost::property_tree::ptree data;
 			boost::property_tree::read_json(response, data);
 
-			cout << "host = " << host << endl;
+			cout << host << "\t";
+			// cout << "host = " << host << endl;
 			for(auto& it : data)
-				cout << it.first << " = " << it.second.data() << endl;
-			cout << endl;
+				cout << it.second.data() << "\t";
+				//cout << it.first << " = " << it.second.data() << endl;
+			cout << endl << endl;
 		}
 	}
 	catch(exception& e)
