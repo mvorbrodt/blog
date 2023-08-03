@@ -23,9 +23,9 @@ class boxed : public i_boxed
 {
 public:
 	template<typename U = T>
-	explicit boxed(U&& v) : m_h{ typeid(T).hash_code() }, m_v { std::forward<U>(v) } {}
+	explicit boxed(U&& v) : m_v { std::forward<U>(v) } {}
 
-	virtual std::size_t hash() const final override { return m_h; }
+	virtual std::size_t hash() const final override { return typeid(T).hash_code(); }
 
 	virtual std::unique_ptr<i_boxed> clone() const final override { return std::make_unique<boxed<T>>(*this); }
 
@@ -34,7 +34,6 @@ public:
 	const T& value() const { return m_v; }
 
 private:
-	std::size_t m_h;
 	T m_v;
 };
 
