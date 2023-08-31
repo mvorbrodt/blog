@@ -60,9 +60,9 @@ add_executable(enum2 enum2.cpp)
 add_executable(erased erased.cpp)
 add_executable(exceptions exceptions.cpp)
 
-add_executable(file_hash file_hash.cpp)
-target_include_directories(file_hash PUBLIC "${BOTAN_INCLUDE_DIRS}")
-target_link_libraries(file_hash ${BOTAN_LIBRARIES})
+# add_executable(file_hash file_hash.cpp)
+# target_include_directories(file_hash PUBLIC "${BOTAN_INCLUDE_DIRS}")
+# target_link_libraries(file_hash ${BOTAN_LIBRARIES})
 
 # add_executable(fmt fmt.cpp)
 # target_link_libraries(fmt -lfmt)
@@ -83,10 +83,10 @@ add_custom_command(
 	--grpc_out=${CMAKE_CURRENT_SOURCE_DIR}
 	--plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN}
 	${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.proto)
-add_executable(grpc_c grpc_service_c.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
-target_link_libraries(grpc_c ${Protobuf_LIBRARIES} ${GRPC_LIBRARIES})
-add_executable(grpc_s grpc_service_s.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
-target_link_libraries(grpc_s ${Protobuf_LIBRARIES} ${GRPC_LIBRARIES})
+# add_executable(grpc_c grpc_service_c.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
+# target_link_libraries(grpc_c ${Protobuf_LIBRARIES} ${GRPC_LIBRARIES})
+# add_executable(grpc_s grpc_service_s.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
+# target_link_libraries(grpc_s ${Protobuf_LIBRARIES} ${GRPC_LIBRARIES})
 
 add_executable(hash hash.cpp)
 add_executable(interview_1 interview_1.cpp)
@@ -140,9 +140,9 @@ target_link_libraries(otp -loath)
 add_executable(playground I.hpp T.hpp playground.cpp)
 set_source_files_properties(playground.cpp PROPERTIES COMPILE_FLAGS "-std=c++2b")
 
-# add_executable(plugin_load plugin_load.cpp)
-# target_link_libraries(plugin_load ${CMAKE_DL_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
-# add_library(plugin SHARED plugin_lib.cpp)
+add_executable(plugin_load plugin_load.cpp)
+target_link_libraries(plugin_load ${CMAKE_DL_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+add_library(plugin SHARED plugin_lib.cpp)
 
 add_executable(pool pool.hpp pool.cpp)
 add_executable(pragma pragma.cpp)
