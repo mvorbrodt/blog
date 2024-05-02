@@ -21,8 +21,8 @@ cd ..
 echo. & echo. & echo.
 pause
 
-REM msbuild -m msvc/blog.sln -t:Rebuild -p:Configuration=Debug
-REM msbuild -m msvc/blog.sln -t:Rebuild -p:Configuration=Release
+msbuild -m msvc/blog.sln -t:Rebuild -p:Configuration=Debug
+msbuild -m msvc/blog.sln -t:Rebuild -p:Configuration=Release
 
 echo. & echo. & echo.
 pause
