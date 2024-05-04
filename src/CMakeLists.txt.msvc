@@ -91,11 +91,11 @@ add_executable(plugin_load plugin_load.cpp)
 target_link_libraries(plugin_load Boost::filesystem Boost::system)
 add_library(plugin SHARED plugin_lib.cpp)
 
-add_executable(file_hash file_hash.cpp)
-target_link_libraries(file_hash botan)
+# add_executable(file_hash file_hash.cpp)
+# target_link_libraries(file_hash botan)
 
-add_executable(crypto crypto.cpp)
-target_link_libraries(crypto PRIVATE cryptopp::cryptopp botan wolfssl)
+# add_executable(crypto crypto.cpp)
+# target_link_libraries(crypto PRIVATE cryptopp::cryptopp botan wolfssl)
 
 add_executable(benchmark-celero benchmark-celero.cpp)
 target_link_libraries(benchmark-celero PRIVATE celero)
@@ -125,26 +125,26 @@ target_link_libraries(protobuf PRIVATE protobuf::libprotoc protobuf::libprotobuf
 
 
 
-get_target_property(gRPC_CPP_PLUGIN_EXECUTABLE gRPC::grpc_cpp_plugin IMPORTED_LOCATION_RELEASE)
-add_custom_command(
-	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.pb.h"
-	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.pb.cc"
-	COMMAND protobuf::protoc
-	ARGS --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-		--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
-		${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.proto)
-add_custom_command(
-	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.grpc.pb.h"
-	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.grpc.pb.cc"
-	COMMAND protobuf::protoc
-	ARGS --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-		--grpc_out=${CMAKE_CURRENT_SOURCE_DIR}
-		--plugin=protoc-gen-grpc=${gRPC_CPP_PLUGIN_EXECUTABLE}
-		${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.proto)
-add_executable(grpc_c grpc_service_c.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
-target_link_libraries(grpc_c PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite gRPC::gpr gRPC::grpc gRPC::grpc++)
-add_executable(grpc_s grpc_service_s.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
-target_link_libraries(grpc_s PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite gRPC::gpr gRPC::grpc gRPC::grpc++)
+#get_target_property(gRPC_CPP_PLUGIN_EXECUTABLE gRPC::grpc_cpp_plugin IMPORTED_LOCATION_RELEASE)
+#add_custom_command(
+#	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.pb.h"
+#	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.pb.cc"
+#	COMMAND protobuf::protoc
+#	ARGS --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
+#		--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
+#		${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.proto)
+#add_custom_command(
+#	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.grpc.pb.h"
+#	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.grpc.pb.cc"
+#	COMMAND protobuf::protoc
+#	ARGS --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
+#		--grpc_out=${CMAKE_CURRENT_SOURCE_DIR}
+#		--plugin=protoc-gen-grpc=${gRPC_CPP_PLUGIN_EXECUTABLE}
+#		${CMAKE_CURRENT_SOURCE_DIR}/grpc_service.proto)
+#add_executable(grpc_c grpc_service_c.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
+#target_link_libraries(grpc_c PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite gRPC::gpr gRPC::grpc gRPC::grpc++)
+#add_executable(grpc_s grpc_service_s.cpp grpc_service.pb.cc grpc_service.grpc.pb.cc)
+#target_link_libraries(grpc_s PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite gRPC::gpr gRPC::grpc gRPC::grpc++)
 
 
 
