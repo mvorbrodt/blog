@@ -179,17 +179,17 @@ add_executable(synchronized synchronized.hpp synchronized.cpp)
 
 add_executable(templates templates.cpp)
 
-add_custom_command(
-	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService.h
-	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService.cpp
-	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service_types.h
-	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService_server.skeleton.cpp
-	COMMAND ${THRIFT_COMPILER} -out ${CMAKE_CURRENT_SOURCE_DIR}
-	-gen cpp ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service.thrift)
-add_executable(thrift_c thrift_service_c.cpp ThriftService.cpp)
-target_link_libraries(thrift_c ${THRIFT_LIBRARIES})
-add_executable(thrift_s thrift_service_s.cpp ThriftService.cpp)
-target_link_libraries(thrift_s ${THRIFT_LIBRARIES})
+#add_custom_command(
+#	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService.h
+#	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService.cpp
+#	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service_types.h
+#	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ThriftService_server.skeleton.cpp
+#	COMMAND ${THRIFT_COMPILER} -out ${CMAKE_CURRENT_SOURCE_DIR}
+#	-gen cpp ${CMAKE_CURRENT_SOURCE_DIR}/thrift_service.thrift)
+#add_executable(thrift_c thrift_service_c.cpp ThriftService.cpp)
+#target_link_libraries(thrift_c ${THRIFT_LIBRARIES})
+#add_executable(thrift_s thrift_service_s.cpp ThriftService.cpp)
+#target_link_libraries(thrift_s ${THRIFT_LIBRARIES})
 
 add_executable(throttle token_bucket.hpp throttle.cpp)
 add_executable(timer timer_test.cpp timer.hpp event.hpp)
