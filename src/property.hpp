@@ -168,7 +168,7 @@ public:
     }
 
     [[nodiscard]] auto operator <=> (const basic_property& other) const { return P::get() <=> other.get(); }
-    [[nodiscard]] auto operator == (const basic_property& other) const { return P::get() == other.get(); }
+    [[nodiscard]] bool operator == (const basic_property& other) const { return P::get() == other.get(); }
 
     template<typename U> requires (not std::same_as<basic_property, std::remove_cvref_t<U>>)
     [[nodiscard]] auto operator <=> (const U& other) const { return P::get() <=> other; }
@@ -484,7 +484,7 @@ template<typename T, typename P>
 #define DEFINE_PROPERTY_OPERATOR_UNARY(PT, OP) \
     template<typename T> \
     [[nodiscard]] auto operator OP (const PT<T>& prop) -> \
-        PT<std::invoke_result_t<decltype([](T v) { return OP v; }), T>> \
+        PT<decltype(OP std::declval<T>())> \
             { return { OP prop.get() }; }
 
 #if defined(DEFINE_PROPERTY_OPERATOR_BINARY)
@@ -494,12 +494,12 @@ template<typename T, typename P>
 #define DEFINE_PROPERTY_OPERATOR_BINARY(PT, OP) \
     template<typename T1, typename T2> \
     [[nodiscard]] auto operator OP (const PT<T1>& lhs, const PT<T2>& rhs) -> \
-        PT<std::invoke_result_t<decltype([](T1 x, T2 y) { return x OP y; }), T1, T2>> \
+        PT<decltype(std::declval<T1>() OP std::declval<T2>())> \
             { return { lhs.get() OP rhs.get() }; } \
     \
     template<typename T, typename U> requires (not std::same_as<PT<T>, std::remove_cvref_t<U>>) \
     [[nodiscard]] auto operator OP (const PT<T>& lhs, const U& rhs) -> \
-        PT<std::invoke_result_t<decltype([](T x, U y) { return x OP y; }), T, U>> \
+        PT<decltype(std::declval<T>() OP std::declval<U>())> \
             { return { lhs.get() OP rhs }; } \
     \
     template<typename U, typename T> requires (not std::same_as<std::remove_cvref_t<U>, PT<T>> \
