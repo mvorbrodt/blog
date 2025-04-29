@@ -1,207 +1,240 @@
 #include <iostream>
-#include <memory>
-#include <vector>
-#include <array>
 #include <map>
-#include <algorithm>
-#include <thread>
-#include <mutex>
-#include "T.hpp"
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
 #include "property.hpp"
+
+void foo(std::string& s) {}
+
+void foo(const std::string& s) {}
+
+void bar(std::string& s) {}
+
+auto qaz(const property<std::string>& prop)
+{
+    auto tmp = property<std::string>{ prop };
+    return tmp;
+}
 
 int main()
 {
-	using namespace std;
+    using namespace std::string_literals;
 
-	// W/ STORAGE BEING FILE ON DISK
-	file_property<std::string>  disk_p1(file_storage_provider("/Users/martin/disk_p1.txt"), "initial value 1");
-	file_property<std::string>  disk_p2(file_storage_provider("/Users/martin/disk_p2.txt"), "initial value 2");
-	file_property<std::wstring> disk_p3(file_storage_provider("/Users/martin/disk_p3.txt"), L"initial value 3");
-	file_property<std::wstring> disk_p4(file_storage_provider("/Users/martin/disk_p4.txt"), L"initial value 4");
-	file_property<char>         disk_p5(file_storage_provider("/Users/martin/disk_p5.txt"), 'C');
-	file_property<int>          disk_p6(file_storage_provider("/Users/martin/disk_p6.txt"), 17);
-	file_property<short>        disk_p7(file_storage_provider("/Users/martin/disk_p7.txt"), -1);
-	file_property<long long>    disk_p8(file_storage_provider("/Users/martin/disk_p8.txt"), 0xDEADBEEF8BADF00D);
+    auto update_proc1 = [](const property<std::string>& p, void* ctx) { std::cout << &p << " / " << ctx << " updated with " << p << std::endl; };
+    auto update_proc2 = [](const property<int>& p, void* ctx) { std::cout << &p << " / " << ctx << " updated with " << p << std::endl; };
+    auto update_proc3 = [](const property<float>& p, void* ctx) { std::cout << &p << " / " << ctx << " updated with " << p << std::endl; };
 
-	disk_p1.add_update_event([](file_property<std::string>* p) { cout << "~~~ disk_p1 updated with value: " << (*p) << endl; });
-	disk_p2.add_update_event([](decltype(disk_p2)* p) { cout << "~~~ disk_p2 updated with value: " << (*p) << endl; });
+    auto p1 = make_property<std::string>("C++11"); // property<std::string>{ "C++11" };
+    auto p2 = make_property(p1); // property<std::string>{ p1 };
+    auto p3 = make_property(std::move(p2)); // std::move(p2);
 
-	string xxxxx = disk_p1;
+    p2 = qaz("C++11");
+    p2 = qaz("C++11"s);
 
-	disk_p1 = disk_p2;
-	disk_p1 = std::move(disk_p2);
-	disk_p2 = "foo"s;
-	disk_p2 = disk_p1;
-	disk_p6 = disk_p7;
+    auto s1 = "C++14"s;
+    auto s2 = "C++17"s;
+    auto p4 = make_property(s1); // property<std::string>{ s1 };
+    auto p5 = make_property(std::move(s2)); // property<std::string>{ std::move(s2) };
+    auto p6 = property<std::string>{ "C++20"s };
+    auto p7 = property<std::string>{ (const std::string&)std::string{ "C++23" } };
 
-	cout << disk_p1 << endl;
-	cout << disk_p2 << endl;
-	wcout << disk_p3 << endl;
-	wcout << disk_p4 << endl;
-	cout << disk_p5 << endl;
-	cout << disk_p6 << endl << endl;
+    p1.set_update_proc(update_proc1, (void*)0x11111111);
+    p2.set_update_proc(update_proc1, (void*)0x22222222);
+    p3.set_update_proc(update_proc1, (void*)0x33333333);
+    p4.set_update_proc(update_proc1, (void*)0x44444444);
 
-	disk_p1 = "v5"s;
-	disk_p2 = "v6";
-	disk_p3 = L"v7"s;
-	disk_p4 = L"v8";
-	disk_p5 = 'D';
-	disk_p6 = 20;
+    p1 = p6;
+    p2 = std::move(p7);
 
-	cout << disk_p1 << endl;
-	cout << disk_p2 << endl;
-	wcout << disk_p3 << endl;
-	wcout << disk_p4 << endl;
-	cout << disk_p5 << endl;
-	cout << disk_p6 << endl;
+    p3 = s1;
+    p4 = std::move(s1);
 
-	//return 0;
+    foo(p3); // OK! implicit user-defined type conversion returns CONST reference!
+    foo(std::as_const(p3));
+    foo(as_volatile(p3));
+    foo(strip(std::as_const(p3)));
+    foo(strip(as_volatile(p3)));
 
+    foo(*p3); // WARNING! explicit call to operator* returns NON-const reference!
+    foo(*std::as_const(p3));
+    foo(*as_volatile(p3));
 
+    foo(p4.get()); // WARNING! explicit call to get() returns NON-const reference!
+    foo(std::as_const(p4).get());
+    foo(as_volatile(p4).get());
 
-	// W/ PRIMITIVE TYPES
-	auto p1 = make_property<int>(1);
-	auto p2 = make_property<int>(2);
+    //bar(p4); // ERROR! implicit conversion to non-const reference is forbiden!
+    bar(p4.get()); // OK! explicit call to get() to convert to non-const reference is allowed!
+    bar(*p4); // OK! explicit call to operator* to convert to non-const reference is allowed!
+    bar(strip(p4)); // OK! explicit call to strip is allowed!
+    bar(static_cast<std::string&>(p4)); // OK! explicit conversion to non-const reference is allowed!
 
-	property<float> p3(p1), p4{p2};
-	const property<double> p5(p1), p6{p2};
-	property<int> p7{}, p8{123}, p9(p1), p10{p2};
+    std::string s3 = p3;
+    std::string s4 = std::move(p3);
 
-	p1.add_update_event([](property<int>* p) { cout << "~~~ p1 updated with value: " << (*p) << endl; });
+    [[maybe_unused]] auto tmp1 = p1->size();
+    [[maybe_unused]] auto tmp2 = std::as_const(p2)->length();
+    [[maybe_unused]] auto tmp3 = as_volatile(p3)->c_str();
 
-	p1 = 1;
-	p1 = 0.f;
-	p1 = p2;
-	p1 = p1 + p2;
-	p1 = p2 + 0.f;
-	p1 = p2 + p3;
-	++p1;
-	p1 *= p4;
+    auto r1 = p1 == p2;
+    auto r2 = p1 == p1;
+    auto r3 = p1 == "C++20";
+    auto r4 = "C++20" == p1;
+    auto r5 = p1 == "C++20"s;
+    auto r6 = "C++20"s == p1;
 
-	// USE property of unique_ptr/shared_ptr or array/vector
-	// instead of specializing property template for T* and T[]
+    auto p8 = make_property(1); // property<int>{ 1 };
+    auto p8_2 = make_property<float>(1); // property<float>{ 1 };
+    auto p9 = make_property(1.f); // property<float>{ 1.f };
+    auto p9_2 = make_property<int>(1.f); // property<int>{ 1.f };
 
-	// W/ COMPLEX TYPES
-	property<Q> c1(1, 2, 3);
-	property<T> c2(c1);
-	property<T> c3(std::move(c2));
+    p8.set_update_proc(update_proc2, (void*)0x88888888);
+    p9.set_update_proc(update_proc3, (void*)0x99999999);
 
-	auto c4 = make_property<T>(4, 5, 6);
-	auto c5 = make_property<Q>(7, 8, 9);
+    //std::cin >> p8;
+    //std::wcin >> p9;
 
-	property<T> c6{}, c7{"C++Rocks!"}, c8{1, 2, 3}; // const stripped away here
-	const property<T> c9{c6}, c10{std::move(c7)};
+    p8 = 2;
+    p8 = 2.f;
+    p9 = 3;
+    p9 = 3.f;
+    p8 = p9;
+    p9 = p8;
+    p8 = (int)p9;
+    p9 = p9;
 
-	c5.add_update_event([](void* p) { cout << "~~~ c5 updated with value: " << p << endl; });
+    p8 += p8;
+    p9 += p8;
+    p8 += p9;
+    p8 += 1;
 
-	c4 = Q{};
-	c5 = c1;
-	c5 = std::move(c1);
+    auto r7 = p8 < p9;
+    auto r8 = p8 == 2;
+    auto r9 = 3 == p9;
+    auto r10 = p1 == p2;
+    auto r11 = p1 > p2;
 
-	((Q&)c5).foo();
-	//((T&)c10).foo(); // U.B. becasue of hard casting away constness
-	//c10.get().foo(); // Compile error becasue foo() is non-const :o)
-	c5.invoke(&T::foo);
+    auto p10 = +p8;
+    auto p11 = -p9;
+    auto p12 = p8 + p8;
+    auto p13 = p8 - p9;
+    auto p14 = p8 * p9;
+    auto p15 = p8 / p9;
+    auto p16 = p8 % p8;
 
+    auto p17 = ~p8;
+    auto p19 = p8 & p8;
+    auto p20 = p8 | p8;
+    auto p21 = p8 ^ p8;
+    auto p22 = p8 << p8;
+    auto p23 = p8 >> p8;
 
+    auto p24 = 10 + p10;
+    auto p25 = p10 + 10;
 
-	// W/ ENUMS
-	enum class E : int { E1, E2 = 123, E3 };
-	property<E> pe1{E::E2};
-	switch(pe1)
-	{
-		case E::E1: cout << "property<enum E> value is E1" << endl; break;
-		case E::E2: cout << "property<enum E> value is E2" << endl; break;
-		case E::E3: cout << "property<enum E> value is E3" << endl; break;
-	}
-	int ec = (int)((E)pe1);
-	cout << "property<E> numeric value is " << ec << endl;
+    auto v1 = property<std::vector<int>>{ 1, 2, 3, 4, 5 };
+    auto v2 = make_property(std::vector<int>{ 1, 2, 3, 4, 5 });
+    [[maybe_unused]] auto tmp4 = v1->size();
+    v1[0] = 666;
+    auto i1 = v1[0];
+    auto i2 = std::as_const(v1)[0];
+    auto i3 = as_volatile(v1)[0];
 
+    auto it1 = v1.begin();
+    decltype(auto) it2 = v2.begin();
 
+    for (auto i : v1) { std::cout << i << std::endl; }
 
-	// W/ STRINGS
-	property<string> pstr1 = "C++11", pstr2 = " ", pstr3 = "Rocks";
-	property<string> pstr4 = pstr1 + pstr2 + pstr3 + " my world!!!";
+    auto m1 = property<std::map<int, int>>(std::map<int, int>{ { 1, 1 }, { 2, 2 }, { 3, 3 } });
+    auto m2 = make_property(std::map<int, int>{ { 1, 1 }, { 2, 2 }, { 3, 3 } });
+    m1[1] = 11;
+    m1[2] = 22;
+    m1[3] = 33;
 
-	pstr1 = "C++17";
-	pstr1 += " " + pstr4 + " Rocks!";
-	cout << "property<string> value is '" << pstr1 << "'" << endl;
-	//cout << "Type something then press [ENTER]: " << flush;
-	//std::getline(cin, pstr1.get());
-	//cout << "property<string> value is '" << pstr1 << "'" << endl;
+    for (auto i : m1) { std::cout << i.first << " -> " << i.second << std::endl; }
 
+    auto ptr1 = make_property(std::make_shared<std::string>("C++23"));
+    auto ptr2 = make_property(std::make_unique<std::string>("C++26"));
+    auto ptr3 = make_property(std::make_shared<std::string>("C++1998"));
+    auto ptr4 = make_property(std::make_unique<std::string>("C++2001"));
+    auto ptr5 = make_property(std::make_shared<int[]>(3));
+    auto ptr6 = make_property(std::make_shared<int[]>(3));
 
+    ptr5[0] = ptr6[0] = 111;
+    ptr5[1] = ptr6[1] = 222;
+    ptr5[2] = ptr6[2] = 333;
 
-	// W/ SMART POINTERS
-	using up = std::unique_ptr<T>;
-	using sp = std::shared_ptr<T>;
+    strip(ptr3).reset();
+    delete strip(ptr4).release();
 
-	up u(new T);
-	sp s(new T);
+    strip(std::as_const(ptr3)).use_count();
+    strip(as_volatile(ptr4)).get_deleter();
 
-	property<up> pu1(std::move(u));
-	property<up> pu2(std::move(pu1));
-	property<up> pu3 = std::make_unique<T>();
-	property<up> pu4 = make_property<up>(new T);
+    strip(ptr5)[2] = strip(ptr6)[2] = -1;
 
-	property<sp> ps1(s);
-	property<sp> ps2(std::move(ps1));
-	property<sp> ps3 = std::make_shared<T>();
-	property<sp> ps4 = make_property<sp>(new T);
+    ptr1->length();
+    (*ptr1).length();
 
-	ps1 = ps2;
-	ps2 = std::move(pu2);
-	ps2 = std::make_unique<T>();
+    ptr2->size();
+    (*ptr2).size();
 
-	[[maybe_unused]] auto use_count = ((sp&)ps2).use_count();
-	use_count = ps2.invoke(&sp::use_count);
+    if (ptr1) std::cout << "not null" << std::endl;
+    if (ptr2) std::cout << "not null" << std::endl;
+    if (!ptr3) std::cout << "null" << std::endl;
+    if (!ptr4) std::cout << "null" << std::endl;
 
-	ps2->foo();
-	ps2->get_instance_number();
+    for (auto i = 0; i < 3; ++i) std::cout << ptr5[i] << ", " << ptr6[i] << std::endl;
 
+    struct S { int x, y, z; };
+    struct U : S {};
 
+    auto ss = S{ 1, 2, 3 };
+    auto uu = U{ 4, 5, 6 };
 
-	// W/ CONTAINERS
-	array<int, 3> arr1 = {1, 0, 3};
-	property<array<int, 3>> pa1 = arr1;
-	property<array<int, 3>> pa2 = array<int, 3>{1, 0, 3};
-	//property<array<int, 3>> pa3 = {1, 2, 3}; // FIX ME~!!!!!111oneone
-	pa1[1] = 2;
-	auto& pa1r = pa1.get();
-	cout << "array: ";
-	for_each(begin(pa1r), end(pa1r), [](auto& v) { cout << v << ", "; });
-	cout << "(" << pa1.invoke(&array<int, 3>::size) << ")" << endl;
+    auto ps1 = make_property<S>(1, 2, 3);
+    auto ps2 = make_property(ss);
+    auto ps3 = make_property(S{ 4, 5, 6 });
 
-	property<vector<int>> pv1{1, 0, 3};
-	pv1[1] = 2;
-	auto& pv1r = pv1.get();
-	cout << "vector: ";
-	for_each(begin(pv1r), end(pv1r), [](auto& v) { cout << v << ", "; });
-	cout << "(" << pv1.invoke(&vector<int>::size) << ")" << endl;
+    auto ps5 = make_property<S>(uu);
+    auto ps6 = make_property<S>(U{ 4, 5, 6 });
 
-	property<vector<int>> pv2 = make_property<vector<int>>({4, 0, 6});
-	pv2[1] = 5;
-	auto& pv2r = pv2.get();
-	cout << "vector: ";
-	for_each(begin(pv2r), end(pv2r), [](auto& v) { cout << v << ", "; });
-	cout << "(" << pv2.invoke(&vector<int>::size) << ")" << endl;
+    auto ps8 = property<std::string>(10, '!');
+    auto ps9 = make_property<std::string>(10, '!');
 
-	property<map<int, int>> pm1({{1, 2}, {3, 4}, {5, 6}});
-	property<map<int, int>> pm2 = make_property<map<int, int>, pair<const int, int>>({{1, 2}, {3, 4}, {5, 6}});
-	pm1 = std::move(pm2);
-	pm1[7] = 8;
-	pm1[9] = 10;
-	pm1[11] = 12;
-	auto& pm1r = pm1.get();
-	cout << "map: ";
-	for_each(begin(pm1r), end(pm1r), [](auto& v) { cout << v.first << " => " << v.second << ", "; });
-	cout << "(" << pm1.invoke(&map<int, int>::size) << ")" << endl;
+    struct SS { ~SS() { std::cout << "~SS\n"; } };
 
-	property<map<string, int>> pm3({{"_1_", 1}, {"_2_", 2}, {"_3_", 3}});
-	pm3["_4_"] = 4;
-	pm3["_5_"] = 5;
-	auto& pm3r = pm3.get();
-	cout << "map: ";
-	for_each(begin(pm3r), end(pm3r), [](auto& v) { cout << v.first << " => " << v.second << ", "; });
-	cout << "(" << pm3.invoke(&map<string, int>::size) << ")" << endl;
+    auto dg1 = property{ "C++17" }; // property<std::string>
+    auto dg2 = property{ L"C++17" }; // property<std::wstring>
+
+    auto dg3 = make_property("C++17"); // property<std::string>
+    auto dg4 = make_property(L"C++17"); // property<std::wstring>
+
+    auto dg5 = property{ new int{ 17 } }; // property<std::unique_ptr<int>>
+    auto dg6 = property{ new SS }; // property<std::unique_ptr<SS>>
+
+    auto dg7 = make_property(new int{ 17 }); // property<std::unique_ptr<int>>
+    auto dg8 = make_property(new SS); // property<std::unique_ptr<SS>>
+
+    auto dg9 = property{ v1.begin(), v1.end() }; // property<std::vector<int>>
+    auto dg10 = property{ m1.begin(), m1.end() }; // property<std::vector<std::pair<int, int>>>
+
+    auto dg11 = make_property(v1.begin(), v1.end()); // property<std::vector<int>>
+    auto dg12 = make_property(m1.begin(), m1.end()); // property<std::vector<std::pair<int, int>>>
+
+    if (&dg1 != &*dg1) throw std::logic_error("Bad pointer!");
+    if (&dg2 != &*dg2) throw std::logic_error("Bad pointer!");
+    if (&dg3 != &dg3.get()) throw std::logic_error("Bad pointer!");
+    if (&dg4 != &dg4.get()) throw std::logic_error("Bad pointer!");
+
+    if (&dg5 != dg5.get().get()) throw std::logic_error("Bad pointer!");
+    if (&dg6 != dg6.get().get()) throw std::logic_error("Bad pointer!");
+    if (&dg7 != dg7.get().get()) throw std::logic_error("Bad pointer!");
+    if (&dg8 != dg8.get().get()) throw std::logic_error("Bad pointer!");
+
+    strip(dg6).reset();
+    strip(dg8).reset();
+
+    std::cout << "\nTHE END!\n";
 }

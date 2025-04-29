@@ -1,531 +1,534 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <utility>
+#include <concepts>
 #include <functional>
-#include <type_traits>
 #include <initializer_list>
 #include <istream>
+#include <iterator>
+#include <memory>
 #include <ostream>
-#include <fstream>
-#include <ios>
-#include <cstddef>
+#include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 
 
-// ===--------------------------------===
-// ===---                          ---===
-// ===---   FORWARD DECLARATIONS   ---===
-// ===---                          ---===
-// ===--------------------------------===
-
-template<typename T>
-struct basic_property_policy;
-
-template<typename T, typename P = basic_property_policy<T>>
-class basic_property;
+template<typename T> concept non_pointer = (not std::is_pointer_v<T>);
+template<typename T> concept non_reference = (not std::is_reference_v<T>);
+template<typename T> concept basic_property_type = (non_pointer<T> and non_reference<T>);
 
 
 
-// ===-----------------------------------------------------------------------===
-// ===---                                                                 ---===
-// ===---   DEFAULT PROPERTY POLICY: CONTROLS STORAGE + ACCESS + EVENTS   ---===
-// ===---              NO ACCESS RESTRICTIONS, FIRES EVENTS               ---===
-// ===---                                                                 ---===
-// ===-----------------------------------------------------------------------===
+template<typename PT> concept std_smart_pointer = requires (PT p)
+{
+    typename PT::element_type;
+    { static_cast<bool>(p) };
+}
+and std::disjunction_v<
+    std::is_same<PT, std::shared_ptr<typename PT::element_type>>,
+    std::is_same<PT, std::unique_ptr<typename PT::element_type>>,
+    std::is_same<PT, std::shared_ptr<typename PT::element_type[]>>,
+    std::is_same<PT, std::unique_ptr<typename PT::element_type[]>>>;
 
-template<typename T>
+
+
+template<typename CT> concept std_container = requires(CT a, const CT b)
+{
+    requires std::regular<CT>;
+    requires std::swappable<CT>;
+    requires std::destructible<typename CT::value_type>;
+    requires std::same_as<typename CT::reference, typename CT::value_type&>;
+    requires std::same_as<typename CT::const_reference, const typename CT::value_type&>;
+    requires std::forward_iterator<typename CT::iterator>;
+    requires std::forward_iterator<typename CT::const_iterator>;
+    requires std::signed_integral<typename CT::difference_type>;
+    requires std::same_as<typename CT::difference_type, typename std::iterator_traits<typename CT::iterator>::difference_type>;
+    requires std::same_as<typename CT::difference_type, typename std::iterator_traits<typename CT::const_iterator>::difference_type>;
+    { a.begin() } -> std::same_as<typename CT::iterator>;
+    { a.end() } -> std::same_as<typename CT::iterator>;
+    { b.begin() } -> std::same_as<typename CT::const_iterator>;
+    { b.end() } -> std::same_as<typename CT::const_iterator>;
+    { a.cbegin() } -> std::same_as<typename CT::const_iterator>;
+    { a.cend() } -> std::same_as<typename CT::const_iterator>;
+    { a.size() } -> std::same_as<typename CT::size_type>;
+    { a.max_size() } -> std::same_as<typename CT::size_type>;
+    { a.empty() } -> std::same_as<bool>;
+};
+
+
+
+template<basic_property_type T>
 struct basic_property_policy
 {
-	basic_property_policy() { validate(m_value); }
+    using value_type = T;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using rvalue_reference = value_type&&;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
 
-	explicit basic_property_policy(const T& v) : m_value(v) { validate(m_value); }
-	explicit basic_property_policy(T&& v) : m_value(std::move(v)) { validate(m_value); }
+    basic_property_policy() = default;
+    basic_property_policy(const basic_property_policy& other) : m_value(other.get()) {}
+    basic_property_policy(basic_property_policy&& other) noexcept : m_value(std::move(other.get())) {}
+    ~basic_property_policy() noexcept = default;
 
-	template<typename... A, std::enable_if_t<
-		std::is_constructible_v<T, A...>>* = nullptr>
-	basic_property_policy(A&&... a) : m_value(std::forward<A>(a)...) { validate(m_value); }
+    basic_property_policy(const_reference value) : m_value(value) {}
+    basic_property_policy(rvalue_reference value) : m_value(std::move(value)) {}
 
-	template<typename V, std::enable_if_t<
-		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
-	basic_property_policy(std::initializer_list<V> l) : m_value(l) { validate(m_value); }
+    template<typename U> requires (std::convertible_to<U, T>)
+    basic_property_policy(U&& value) : m_value(static_cast<T>(std::forward<U>(value))) {}
 
-	using update_event_t = std::function<void(basic_property<T, basic_property_policy>*)>;
-	using update_event_list_t = std::vector<update_event_t>;
+    template<typename... Args> requires (std::constructible_from<T, Args...>)
+    basic_property_policy(Args&&... args) : m_value(std::forward<Args>(args)...) {}
 
-	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
+    template<typename U> requires (std::constructible_from<T, std::initializer_list<U>>)
+    basic_property_policy(std::initializer_list<U> l) : m_value(l) {}
 
-protected:
-	template<typename U> void validate(const U& v) const {}
+    [[nodiscard]] reference get() { return m_value; }
+    [[nodiscard]] const_reference get() const { return m_value; }
+    [[nodiscard]] const_reference get() const volatile { return const_cast<const_reference>(m_value); }
 
-	decltype(auto) get() const { return(m_value); }
-
-	template<typename U> void set(U&& nv)
-	{
-		validate(nv);
-		m_value = std::forward<U>(nv);
-		fire_update_event();
-	}
+    void set(const_reference value) { m_value = value; }
+    void set(rvalue_reference value) noexcept { m_value = std::move(value); }
 
 private:
-	void fire_update_event()
-	{
-		for(auto& event : m_update_events)
-			event((basic_property<T, basic_property_policy>*)this);
-	}
-
-	mutable T m_value = T{};
-	update_event_list_t m_update_events;
+    T m_value;
 };
 
 
 
-// ===------------------------------------------------------===
-// ===---                                                ---===
-// ===---   STORAGE POLICY CLASS BASED PROPERTY POLICY   ---===
-// ===---      NO ACCESS RESTRICTIONS, FIRES EVENTS      ---===
-// ===---                                                ---===
-// ===------------------------------------------------------===
-
-template<typename T, typename P>
-struct storage_property_policy
-{
-	explicit storage_property_policy(P p) : m_storage_provider(p)
-	{
-		validate(m_value);
-		m_storage_provider.save(m_value);
-	}
-
-	storage_property_policy(P p, const T& v) : m_value(v), m_storage_provider(p)
-	{
-		validate(m_value);
-		m_storage_provider.save(m_value);
-	}
-
-	storage_property_policy(P p, T&& v) : m_value(std::move(v)), m_storage_provider(p)
-	{
-		validate(m_value);
-		m_storage_provider.save(m_value);
-	}
-
-	template<typename... A, std::enable_if_t<
-		std::is_constructible_v<T, A...>>* = nullptr>
-	storage_property_policy(P p, A&&... a) : m_value(std::forward<A>(a)...), m_storage_provider(p)
-	{
-		validate(m_value);
-		m_storage_provider.save(m_value);
-	}
-
-	template<typename V, std::enable_if_t<
-		std::is_constructible_v<T, std::initializer_list<V>>>* = nullptr>
-	storage_property_policy(P p, std::initializer_list<V> l) : m_value(l), m_storage_provider(p)
-	{
-		validate(m_value);
-		m_storage_provider.save(m_value);
-	}
-
-	using update_event_t = std::function<void(basic_property<T, storage_property_policy>*)>;
-	using update_event_list_t = std::vector<update_event_t>;
-
-	void add_update_event(update_event_t proc) { m_update_events.push_back(proc); }
-
-protected:
-	void validate(const T& v) const {}
-
-	decltype(auto) get() const
-	{
-		m_storage_provider.load(m_value);
-		return(m_value);
-	}
-
-	template<typename U> void set(U&& nv)
-	{
-		validate(nv);
-		m_value = std::forward<U>(nv);
-		m_storage_provider.save(m_value);
-		fire_update_event();
-	}
-
-private:
-	void fire_update_event()
-	{
-		for(auto& event : m_update_events)
-			event((basic_property<T, storage_property_policy>*)this);
-	}
-
-	mutable T m_value = T{};
-	P m_storage_provider;
-	update_event_list_t m_update_events;
-};
-
-
-
-// ===---------------------------------------------===
-// ===---                                       ---===
-// ===---   DISK BASED PROPERTY VALUE STORAGE   ---===
-// ===---                                       ---===
-// ===---------------------------------------------===
-
-struct file_storage_provider
-{
-	explicit file_storage_provider(const char* path) : m_path(path) {}
-
-	template<typename T>
-		std::enable_if_t<std::is_trivial_v<T> && std::is_standard_layout_v<T>, void>
-	save(const T& v) const
-	{
-		using out_char_t = typename std::ofstream::char_type;
-
-		std::ofstream ofs(m_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
-		ofs.exceptions(std::ios::failbit | std::ios::badbit);
-
-		ofs.write(reinterpret_cast<const out_char_t*>(&v), sizeof(v));
-		ofs.flush();
-		ofs.close();
-	}
-
-	template<typename T>
-		std::enable_if_t<std::is_trivial_v<T> && std::is_standard_layout_v<T>, void>
-	load(T& v) const
-	{
-		using in_char_t = typename std::ifstream::char_type;
-
-		std::ifstream ifs(m_path, std::ios_base::binary | std::ios_base::in);
-		ifs.exceptions(std::ios::failbit | std::ios::badbit);
-
-		ifs.read(reinterpret_cast<in_char_t*>(&v), sizeof(v));
-		ifs.close();
-	}
-
-	template<class CharT, class Traits, class Allocator>
-	void save(const std::basic_string<CharT, Traits, Allocator>& v) const
-	{
-		using str_t = std::basic_string<CharT, Traits, Allocator>;
-		using str_char_t = typename str_t::value_type;
-		using out_char_t = typename std::ofstream::char_type;
-
-		std::ofstream ofs(m_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
-		ofs.exceptions(std::ios::failbit | std::ios::badbit);
-
-		typename str_t::size_type bytes = v.length() * sizeof(str_char_t);
-
-		ofs.write(reinterpret_cast<const out_char_t*>(v.data()), bytes);
-		ofs.flush();
-		ofs.close();
-	}
-
-	template<class CharT, class Traits, class Allocator>
-	void load(std::basic_string<CharT, Traits, Allocator>& v) const
-	{
-		using str_t = std::basic_string<CharT, Traits, Allocator>;
-		using str_char_t = typename str_t::value_type;
-		using in_char_t = typename std::ifstream::char_type;
-
-		std::ifstream ifs(m_path, std::ios_base::binary | std::ios_base::in | std::ios::ate);
-		ifs.exceptions(std::ios::failbit | std::ios::badbit);
-
-		typename str_t::size_type bytes = ifs.tellg();
-		str_t temp(bytes / sizeof(str_char_t), str_char_t{});
-		ifs.seekg(0);
-
-		ifs.read(reinterpret_cast<in_char_t*>(temp.data()), bytes);
-		ifs.close();
-
-		v = std::move(temp);
-	}
-
-private:
-	std::string m_path;
-};
-
-
-
-// ===--------------------------------===
-// ===---                          ---===
-// ===---   PROPERTY TYPE TRAITS   ---===
-// ===---                          ---===
-// ===--------------------------------===
-
-template<typename>
-struct is_property : std::false_type {};
-
-template<typename T, typename P>
-struct is_property<basic_property<T, P>> : std::true_type {};
-
-template<typename T>
-inline constexpr bool is_property_v = is_property<std::decay_t<T>>::value;
-
-
-
-// ===--------------------------------------------===
-// ===---                                      ---===
-// ===---   PROPERTY TEMPLATE IMPLEMENTATION   ---===
-// ===---                                      ---===
-// ===--------------------------------------------===
-
-template<typename T, typename P>
-class basic_property : public P
+template<basic_property_type T, typename P>
+class basic_property : private P
 {
 public:
-	basic_property() = default;
+    using value_type = T;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using rvalue_reference = value_type&&;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
 
-	basic_property(const T& v) : P(v) {}
-	basic_property(T&& v) :  P(std::move(v)) {}
+    using P::P;
+    using P::get;
 
-	basic_property(const basic_property& p) : P(p.get()) {}
-	basic_property(basic_property&& p) : P(std::move(p.get())) {}
+    basic_property() = default;
+    basic_property(const basic_property&) = default;
+    basic_property(basic_property&&) noexcept = default;
+    ~basic_property() noexcept { clear_update_proc(); }
 
-	template<typename U, typename P2> basic_property(const basic_property<U, P2>& p) : P(p.get()) {}
-	template<typename U, typename P2> basic_property(basic_property<U, P2>&& p) : P(std::move(p.get())) {}
+    basic_property(const_reference value) : P(value) {}
+    basic_property(rvalue_reference value) : P(std::move(value)) {}
 
-	template<typename... A, std::enable_if_t<
-		std::is_constructible_v<P, A...>>* = nullptr>
-	basic_property(A&&... a) : P(std::forward<A>(a)...) {}
+    template<typename U> requires (std::convertible_to<U, T>)
+    basic_property(U&& value) : P(std::forward<U>(value)) {}
 
-	template<typename V, std::enable_if_t<
-		std::is_constructible_v<P, std::initializer_list<V>>>* = nullptr>
-	basic_property(std::initializer_list<V> l) : P(std::move(l)) {}
+    template<typename... Args> requires (std::constructible_from<T, Args...>)
+    basic_property(Args&&... args) : P(std::forward<Args>(args)...) {}
 
-	template<typename U>
-		std::enable_if_t<!is_property_v<U>, basic_property&>
-	operator = (U&& v)
-	{
-		set(std::forward<U>(v));
-		return *this;
-	}
+    template<typename U> requires (std::constructible_from<T, std::initializer_list<U>>)
+    basic_property(std::initializer_list<U> l) : P(l) {}
 
-	basic_property& operator = (const basic_property& p)
-	{
-		if(this != &p)
-			set(p.get());
-		return *this;
-	}
+    basic_property& operator = (const basic_property& other)
+    {
+        P::set(other.get());
+        dispatch_update();
+        return *this;
+    }
 
-	basic_property& operator = (basic_property&& p)
-	{
-		if(this != &p)
-			set(std::move(p.get()));
-		return *this;
-	}
+    basic_property& operator = (basic_property&& other) noexcept
+    {
+        P::set(std::move(other.get()));
+        dispatch_update();
+        return *this;
+    }
 
-	template<typename U, typename V>
-	basic_property& operator = (const basic_property<U, V>& p)
-	{
-		if(this != (decltype(this))&p)
-			set(p.get());
-		return *this;
-	}
+    basic_property& operator = (const_reference value)
+    {
+        P::set(value);
+        dispatch_update();
+        return *this;
+    }
 
-	template<typename U, typename V>
-	basic_property& operator = (basic_property<U, V>&& p)
-	{
-		if(this != (decltype(this))&p)
-			set(std::move(p.get()));
-		return *this;
-	}
+    basic_property& operator = (rvalue_reference value) noexcept
+    {
+        P::set(std::move(value));
+        dispatch_update();
+        return *this;
+    }
 
-	#ifdef PROPERTY_OPERATOR
-	#error "PROPERTY_OPERATOR should not be defined!"
-	#endif
-	#define PROPERTY_OPERATOR(op) \
-	basic_property& operator op () \
-	{ \
-		auto temp(get()); \
-		op temp; \
-		set(std::move(temp)); \
-		return *this; \
-	} \
-	basic_property operator op (int) \
-	{ \
-		auto temp(*this); \
-		operator op (); \
-		return temp; \
-	}
-	PROPERTY_OPERATOR(++)
-	PROPERTY_OPERATOR(--)
-	#undef PROPERTY_OPERATOR
+    template<typename U> requires (std::constructible_from<T, U>
+    and not std::same_as<T, std::remove_cvref_t<U>> and not std::same_as<basic_property, std::remove_cvref_t<U>>)
+    basic_property& operator = (U&& value)
+    {
+        P::set(std::forward<U>(value));
+        dispatch_update();
+        return *this;
+    }
 
-	#ifdef PROPERTY_OPERATOR
-	#error "PROPERTY_OPERATOR should not be defined!"
-	#endif
-	#define PROPERTY_OPERATOR(op) \
-	basic_property& operator op (const T& v) \
-	{ \
-		auto temp(get()); \
-		temp op v; \
-		set(std::move(temp)); \
-		return *this; \
-	} \
-	template<typename U> \
-		std::enable_if_t<!is_property_v<U>, basic_property&> \
-	operator op (const U& v) \
-	{ \
-		auto temp(get()); \
-		temp op v; \
-		set(std::move(temp)); \
-		return *this; \
-	} \
-	template<typename U, typename V> \
-	basic_property& operator op (const basic_property<U, V>& p) \
-	{ \
-		auto temp(get()); \
-		temp op p.get(); \
-		set(std::move(temp)); \
-		return *this; \
-	}
-	PROPERTY_OPERATOR(+=)
-	PROPERTY_OPERATOR(-=)
-	PROPERTY_OPERATOR(*=)
-	PROPERTY_OPERATOR(/=)
-	PROPERTY_OPERATOR(&=)
-	PROPERTY_OPERATOR(|=)
-	PROPERTY_OPERATOR(^=)
-	PROPERTY_OPERATOR(%=)
-	PROPERTY_OPERATOR(>>=)
-	PROPERTY_OPERATOR(<<=)
-	#undef PROPERTY_OPERATOR
+    [[nodiscard]] auto operator <=> (const basic_property& other) const { return P::get() <=> other.get(); }
+    [[nodiscard]] auto operator == (const basic_property& other) const { return P::get() == other.get(); }
 
-	decltype(auto) get() { return(P::get()); }
-	decltype(auto) get() const { return(P::get()); }
+    template<typename U> requires (not std::same_as<basic_property, std::remove_cvref_t<U>>)
+    [[nodiscard]] auto operator <=> (const U& other) const { return P::get() <=> other; }
 
-	void set(const T& v) { P::set(v); }
-	void set(T&& v) { P::set(std::move(v)); }
+    template<typename U> requires (not std::same_as<basic_property, std::remove_cvref_t<U>>)
+    [[nodiscard]] bool operator == (const U& other) const { return P::get() == other; }
 
-	explicit operator T& () { return get(); }
-	operator const T& () const { return get(); }
+#if defined(DEFINE_PROPERTY_OPERATOR)
+#undef DEFINE_PROPERTY_OPERATOR
+#endif
 
-	T& operator -> () { return get(); }
-	const T& operator -> () const { return get(); }
+#define DEFINE_PROPERTY_OPERATOR(OP) \
+    basic_property& operator OP (const basic_property& other) \
+    { \
+        P::get() OP other.get(); \
+        dispatch_update(); \
+        return *this; \
+    } \
+    \
+    template<typename U> requires (not std::same_as<basic_property, std::remove_cvref_t<U>>) \
+    basic_property& operator OP (const U& value) \
+    { \
+        P::get() OP value; \
+        dispatch_update(); \
+        return *this; \
+    }
 
-	template<typename U> decltype(auto) operator [] (U&& i) { return(get()[std::forward<U>(i)]); }
-	template<typename U> decltype(auto) operator [] (U&& i) const { return(get()[std::forward<U>(i)]); }
+    DEFINE_PROPERTY_OPERATOR(+=);
+    DEFINE_PROPERTY_OPERATOR(-=);
+    DEFINE_PROPERTY_OPERATOR(*=);
+    DEFINE_PROPERTY_OPERATOR(/=);
+    DEFINE_PROPERTY_OPERATOR(%=);
 
-	template<typename F, typename... A>
-	auto invoke(F&& f, A&&... a) -> std::invoke_result_t<F, T, A...>
-	{ return std::invoke(std::forward<F>(f), get(), std::forward<A>(a)...); }
+    DEFINE_PROPERTY_OPERATOR(&=);
+    DEFINE_PROPERTY_OPERATOR(|=);
+    DEFINE_PROPERTY_OPERATOR(^=);
+    DEFINE_PROPERTY_OPERATOR(<<=);
+    DEFINE_PROPERTY_OPERATOR(>>=);
+
+#undef DEFINE_PROPERTY_OPERATOR
+
+    explicit operator reference () { return P::get(); }
+    operator const_reference () const { return P::get(); }
+    operator const_reference () const volatile { return P::get(); }
+
+
+
+    template<typename PT = T> requires (not std_smart_pointer<PT>)
+    [[nodiscard]] pointer operator & () { return &P::get(); }
+
+    template<typename PT = T> requires (not std_smart_pointer<PT>)
+    [[nodiscard]] const_pointer operator & () const { return &P::get(); }
+
+    template<typename PT = T> requires (not std_smart_pointer<PT>)
+    [[nodiscard]] const_pointer operator & () const volatile { return &P::get(); }
+
+    template<typename PT = T> requires (not std_smart_pointer<PT>)
+    [[nodiscard]] reference operator * () { return P::get(); }
+
+    template<typename PT = T> requires (not std_smart_pointer<PT>)
+    [[nodiscard]] const_reference operator * () const { return P::get(); }
+
+    template<typename PT = T> requires (not std_smart_pointer<PT>)
+    [[nodiscard]] const_reference operator * () const volatile { return P::get(); }
+
+    template<typename PT = T> requires (not std_smart_pointer<PT>)
+    pointer operator -> () { return &P::get(); }
+
+    template<typename PT = T> requires (not std_smart_pointer<PT>)
+    const_pointer operator -> () const { return &P::get(); }
+
+    template<typename PT = T> requires (not std_smart_pointer<PT>)
+    const_pointer operator -> () const volatile { return &P::get(); }
+
+
+
+    template<typename PT = T> requires (std_smart_pointer<PT>)
+    explicit operator bool() const noexcept { return static_cast<bool>(P::get()); }
+
+    template<typename PT = T> requires (std_smart_pointer<PT>)
+    [[nodiscard]] PT::element_type* operator & () { return P::get().get(); }
+
+    template<typename PT = T> requires (std_smart_pointer<PT>)
+    [[nodiscard]] const PT::element_type* operator & () const { return P::get().get(); }
+
+    template<typename PT = T> requires (std_smart_pointer<PT>)
+    [[nodiscard]] const PT::element_type* operator & () const volatile { return P::get().get(); }
+
+    template<typename PT = T> requires (std_smart_pointer<PT>)
+    [[nodiscard]] PT::element_type& operator * () { return *P::get(); }
+
+    template<typename PT = T> requires (std_smart_pointer<PT>)
+    [[nodiscard]] const PT::element_type& operator * () const { return *P::get(); }
+
+    template<typename PT = T> requires (std_smart_pointer<PT>)
+    [[nodiscard]] const PT::element_type& operator * () const volatile { return *P::get(); }
+
+    template<typename PT = T> requires (std_smart_pointer<PT>)
+    reference operator -> () { return P::get(); }
+
+    template<typename PT = T> requires (std_smart_pointer<PT>)
+    const_reference operator -> () const { return P::get(); }
+
+    template<typename PT = T> requires (std_smart_pointer<PT>)
+    const_reference operator -> () const volatile { return P::get(); }
+
+
+
+    template<typename U> requires (std_smart_pointer<T> or std_container<T>)
+    [[nodiscard]] decltype(auto) operator [] (U&& index) { return P::get()[std::forward<U>(index)]; }
+
+    template<typename U> requires (std_smart_pointer<T> or std_container<T>)
+    [[nodiscard]] decltype(auto) operator [] (U&& index) const { return P::get()[std::forward<U>(index)]; }
+
+    template<typename U> requires (std_smart_pointer<T> or std_container<T>)
+    [[nodiscard]] decltype(auto) operator [] (U&& index) const volatile { return P::get()[std::forward<U>(index)]; }
+
+
+
+    template<typename C = T> requires (std_container<C>)
+    [[nodiscard]] decltype(auto) begin() { return P::get().begin(); }
+
+    template<typename C = T> requires (std_container<C>)
+    [[nodiscard]] decltype(auto) end() { return P::get().end(); }
+
+    template<typename C = T> requires (std_container<C>)
+    [[nodiscard]] decltype(auto) begin() const { return P::get().begin(); }
+
+    template<typename C = T> requires (std_container<C>)
+    [[nodiscard]] decltype(auto) end() const { return P::get().end(); }
+
+    template<typename C = T> requires (std_container<C>)
+    [[nodiscard]] decltype(auto) cbegin() { return P::get().cbegin(); }
+
+    template<typename C = T> requires (std_container<C>)
+    [[nodiscard]] decltype(auto) cend() { return P::get().cend(); }
+
+
+
+    template<typename M> requires (std::invocable<M, basic_property, void*>)
+    void set_update_proc(M&& proc, void* ctx) { k_update_proc_map.insert_or_assign(this, std::make_pair(std::forward<M>(proc), ctx)); }
+
+    void clear_update_proc() noexcept { k_update_proc_map.erase(this); }
+
+    friend std::ostream& operator << (std::ostream& output, const basic_property& prop)
+    {
+        output << prop.get();
+        return output;
+    }
+
+    friend std::wostream& operator << (std::wostream& output, const basic_property& prop)
+    {
+        output << prop.get();
+        return output;
+    }
+
+    friend std::istream& operator >> (std::istream& input, basic_property& prop)
+    {
+        input >> prop.get();
+        prop.dispatch_update();
+        return input;
+    }
+
+    friend std::wistream& operator >> (std::wistream& input, basic_property& prop)
+    {
+        input >> prop.get();
+        prop.dispatch_update();
+        return input;
+    }
+
+private:
+    using update_proc_t = std::function<void(const basic_property&, void*)>;
+    using update_proc_map_key_t = void*;
+    using update_proc_map_val_t = std::pair<update_proc_t, void*>;
+    using update_proc_map_t = std::unordered_map<update_proc_map_key_t, update_proc_map_val_t>;
+
+    inline static auto k_update_proc_map = update_proc_map_t{};
+
+    void dispatch_update() noexcept
+    {
+        if (auto it = k_update_proc_map.find(this); it != std::end(k_update_proc_map))
+        {
+            auto& proc = it->second.first;
+            auto& ctx = it->second.second;
+            proc(*this, ctx);
+        }
+    }
 };
 
 
 
-// ===-----------------------------------------===
-// ===---                                   ---===
-// ===---   PROPERTY ARYTHMETIC OPERATORS   ---===
-// ===---                                   ---===
-// ===-----------------------------------------===
+basic_property(const char*) -> basic_property<std::string, basic_property_policy<std::string>>;
+basic_property(const wchar_t*) -> basic_property<std::wstring, basic_property_policy<std::wstring>>;
 
-#ifdef PROPERTY_OPERATOR
-#error "PROPERTY_OPERATOR should not be defined!"
+template<typename T> basic_property(T*) -> basic_property<std::unique_ptr<T>, basic_property_policy<std::unique_ptr<T>>>;
+
+template<typename Iterator> basic_property(Iterator, Iterator) ->
+    basic_property<std::vector<typename std::iterator_traits<Iterator>::value_type>,
+    basic_property_policy<std::vector<typename std::iterator_traits<Iterator>::value_type>>>;
+
+
+
+template<basic_property_type T, typename P = basic_property_policy<T>>
+[[nodiscard]] auto make_property(const basic_property<T, P>& prop)
+{
+    using U = std::remove_cvref_t<T>;
+    return basic_property<U, P>(prop);
+}
+
+template<basic_property_type T, typename P = basic_property_policy<T>>
+[[nodiscard]] auto make_property(basic_property<T, P>&& prop)
+{
+    using U = std::remove_cvref_t<T>;
+    return basic_property<U, P>(std::move(prop));
+}
+
+template<basic_property_type T, typename P = basic_property_policy<T>>
+[[nodiscard]] auto make_property(const T& value)
+{
+    using U = std::remove_cvref_t<T>;
+    return basic_property<U, P>(value);
+}
+
+template<basic_property_type T, typename P = basic_property_policy<T>>
+[[nodiscard]] auto make_property(T&& value)
+{
+    using U = std::remove_cvref_t<T>;
+    return basic_property<U, P>(std::move(value));
+}
+
+template<basic_property_type T, typename U, typename P = basic_property_policy<T>>
+requires (std::convertible_to<U, T>)
+[[nodiscard]] auto make_property(U&& value)
+{
+    using V = std::remove_cvref_t<T>;
+    return basic_property<V, P>(std::forward<U>(value));
+}
+
+template<basic_property_type T, typename... Args, typename P = basic_property_policy<T>>
+requires (std::constructible_from<T, Args...>)
+[[nodiscard]] auto make_property(Args&&... args)
+{
+    using U = std::remove_cvref_t<T>;
+    return basic_property<U, P>(std::forward<Args>(args)...);
+}
+
+template<basic_property_type T, typename U, typename P = basic_property_policy<T>>
+requires (std::constructible_from<T, std::initializer_list<U>>)
+[[nodiscard]] auto make_property(std::initializer_list<U> l)
+{
+    using V = std::remove_cvref_t<T>;
+    return basic_property<V, P>(l);
+}
+
+[[nodiscard]] auto make_property(const char* str)
+{
+    return basic_property(str);
+}
+
+[[nodiscard]] auto make_property(const wchar_t* str)
+{
+    return basic_property(str);
+}
+
+template<typename T>
+requires (std::is_pointer_v<T>)
+[[nodiscard]] auto make_property(T ptr)
+{
+    return basic_property(ptr);
+}
+
+template<typename Iterator>
+requires (std::input_iterator<Iterator>)
+[[nodiscard]] auto make_property(Iterator begin, Iterator end)
+{
+    return basic_property(begin, end);
+}
+
+
+
+template<typename T, typename P>
+[[nodiscard]] decltype(auto) strip(basic_property<T, P>& prop)
+{
+    return static_cast<T&>(prop);
+}
+
+template<typename T, typename P>
+[[nodiscard]] decltype(auto) strip(const basic_property<T, P>& prop)
+{
+    return static_cast<const T&>(prop);
+}
+
+template<typename T, typename P>
+[[nodiscard]] decltype(auto) strip(const volatile basic_property<T, P>& prop)
+{
+    return static_cast<const T&>(prop);
+}
+
+
+
+template<typename T, typename P>
+[[nodiscard]] const volatile basic_property<T, P>& as_volatile(const basic_property<T, P>& prop)
+{
+    return const_cast<const volatile basic_property<T, P>&>(prop);
+}
+
+
+
+#if defined(DEFINE_PROPERTY_OPERATOR_UNARY)
+#undef DEFINE_PROPERTY_OPERATOR_UNARY
 #endif
-#define PROPERTY_OPERATOR(op) \
-template<typename T2, typename P2, typename V, \
-	std::enable_if_t<!is_property_v<V>, int> = 0> \
-auto operator op (const basic_property<T2, P2>& lhs, const V& rhs) \
-	-> basic_property<decltype(std::declval<T2>() op std::declval<V>()), P2> \
-{ \
-	return basic_property(lhs.get() op rhs); \
-} \
-template<typename V, typename T2, typename P2, \
-	std::enable_if_t<!is_property_v<V>, int> = 0> \
-auto operator op (const V& lhs, const basic_property<T2, P2>& rhs) \
-	-> basic_property<decltype(std::declval<V>() op std::declval<T2>()), P2> \
-{ \
-	return basic_property(lhs op rhs.get()); \
-} \
-template<typename T2, typename T3, typename P2> \
-auto operator op (const basic_property<T2, P2>& lhs, const basic_property<T3, P2>& rhs) \
-	-> basic_property<decltype(std::declval<T2>() op std::declval<T3>()), P2> \
-{ \
-	return basic_property(lhs.get() op rhs.get()); \
-}
-PROPERTY_OPERATOR(+)
-PROPERTY_OPERATOR(-)
-PROPERTY_OPERATOR(*)
-PROPERTY_OPERATOR(/)
-PROPERTY_OPERATOR(&)
-PROPERTY_OPERATOR(|)
-PROPERTY_OPERATOR(^)
-PROPERTY_OPERATOR(%)
-PROPERTY_OPERATOR(>>)
-PROPERTY_OPERATOR(<<)
-#undef PROPERTY_OPERATOR
+
+#define DEFINE_PROPERTY_OPERATOR_UNARY(PT, OP) \
+    template<typename T> \
+    [[nodiscard]] auto operator OP (const PT<T>& prop) -> \
+        PT<std::invoke_result_t<decltype([](T v) { return OP v; }), T>> \
+            { return { OP prop.get() }; }
+
+#if defined(DEFINE_PROPERTY_OPERATOR_BINARY)
+#undef DEFINE_PROPERTY_OPERATOR_BINARY
+#endif
+
+#define DEFINE_PROPERTY_OPERATOR_BINARY(PT, OP) \
+    template<typename T1, typename T2> \
+    [[nodiscard]] auto operator OP (const PT<T1>& lhs, const PT<T2>& rhs) -> \
+        PT<std::invoke_result_t<decltype([](T1 x, T2 y) { return x OP y; }), T1, T2>> \
+            { return { lhs.get() OP rhs.get() }; } \
+    \
+    template<typename T, typename U> requires (not std::same_as<PT<T>, std::remove_cvref_t<U>>) \
+    [[nodiscard]] auto operator OP (const PT<T>& lhs, const U& rhs) -> \
+        PT<std::invoke_result_t<decltype([](T x, U y) { return x OP y; }), T, U>> \
+            { return { lhs.get() OP rhs }; } \
+    \
+    template<typename U, typename T> requires (not std::same_as<std::remove_cvref_t<U>, PT<T>> \
+    and not std::same_as<std::remove_cvref_t<U>, std::ostream> and not std::same_as<std::remove_cvref_t<U>, std::wostream> \
+    and not std::same_as<std::remove_cvref_t<U>, std::istream> and not std::same_as<std::remove_cvref_t<U>, std::wistream>) \
+    [[nodiscard]] auto operator OP (const U& lhs, const PT<T>& rhs) -> \
+        PT<decltype(std::declval<U>() OP std::declval<T>())> \
+            { return { lhs OP rhs.get() }; }
 
 
 
-// ===-------------------------------------------===
-// ===---                                     ---===
-// ===---   PROPERTY INPUT/OUTPUT OPERATORS   ---===
-// ===---                                     ---===
-// ===-------------------------------------------===
+template<basic_property_type T> using property = basic_property<T, basic_property_policy<T>>;
 
-template<class CharT, class Traits, typename T, typename P>
-inline auto& operator >> (std::basic_istream<CharT, Traits>& is, basic_property<T, P>& p)
-{
-	is >> p.get();
-	return is;
-}
+DEFINE_PROPERTY_OPERATOR_UNARY(property, +);
+DEFINE_PROPERTY_OPERATOR_UNARY(property, -);
 
-template<class CharT, class Traits, typename T, typename P>
-inline auto& operator << (std::basic_ostream<CharT, Traits>& os, const basic_property<T, P>& p)
-{
-	os << p.get();
-	return os;
-}
+DEFINE_PROPERTY_OPERATOR_BINARY(property, +);
+DEFINE_PROPERTY_OPERATOR_BINARY(property, -);
+DEFINE_PROPERTY_OPERATOR_BINARY(property, *);
+DEFINE_PROPERTY_OPERATOR_BINARY(property, /);
+DEFINE_PROPERTY_OPERATOR_BINARY(property, %)
 
+DEFINE_PROPERTY_OPERATOR_UNARY(property, ~);
 
+DEFINE_PROPERTY_OPERATOR_BINARY(property, &);
+DEFINE_PROPERTY_OPERATOR_BINARY(property, |);
+DEFINE_PROPERTY_OPERATOR_BINARY(property, ^);
+DEFINE_PROPERTY_OPERATOR_BINARY(property, <<);
+DEFINE_PROPERTY_OPERATOR_BINARY(property, >>);
 
-// ===-------------------------------------------===
-// ===---                                     ---===
-// ===---   PROPERTY MAKER HELPER FUNCTIONS   ---===
-// ===---                                     ---===
-// ===-------------------------------------------===
-
-template<typename T, typename V>
-inline auto make_property(std::initializer_list<V> l)
-{
-	using U = std::decay_t<T>;
-	return basic_property<T>(U(l));
-}
-
-template<typename T, typename P, typename V>
-inline auto make_property(std::initializer_list<V> l)
-{
-	using U = std::decay_t<T>;
-	return basic_property<T, P>(U(l));
-}
-
-template<typename T, typename... A>
-inline auto make_property(A&&... a)
-{
-	using U = std::decay_t<T>;
-	return basic_property<T>(U(std::forward<A>(a)...));
-}
-
-template<typename T, typename P, typename... A>
-inline auto make_property(A&&... a)
-{
-	using U = std::decay_t<T>;
-	return basic_property<T, P>(U(std::forward<A>(a)...));
-}
-
-
-
-// ===---------------------------------===
-// ===---                           ---===
-// ===---   PROPERTY TYPE ALIASES   ---===
-// ===---                           ---===
-// ===---------------------------------===
-
-template<typename T>
-using property = basic_property<T, basic_property_policy<T>>;
-
-template<typename T>
-using file_property = basic_property<T, storage_property_policy<T, file_storage_provider>>;
-
-
-
-// ===-------------------===
-// ===---             ---===
-// ===---   THE END   ---===
-// ===---             ---===
-// ===-------------------===
+#undef DEFINE_PROPERTY_OPERATOR_UNARY
+#undef DEFINE_PROPERTY_OPERATOR_BINARY
