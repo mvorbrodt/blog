@@ -78,12 +78,12 @@ int main()
     [[maybe_unused]] auto tmp2 = std::as_const(p2)->length();
     [[maybe_unused]] auto tmp3 = as_volatile(p3)->c_str();
 
-    auto r1 = p1 == p2;
-    auto r2 = p1 == p1;
-    auto r3 = p1 == "C++20";
-    auto r4 = "C++20" == p1;
-    auto r5 = p1 == "C++20"s;
-    auto r6 = "C++20"s == p1;
+    [[maybe_unused]] auto r1 = p1 == p2;
+    [[maybe_unused]] auto r2 = p1 == p1;
+    [[maybe_unused]] auto r3 = p1 == "C++20";
+    [[maybe_unused]] auto r4 = "C++20" == p1;
+    [[maybe_unused]] auto r5 = p1 == "C++20"s;
+    [[maybe_unused]] auto r6 = "C++20"s == p1;
 
     auto p8 = make_property(1); // property<int>{ 1 };
     auto p8_2 = make_property<float>(1); // property<float>{ 1 };
@@ -103,18 +103,18 @@ int main()
     p8 = p9;
     p9 = p8;
     p8 = (int)p9;
-    p9 = p9;
+    //p9 = p9;
 
     p8 += p8;
     p9 += p8;
     p8 += p9;
     p8 += 1;
 
-    auto r7 = p8 < p9;
-    auto r8 = p8 == 2;
-    auto r9 = 3 == p9;
-    auto r10 = p1 == p2;
-    auto r11 = p1 > p2;
+    [[maybe_unused]] auto r7 = p8 < p9;
+    [[maybe_unused]] auto r8 = p8 == 2;
+    [[maybe_unused]] auto r9 = 3 == p9;
+    [[maybe_unused]] auto r10 = p1 == p2;
+    [[maybe_unused]] auto r11 = p1 > p2;
 
     auto p10 = +p8;
     auto p11 = -p9;
@@ -138,12 +138,12 @@ int main()
     auto v2 = make_property(std::vector<int>{ 1, 2, 3, 4, 5 });
     [[maybe_unused]] auto tmp4 = v1->size();
     v1[0] = 666;
-    auto i1 = v1[0];
-    auto i2 = std::as_const(v1)[0];
-    auto i3 = as_volatile(v1)[0];
+    [[maybe_unused]] auto i1 = v1[0];
+    [[maybe_unused]] auto i2 = std::as_const(v1)[0];
+    [[maybe_unused]] auto i3 = as_volatile(v1)[0];
 
-    auto it1 = v1.begin();
-    decltype(auto) it2 = v2.begin();
+    [[maybe_unused]] auto it1 = v1.begin();
+    [[maybe_unused]] decltype(auto) it2 = v2.begin();
 
     for (auto i : v1) { std::cout << i << std::endl; }
 
