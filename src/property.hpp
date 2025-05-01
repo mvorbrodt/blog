@@ -15,12 +15,6 @@
 
 
 
-template<typename T> concept non_pointer = (not std::is_pointer_v<T>);
-template<typename T> concept non_reference = (not std::is_reference_v<T>);
-template<typename T> concept basic_property_type = (non_pointer<T> and non_reference<T>);
-
-
-
 template<typename PT> concept std_smart_pointer = requires (PT p)
 {
     typename PT::element_type;
@@ -56,6 +50,12 @@ template<typename CT> concept std_container = requires(CT a, const CT b)
     { a.max_size() } -> std::same_as<typename CT::size_type>;
     { a.empty() } -> std::same_as<bool>;
 };
+
+
+
+template<typename T> concept non_pointer = (not std::is_pointer_v<T>);
+template<typename T> concept non_reference = (not std::is_reference_v<T>);
+template<typename T> concept basic_property_type = ((non_pointer<T> and non_reference<T>) or std_smart_pointer<T> or std_container<T>);
 
 
 
