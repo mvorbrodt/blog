@@ -1,8 +1,11 @@
 #pragma once
 
 #include <concepts>
+#include <filesystem>
+#include <fstream>
 #include <functional>
 #include <initializer_list>
+#include <ios>
 #include <istream>
 #include <iterator>
 #include <memory>
@@ -99,16 +102,97 @@ private:
 
 
 
-template<basic_property_type T, typename P>
-class basic_property : private P
+template<basic_property_type T>
+struct file_storage_property_policy
 {
-public:
     using value_type = T;
     using reference = value_type&;
     using const_reference = const value_type&;
     using rvalue_reference = value_type&&;
     using pointer = value_type*;
     using const_pointer = const value_type*;
+
+    explicit file_storage_property_policy(const std::filesystem::path& path) : m_path(path) {}
+
+    file_storage_property_policy(const std::filesystem::path& path, const_reference value) : m_path(path) { set(value); }
+
+    template<typename U = T> requires (not std::same_as<U, std::string> and not std::same_as<U, std::wstring>)
+    [[nodiscard]] value_type get() const
+    {
+        using in_char_t = typename std::ifstream::char_type;
+
+        auto value = T{};
+        auto ifs = std::ifstream(m_path, std::ios_base::binary | std::ios_base::in);
+
+        ifs.exceptions(std::ios::failbit | std::ios::badbit);
+        ifs.read(reinterpret_cast<in_char_t*>(&value), sizeof(value));
+        ifs.close();
+
+        return value;
+    }
+
+    template<typename U = T> requires (std::same_as<U, std::string> or std::same_as<U, std::wstring>)
+    [[nodiscard]] value_type get() const
+    {
+        using in_char_t = typename std::ifstream::char_type;
+
+        auto value = U{};
+        auto ifs = std::ifstream(m_path, std::ios_base::binary | std::ios_base::in | std::ios::ate);
+
+        ifs.exceptions(std::ios::failbit | std::ios::badbit);
+
+        auto bytes = ifs.tellg();
+        value.resize(bytes / sizeof(typename U::value_type));
+        ifs.seekg(0);
+
+        ifs.read(reinterpret_cast<in_char_t*>(value.data()), bytes);
+        ifs.close();
+
+        return value;
+    }
+
+    template<typename U = T> requires (not std::same_as<U, std::string> and not std::same_as<U, std::wstring>)
+    void set(const_reference value)
+    {
+        using out_char_t = typename std::ofstream::char_type;
+
+        auto ofs = std::ofstream(m_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+
+        ofs.exceptions(std::ios::failbit | std::ios::badbit);
+        ofs.write(reinterpret_cast<const out_char_t*>(&value), sizeof(value));
+        ofs.flush();
+        ofs.close();
+    }
+
+    template<typename U = T> requires (std::same_as<U, std::string> or std::same_as<U, std::wstring>)
+    void set(const_reference value)
+    {
+        using out_char_t = typename std::ofstream::char_type;
+
+        auto ofs = std::ofstream(m_path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+
+        ofs.exceptions(std::ios::failbit | std::ios::badbit);
+        ofs.write(reinterpret_cast<const out_char_t*>(value.data()), value.length() * sizeof(typename U::value_type));
+        ofs.flush();
+        ofs.close();
+    }
+
+private:
+    std::filesystem::path m_path;
+};
+
+
+
+template<basic_property_type T, typename P>
+class basic_property : private P
+{
+public:
+    using typename P::value_type;
+    using typename P::reference;
+    using typename P::const_reference;
+    using typename P::rvalue_reference;
+    using typename P::pointer;
+    using typename P::const_pointer;
 
     using P::P;
     using P::get;
@@ -529,6 +613,27 @@ DEFINE_PROPERTY_OPERATOR_BINARY(property, |);
 DEFINE_PROPERTY_OPERATOR_BINARY(property, ^);
 DEFINE_PROPERTY_OPERATOR_BINARY(property, <<);
 DEFINE_PROPERTY_OPERATOR_BINARY(property, >>);
+
+
+
+template<basic_property_type T> using fs_property = basic_property<T, file_storage_property_policy<T>>;
+
+DEFINE_PROPERTY_OPERATOR_UNARY(fs_property, +);
+DEFINE_PROPERTY_OPERATOR_UNARY(fs_property, -);
+
+DEFINE_PROPERTY_OPERATOR_BINARY(fs_property, +);
+DEFINE_PROPERTY_OPERATOR_BINARY(fs_property, -);
+DEFINE_PROPERTY_OPERATOR_BINARY(fs_property, *);
+DEFINE_PROPERTY_OPERATOR_BINARY(fs_property, /);
+DEFINE_PROPERTY_OPERATOR_BINARY(fs_property, %)
+
+DEFINE_PROPERTY_OPERATOR_UNARY(fs_property, ~);
+
+DEFINE_PROPERTY_OPERATOR_BINARY(fs_property, &);
+DEFINE_PROPERTY_OPERATOR_BINARY(fs_property, |);
+DEFINE_PROPERTY_OPERATOR_BINARY(fs_property, ^);
+DEFINE_PROPERTY_OPERATOR_BINARY(fs_property, <<);
+DEFINE_PROPERTY_OPERATOR_BINARY(fs_property, >>);
 
 #undef DEFINE_PROPERTY_OPERATOR_UNARY
 #undef DEFINE_PROPERTY_OPERATOR_BINARY

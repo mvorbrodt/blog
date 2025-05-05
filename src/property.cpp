@@ -236,5 +236,21 @@ int main()
     strip(dg6).reset();
     strip(dg8).reset();
 
+    auto fsp1 = fs_property<int>(std::filesystem::path("./fsp1.bin"));
+    auto fsp2 = fs_property<int>(std::filesystem::path("./fsp2.bin"), 17);
+    auto fsp3 = fs_property<float>(std::filesystem::path("./fsp3.bin"), 20.0f);
+    auto fsp4 = fs_property<double>(std::filesystem::path("./fsp4.bin"), 23.0);
+    auto fsp5 = fs_property<std::string>(std::filesystem::path("./fsp5.txt"), "I LUV C++\nI LUV C++");
+    auto fsp6 = fs_property<std::wstring>(std::filesystem::path("./fsp6.txt"), L"I LUV C++ Too\nI LUV C++ Too\nI LUV C++ Too");
+
+    fsp1 = 11;
+    fsp2 = 14;
+    fsp3 = 3.141f;
+    fsp4 = 1720.11;
+
+    std::cout << "\n" << fsp1 << ", " << fsp2 << ", " << fsp3 << ", " << fsp4 << "\n";
+    std::cout << fsp5 << "\n";
+    std::wcout << fsp6 << L"\n";
+
     std::cout << "\nTHE END!\n";
 }
