@@ -78,6 +78,23 @@ int main()
     [[maybe_unused]] auto tmp2 = std::as_const(p2)->length();
     [[maybe_unused]] auto tmp3 = as_volatile(p3)->c_str();
 
+    tmp1 = p1.invoke(&std::string::size);
+    tmp2 = std::as_const(p2).invoke(&std::string::length);
+    tmp3 = as_volatile(p3).invoke(&std::string::c_str);
+
+    using Str = std::string;
+
+    void(Str::*mptr1)(Str::size_type, Str::value_type) = static_cast<void(Str::*)(Str::size_type, Str::value_type)>(&Str::resize);
+    p1.invoke(mptr1, p1->size() + 3, '-');
+    p2.invoke(mptr1, p2->size() + 5, '*');
+
+    Str::iterator(Str::*mptr2)(Str::const_iterator, Str::size_type, Str::value_type) = static_cast<Str::iterator(Str::*)(Str::const_iterator, Str::size_type, Str::value_type)>(&Str::insert);
+    p3.invoke(mptr2, p3->end(), 7, '=');
+
+    std::cout << p1 << std::endl;
+    std::cout << p2 << std::endl;
+    std::cout << p3 << std::endl;
+
     [[maybe_unused]] auto r1 = p1 == p2;
     [[maybe_unused]] auto r2 = p1 == p1;
     [[maybe_unused]] auto r3 = p1 == "C++20";
@@ -137,13 +154,18 @@ int main()
     auto v1 = property<std::vector<int>>{ 1, 2, 3, 4, 5 };
     auto v2 = make_property(std::vector<int>{ 1, 2, 3, 4, 5 });
     [[maybe_unused]] auto tmp4 = v1->size();
-    v1[0] = 666;
     [[maybe_unused]] auto i1 = v1[0];
     [[maybe_unused]] auto i2 = std::as_const(v1)[0];
     [[maybe_unused]] auto i3 = as_volatile(v1)[0];
 
     [[maybe_unused]] auto it1 = v1.begin();
     [[maybe_unused]] decltype(auto) it2 = v2.begin();
+
+    v1[0] = 11;
+    v1[1] = 14;
+    v1[2] = 17;
+    v1[3] = 20;
+    v1[4] = 23;
 
     for (auto i : v1) { std::cout << i << std::endl; }
 
@@ -168,6 +190,9 @@ int main()
 
     strip(ptr3).reset();
     delete strip(ptr4).release();
+
+    ptr1.invoke(&std::shared_ptr<std::string>::get);
+    ptr2.invoke(&std::unique_ptr<std::string>::reset, new std::string("Yey!"));
 
     strip(std::as_const(ptr3)).use_count();
     strip(as_volatile(ptr4)).get_deleter();

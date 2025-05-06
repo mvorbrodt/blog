@@ -392,8 +392,28 @@ public:
 
 
 
-    template<typename M> requires (std::invocable<M, basic_property, void*>)
-    void set_update_proc(M&& proc, void* ctx) { k_update_proc_map.insert_or_assign(this, std::make_pair(std::forward<M>(proc), ctx)); }
+    template<typename Func, typename... Args> requires (std::invocable<Func, T, Args...>)
+    auto invoke(Func&& func, Args&&... args) -> std::invoke_result_t<Func, T, Args...>
+    {
+        return std::invoke(std::forward<Func>(func), P::get(), std::forward<Args>(args)...);
+    }
+
+    template<typename Func, typename... Args> requires (std::invocable<Func, T, Args...>)
+    auto invoke(Func&& func, Args&&... args) const -> std::invoke_result_t<Func, T, Args...>
+    {
+        return std::invoke(std::forward<Func>(func), P::get(), std::forward<Args>(args)...);
+    }
+
+    template<typename Func, typename... Args> requires (std::invocable<Func, T, Args...>)
+    auto invoke(Func&& func, Args&&... args) const volatile -> std::invoke_result_t<Func, T, Args...>
+    {
+        return std::invoke(std::forward<Func>(func), P::get(), std::forward<Args>(args)...);
+    }
+
+
+
+    template<typename Proc> requires (std::invocable<Proc, basic_property, void*>)
+    void set_update_proc(Proc&& proc, void* ctx) { k_update_proc_map.insert_or_assign(this, std::make_pair(std::forward<Proc>(proc), ctx)); }
 
     void clear_update_proc() noexcept { k_update_proc_map.erase(this); }
 
