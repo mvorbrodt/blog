@@ -22,6 +22,7 @@ int main()
 {
     using namespace std::string_literals;
 
+    // UPDATE PROCS: called when property is modified...
     auto update_proc1 = [](const property<std::string>& p, void* ctx) { std::cout << &p << " / " << ctx << " updated with " << p << std::endl; };
     auto update_proc2 = [](const property<int>& p, void* ctx) { std::cout << &p << " / " << ctx << " updated with " << p << std::endl; };
     auto update_proc3 = [](const property<float>& p, void* ctx) { std::cout << &p << " / " << ctx << " updated with " << p << std::endl; };
