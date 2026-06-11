@@ -1,8 +1,10 @@
 #include <iostream>
 #include <atomic>
+#include <chrono>
 #include <thread>
 
 using namespace std;
+using namespace std::chrono_literals;
 
 //#define ATOMIC_FENCE
 //#define ATOMIC_RELEASE

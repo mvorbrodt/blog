@@ -1,9 +1,11 @@
 #include <iostream>
+#include <chrono>
 #include <mutex>
 #include <thread>
 #include "queue.hpp"
 
 using namespace std;
+using namespace std::chrono_literals;
 
 const int COUNT = 10;
 
